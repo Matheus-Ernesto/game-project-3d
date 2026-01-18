@@ -24,7 +24,7 @@ You are a discarded robot, trying to be the best project of your master, so you 
 Game time: ~1 hour to beat each end.
 Requirements: Run in any potato powered by a Esp32 with 4 MB ram, also runs on Windows and Linux.
 
-Why? Is just a test ofg all my abilities, 3d art, programming, design, all. So I'll use jus libraries in programming, but all other things like assets, soundtrack, needs o be my arts.
+Why? Is just a test of all my abilities, 3d art, programming, design, all. So I'll use jus libraries in programming, but all other things like assets, soundtrack, needs o be my arts.
 
 AI: No, just no. No AI arts, no scripts from AI, not because isnt helpful, but because is MY test, so needs to be MY abilites, ME proving to myself that I can do this. If you dont believe me, I don care. this test is for myself, no others.
 
