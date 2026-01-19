@@ -1,8 +1,8 @@
-// 1 hours spent
+// 1.5 hours spent
 // OpenGL choosed
 #include <stdio.h>
 #include <iostream>
-//#include <GL/glut.h>
+#include <GL/glut.h>
 
 using namespace std;
 
@@ -39,25 +39,26 @@ class ConfigLoader{
 
 class Engine{
 public:
-    
+
+    void display(void) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+	glutSwapBuffers();
+    }
+
     void start() {
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+	glutCreateWindow("Test");
+	glutDisplayFunc(display);
+	glutMainLoop(); 
     }
 };
 
-int main(int argc, char **argv)
+int main()
 {
     std::cout<<"Engine launch\n";
-    /*
-    glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB);
-  glutInitWindowSize(210, 210);
-  int main_w = glutCreateWindow("4 subwindows");
-  glutDisplayFunc(display);
-  glutVisibilityFunc(vis);
-  glutReshapeFunc(reshape);
-  glClearColor(1.0, 1.0, 1.0, 1.0);
-  glutMainLoop();
-  */
     std::cout<<"Window launch\n";
+    Engine engine;
+    engine.start();
     return 0;
 }
