@@ -3,7 +3,7 @@ In development. Just a 3d game for desktop. Linux and Windows compatible. There 
 
 ## Stats
 
-Time spent: 2 hours.
+Time spent: 2.5 hours.
 
 ## Requirements
 
