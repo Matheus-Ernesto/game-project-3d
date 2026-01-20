@@ -27,14 +27,6 @@ struct GameConfigs{
 struct Bindings{
 };
 
-class SaveLoader{
-    
-};
-
-class ConfigLoader{
-    
-};
-
 class Engine{
 private:
     inline static int totalFrames = 0;
@@ -47,16 +39,35 @@ private:
 public:
     Configs configs;
     GameConfigs gameConfigs;
-    std::function<void()> userIdle; //FOR USER DEFINE
+    function<void()> gameVoid; //FOR USER DEFINE
+    function<void(int, int, int, int)> mouseVoid; //FOR USER DEFINE
+    function<void(unsigned char, int, int)> keyboardVoid; //FOR USER DEFINE
+    function<void(int, int, int)> specialVoid; //FOR USER DEFINE
+
 
     Engine() {
         instance = this;
     }
 
-    static void internalIdle(int arg) { 
-        if (instance && instance->userIdle)
-            instance->userIdle();
-        glutTimerFunc(timeGameStep,internalIdle,0);
+    static void game(int arg) { 
+        if (instance && instance->gameVoid)
+            instance->gameVoid();
+        glutTimerFunc(timeGameStep,game,0);
+    }
+
+    static void keyboard(unsigned char key, int x, int y) { 
+        if (instance && instance->keyboardVoid)
+            instance->keyboardVoid(key, x, y);
+    }
+
+    static void mouse(int button, int state, int x, int y) { 
+        if (instance && instance->mouseVoid)
+            instance->mouseVoid(button,state,x,y);
+    }
+
+    static void special(int key, int x, int y) { 
+        if (instance && instance->specialVoid)
+            instance->specialVoid(key,x,y);
     }
 
     
@@ -101,7 +112,10 @@ public:
 
         if(configs.typeWindow == "Fullscreen") {glutFullScreen();}
 	    glutDisplayFunc(display); // FPS RENDER LOOP
-        glutTimerFunc(gameConfigs.fixedTimeStepMs,internalIdle,0); //GAME STEP LOOP
+        glutTimerFunc(gameConfigs.fixedTimeStepMs,game,0); //GAME STEP LOOP
+        glutKeyboardFunc(keyboard);
+        glutMouseFunc(mouse);
+        glutSpecialFunc(special);
 	    glutMainLoop(); 
     }
 };
@@ -117,12 +131,20 @@ int main(int argc, char* argv[])
     engine.configs = n_configs;
     engine.gameConfigs = n_gameConfigs;
 
-    engine.userIdle = [](){
+    engine.gameVoid = [](){
         cout << "OK Game Step" << endl;
+    };
+    engine.keyboardVoid = [](unsigned char key, int x, int y){
+        cout << "key: " << key << " Mouse Position: (" << x << "," << y << ")." << endl;
+    };
+    engine.mouseVoid = [](int button, int state, int x, int y){
+        cout << "button: " << button << " State: " << state << " Mouse Position: (" << x << "," << y << ")." << endl;
+    };
+    engine.specialVoid = [](int key, int x, int y){
+        cout << "key: " << key << " Mouse Position: (" << x << "," << y << ")." << endl;
     };
 
     cout<<"Engine start\n";
     engine.start(argc, argv);
-
     return 0;
 }
