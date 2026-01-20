@@ -1,9 +1,9 @@
 Plans:
 
 1. Vulkan API or OpenGL API. - **OK**
-2. Create a windowed black screen in OOP format.
-3. Get stats, like FPS, RAM usage, Computer stats.
-3.5. Clean Coding.
+2. Create a windowed black screen in OOP format. - **OK**
+3. Get stats, like FPS, RAM usage, Computer stats. - **OK**
+3.5. Clean Coding. - **OK**
 4. Draw shapes.
 5. Draw Texts.
 6. Draw Images.
