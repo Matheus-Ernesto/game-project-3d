@@ -1,7 +1,8 @@
-// 3 hours spent
+// 6 hours spent
 // OpenGL choosed
 #include <stdio.h>
 #include <iostream>
+#include <functional>
 #include <chrono>
 #include <GL/glut.h>
 
@@ -11,23 +12,19 @@ struct Configs{
     int widthWindow = 800;
     int heightWindow = 600;
     string typeWindow = "Windowed";
-    int fpsLimit = 60;
-    bool vsync = false;
-    int monitorIndex = 0;
-    string aspectRatio = "normal";
-    string quality = "normal";
-};
-
-struct Bindings{
+    bool showFPS = true;
 };
 
 struct GameConfigs{
-    string fixedTimeStep = "";
+    int fixedTimeStepMs = 500;
     string maxDeltaTime = "";
     string useMultiThreading = "";
     string enableDebug = "";
     string muteWhenUnfocused = "";
     string autoSave = "";
+};
+
+struct Bindings{
 };
 
 class SaveLoader{
@@ -39,48 +36,93 @@ class ConfigLoader{
 };
 
 class Engine{
+private:
+    inline static int totalFrames = 0;
+    inline static chrono::high_resolution_clock::time_point last = chrono::high_resolution_clock::now();
+    inline static int fps = 0;
+    inline static bool showFps = false;
+    inline static Engine* instance = nullptr;
+    inline static int timeGameStep = 0;
+
 public:
-    static int totalFrames;
-    static std::chrono::high_resolution_clock::time_point last;
+    Configs configs;
+    GameConfigs gameConfigs;
+    std::function<void()> userIdle; //FOR USER DEFINE
 
+    Engine() {
+        instance = this;
+    }
+
+    static void internalIdle(int arg) { 
+        if (instance && instance->userIdle)
+            instance->userIdle();
+        glutTimerFunc(timeGameStep,internalIdle,0);
+    }
+
+    
     static void display() {
-        totalFrames++;
-        int fps = 0;
+        //FPS
+        if(showFps){
+            totalFrames++;
 
-        auto now = std::chrono::high_resolution_clock::now();
+            auto now = chrono::high_resolution_clock::now();
+            auto diff = chrono::duration<double>(now - last).count();
 
-        auto diff = std::chrono::duration<double>(now - last).count();
-
-        if(diff >= 1.0){
-            fps = totalFrames / 60;
-            totalFrames = 0;
-            last = now;
-            string fpsTotal = "FPS" + to_string(fps);
-            glutSetWindowTitle(fpsTotal.c_str());
+            if(diff >= 1.0){
+                fps = totalFrames;
+                totalFrames = 0;
+                last = now;
+                string fpsTotal = "FPS: " + to_string(fps);
+                cout<<fpsTotal<<"\n";
+            }
         }
-        
+        //TO DO
+
+        //RECALL
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	    glutSwapBuffers();
         glutPostRedisplay();
     }
 
     void start(int argc, char* argv[]) {
+        //TO DO
+
+
+        //DEFINE WINDOWS CONFIGS
+        showFps = configs.showFPS;
+        timeGameStep = gameConfigs.fixedTimeStepMs;
+
 	    glutInit(&argc, argv);
 	    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	    glutCreateWindow("Test");
-	    glutDisplayFunc(display);
+
+        glutInitWindowSize(configs.widthWindow, configs.heightWindow);
+
+        glutCreateWindow("Test");
+
+        if(configs.typeWindow == "Fullscreen") {glutFullScreen();}
+	    glutDisplayFunc(display); // FPS RENDER LOOP
+        glutTimerFunc(gameConfigs.fixedTimeStepMs,internalIdle,0); //GAME STEP LOOP
 	    glutMainLoop(); 
     }
 };
 
-int Engine::totalFrames = 0;
-std::chrono::high_resolution_clock::time_point Engine::last = std::chrono::high_resolution_clock::now();
-
 int main(int argc, char* argv[])
 {
-    std::cout<<"Engine launch\n";
-    std::cout<<"Window launch\n";
+    cout<<"Configs: normal\n";
+    Configs n_configs;
+    GameConfigs n_gameConfigs;
+
+    cout<<"Engine instances\n";
     Engine engine;
+    engine.configs = n_configs;
+    engine.gameConfigs = n_gameConfigs;
+
+    engine.userIdle = [](){
+        cout << "OK Game Step" << endl;
+    };
+
+    cout<<"Engine start\n";
     engine.start(argc, argv);
+
     return 0;
 }
