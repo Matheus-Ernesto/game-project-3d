@@ -1,4 +1,4 @@
-// 7 hours spent
+// 10 hours spent
 // OpenGL choosed
 #include <stdio.h>
 #include <iostream>
@@ -6,6 +6,7 @@
 #include <chrono>
 #include <GL/glut.h>
 #include <fstream>
+#include <cstring>
 
 using namespace std;
 
@@ -73,12 +74,15 @@ private:
    inline static bool showFps = false;
    inline static Engine* instance = nullptr;
    inline static int timeGameStep = 0;
+   inline static int width = 100;
+   inline static int height = 100;
 
 public:
    Configs configs;
    GameConfigs gameConfigs;
 
    function<void()> gameVoid; //FOR USER DEFINE
+   function<void()> displayVoid; //FOR USER DEFINE
    function<void(int, int, int, int)> mouseVoid; //FOR USER DEFINE
    function<void(unsigned char, int, int)> keyboardVoid; //FOR USER DEFINE
    function<void(int, int, int)> specialVoid; //FOR USER DEFINE
@@ -109,6 +113,13 @@ public:
          instance->specialVoid(key,x,y);
    }
 
+   static void reshape(int t_width, int t_height){
+      //configs.widthWindow = t_width;
+      //configs.heightWindow = t_height;
+      width = t_width;
+      height = t_height;
+   }
+
    static void display() {
       //FPS
       if(showFps){
@@ -122,12 +133,29 @@ public:
             totalFrames = 0;
             last = now;
             string fpsTotal = "FPS: " + to_string(fps);
-            cout<<fpsTotal<<"\n";
+            
+            glClear(GL_COLOR_BUFFER_BIT);
+            glClearColor(0.0, 0.0, 0.0, 1.0);
+            glViewport(0, 0, width, height);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            gluOrtho2D(0, width, height, 0);
+            int len, i;
+            void *font = GLUT_BITMAP_TIMES_ROMAN_24;
+
+            glRasterPos2f(0, 24);
+            len = (int) strlen(fpsTotal.c_str());
+            for (i = 0; i < len; i++) {
+               glutBitmapCharacter(font, fpsTotal[i]);
+            }
          }
       }
+      
+      if (instance && instance->displayVoid)
+         instance->displayVoid();
 
       //RECALL
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
       glutSwapBuffers();
       glutPostRedisplay();
    }
@@ -150,6 +178,7 @@ public:
       glutKeyboardFunc(keyboard);
       glutMouseFunc(mouse);
       glutSpecialFunc(special);
+      glutReshapeFunc(reshape);
       glutMainLoop(); 
    }
    
@@ -159,8 +188,35 @@ public:
       } else{
          glutReshapeWindow(configs.widthWindow, configs.heightWindow);
       }
+      configs.widthWindow = width;
+      configs.heightWindow = height;
    }
 
+   void set2D(){
+      glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+      glClearColor(0.0, 0.0, 0.0, 1.0);
+      glViewport(0, 0, configs.widthWindow, configs.heightWindow);
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      gluOrtho2D(0, configs.widthWindow, configs.heightWindow, 0);
+      //glMatrixMode(GL_MODELVIEW);
+      reload();
+   }
+   void text(int x, int y, char *text){
+      
+      int len, i;
+      void *font = GLUT_BITMAP_TIMES_ROMAN_24;
+
+      glRasterPos2f(x, y);
+      len = (int) strlen(text);
+      for (i = 0; i < len; i++) {
+         glutBitmapCharacter(font, text[i]);
+      }
+   }
+
+   void set3D(){
+
+   }
 };
 
 int gameMenu = 0;
@@ -183,6 +239,8 @@ void mainGame(){
       cout << "key: " << key << " Mouse Position: (" << x << "," << y << ")." << endl;
    };
    
+   engine.set2D();
+   //engine.text(0, 24, "This is written in a GLUT bitmap font.");
    
 };
 
@@ -190,9 +248,6 @@ void mainGame(){
 
 int main(int argc, char* argv[])
 {
-    cout<<"Configs: normal\n";
-
-    cout<<"Engine instances\n";
     Engine engine;
     engine.configs = n_configs;
     engine.gameConfigs = n_gameConfigs;
@@ -209,17 +264,37 @@ int main(int argc, char* argv[])
     };
     */
 
+    //LOOP WITH STEP
     engine.gameVoid = [](){
         switch(gameMenu){
             case 0:
                mainGame();
-                break;
+               break;
             default:
-                break;
+               break;
         }
     };
 
-    cout << "Engine start\n";
+    //LOOP WITH FRAMERATE MAX
+    engine.displayVoid = [](){
+        switch(gameMenu){
+            case 0:
+               break;
+            default:
+               break;
+        }
+    };
+
+   //LOOP WITH INPUTFUNC MAX
+    engine.keyboardVoid = [](unsigned char key, int x, int y){
+        switch(gameMenu){
+            case 0:
+               
+               break;
+            default:
+               break;
+        }
+    };
     engine.start(argc, argv);
 
     return 0;
