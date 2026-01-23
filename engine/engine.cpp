@@ -1,4 +1,4 @@
-// 13 hours spent
+// 16 - hours spent
 // OpenGL choosed
 #include <stdio.h>
 #include <iostream>
@@ -8,6 +8,8 @@
 #include <fstream>
 #include <cstring>
 #include <vector>
+#include <cmath>
+#include <iomanip>
 
 using namespace std;
 
@@ -85,28 +87,31 @@ public:
 
    class Drawable{
    public:
+      float x;
+      float y;
+
       Text* text = nullptr;
       void draw(){
          if(text){
             glColor3f(text->color.r, text->color.g, text->color.b);
             
             int width_text = 0;
+            int x1 = x;
             for (int i = 0; text->text[i] != '\0'; i++)
             {
                width_text += glutBitmapWidth(text->font, text->text[i]);
             }
-            int w = width_text;
 
             if (text->position == 0)
             { // CENTER
-               text->x -= w / 2;
+               x1 -= width_text / 2;
             }
             else if (text->position == 1)
             { // RIGHT
-               text->x -= w;
+               x1 -= width_text;
             }
 
-            glRasterPos2i(text->x, text->y);
+            glRasterPos2i(x1, y+24); // FONT SIZE
 
             for (int i = 0; text->text[i] != '\0'; i++)
             {
@@ -121,7 +126,6 @@ public:
 
    void apply(int width, int height, bool showFps)
    {
-      glClear(GL_COLOR_BUFFER_BIT);
       // FPS
       if (showFps)
       {
@@ -137,7 +141,7 @@ public:
             totalFrames = 0;
             last = now;
          }
-
+         glColor3f(1.0f, 1.0f, 1.0f);
          glViewport(0, 0, width, height);
          glMatrixMode(GL_PROJECTION);
          glLoadIdentity();
@@ -153,25 +157,35 @@ public:
          }
       }
       //DRAW CHILDS 2D:
-      // for(auto& draw : draws){
-      //    draw.draw();
-      // }
+      for(auto& draw : draws){
+         float x_temp = draw.x;
+         float y_temp = draw.y;
+         draw.x = draw.x * (float)width;
+         draw.y = draw.y * (float)height;
+         draw.draw();
+         draw.x = x_temp;
+         draw.y = y_temp;
+      }
    }
    //glMatrixMode(GL_MODELVIEW);
 
-   void text(int x, int y, const char *text, int align,float r, float g, float b)
+   void text(float xpercetage, float ypercetage, const char *text, int align,float r, float g, float b)
    {
       Drawable t_draw;
+      t_draw.text = new Text;
       t_draw.text->color.r = r;
       t_draw.text->color.g = g;
       t_draw.text->color.b = b;
       t_draw.text->position = align;
-      t_draw.text->x = x;
-      t_draw.text->y = y;
+      t_draw.x = xpercetage;
+      t_draw.y = ypercetage;
       t_draw.text->text = text;
 
       draws.push_back(t_draw);
 
+   }
+   void clearAll(){
+      draws.clear();
    }
 };
 
@@ -293,38 +307,10 @@ public:
 
 // game.cpp --------------------------------------------------------------------------
 
-// void mainGameVoid()
-// {
-//    Loader loader;
-//    Configs configs = loader.loadConfig();
-//    if (configs == n_configs)
-//    {
-//       loader.saveConfig(configs); // SAVE BECAUSE DOESNT EXIST THE FILE
-//    }
-//    else
-//    {
-//       engine.configs = configs; // IS DIFFERENT FROM NORMAL, RELOAD
-//       engine.reload();
-//    }
-
-//    // TO DO
-//    engine.keyboardVoid = [](unsigned char key, int x, int y)
-//    {
-//       cout << "key: " << key << " Mouse Position: (" << x << "," << y << ")." << endl;
-//    };
-
-//    engine.set2D();
-//    engine.color(1.0f, i, i);
-// };
-
-// void mainDisplayVoid()
-// {
-//    engine.text(engine.configs.widthWindow / 2, engine.configs.heightWindow / 2 + 24, "By: Matheus Ernesto", 0);
-// };
-
 Engine engine;
 Configs configs;
 int gameMenu = 0;
+int deltaTime = 0;
 
 int main(int argc, char *argv[])
 {
@@ -345,7 +331,7 @@ int main(int argc, char *argv[])
    engine.showFPS = configs.showFPS;
 
    // Game configs
-   engine.timeGameStep = 16; // 60FPS for game steps
+   engine.timeGameStep = 10; // 60FPS for game steps
    engine.windowName = "Metal Himiko - V0.0";
 
    // Game code
@@ -353,11 +339,38 @@ int main(int argc, char *argv[])
    // LOOP WITH STEP
    engine.gameVoid = []()
    {
+      deltaTime++;
       switch (gameMenu)
       {
       case 0:
          // TO DO
-         engine.canvas.text(400,300,"Metal Himiko",0,1.0f,1.0f,1.0f);
+         if(deltaTime <= 80) {
+            int fadeIn = deltaTime/8;
+            engine.canvas.clearAll();
+            engine.canvas.text(0.5f,0.5f,"Metal Himiko",0,0.1f*fadeIn,0.1f*fadeIn,0.1f*fadeIn);
+         } else if(deltaTime > 240 && deltaTime < 320){
+            float fadeOut = (float)abs(deltaTime-320)/80.0f;
+            engine.canvas.clearAll();
+            engine.canvas.text(0.5f,0.5f,"Metal Himiko",0,fadeOut,fadeOut,fadeOut);
+         } else if(deltaTime >= 320){
+            gameMenu = 1;
+            //engine.canvas.text(0.5f,0.5f,"Metal Himiko",0,0.1f*fadeIn,0.1f*fadeIn,0.1f*fadeIn);
+         }
+         break;
+      case 1:
+         //deltaTime = 321 now
+         if(deltaTime >= 500, deltaTime < 600){
+            float move = (float)(deltaTime-500) / 100.0f;
+            engine.canvas.clearAll();
+            engine.canvas.text(0.1f*move,0.1f,"Metal Himiko",2,1.0f*move,1.0f*move,0.7f*move);
+            engine.canvas.text(0.1f*move,0.5f,"Iniciar",2,1.0f*move,1.0f*move,0.7f*move);
+            engine.canvas.text(0.1f*move,0.6f,"Configurações",2,1.0f*move,1.0f*move,0.7f*move);
+         } else if(deltaTime = 600){
+            engine.canvas.clearAll();
+            engine.canvas.text(0.1f,0.1f,"Metal Himiko",2,1.0f,1.0f,0.7f);
+            engine.canvas.text(0.1f,0.5f,"Iniciar",2,1.0f,1.0f,0.7f);
+            engine.canvas.text(0.1f,0.6f,"Configurações",2,1.0f,1.0f,0.7f);
+         }
          break;
       default:
          break;
