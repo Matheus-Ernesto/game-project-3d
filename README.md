@@ -3,7 +3,7 @@ In development. Just a 3d game for desktop. Linux and Windows compatible. There 
 
 ## Stats
 
-Time spent: 2 hours.
+Time spent: 23 hours.
 
 ## Requirements
 
@@ -14,23 +14,27 @@ The computer I using is a Intel duo E5300 without gpu... So this game runs in a 
 
 ## Description
 
-You are a discarded robot, trying to be the best project of your master, so you need to improve yourself, defend your master and destroy others projects with bad intuitions.
-
+You are a discarded robot, trying to be the best project of your master, so you need to improve yourself, defend your master and destroy others projects with virus
 - Top view 3d Game
 - Decisions and 2 End games.
 
-
 ## Goals
 
-Game time: ~1 hour to beat each end.
+Game time: ~1 hour to beat.
 
 Requirements: Run in any potato powered by a Esp32 with 4 MB ram, also runs on Windows and Linux.
 
+AI: No, just no. No AI arts, no scripts from AI.
 
-Why? Is just a test of all my abilities, 3d art, programming, design, all. So I'll use jus libraries in programming, but all other things like assets, soundtrack, needs o be my arts.
+Feel free to use any part of this project, just credit the names of the involved with this project.
+
+People making project:
 
 
-AI: No, just no. No AI arts, no scripts from AI, not because isnt helpful, but because is MY test, so needs to be MY abilites, ME proving to myself that I can do this. If you dont believe me, I don care. this test is for myself, no others.
+Matheus-Ernesto (github) - Code Project - Developer.
 
+hidden (telegram) - Concept Art - Artist
 
-Feel free to use any part of this project, just credit my name pls ( ´◔ ω◔`)
+hidden (X - old Twitter) - Concept Art - Artist
+
+hidden (whatsapp) - Concept Art - Artist
