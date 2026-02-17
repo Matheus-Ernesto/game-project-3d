@@ -1,2 +1,0 @@
-x86_64-w64-mingw32-g++ engine.cpp -o engine.exe -I./SFML/include -L./SFML/lib -lsfml-graphics -lsfml-window -lsfml-system -static-libgcc -static-libstdc++
-
