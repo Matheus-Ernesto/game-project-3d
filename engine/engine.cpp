@@ -1,45 +1,11 @@
-// changes: glut -> glfw -> sfml. Ufff
-// 30 hours.
-
-// YES, IS NOT IN ENGLISH THE GAME, JUST THE CODE.
-// SOMEDAY I GET A LOCALIZATION SCRIPT
-// BUT IS NOT TODAY.
-
-// SEE PLANS.MD TO READ WHERE I LOSE MY MIND
-
 #include <unordered_set>
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <iostream>
 
-// Idk half of this libs, they just appeared because compilers errors.
-
-// I use linux mint without lightdm btw :)
-
-// HALF OF THIS CODE WAS WRITTEN IN VSCODE WITH A KEYBOARD, HALF WITH MY ASS
-
-// CHATGPT DOESNT MAKE THIS CODE, BECAUSE IS TOO TRASHY
-
-// I DONT KNOW WHY AM DOCUMETING THIS SHIT, NO ONES GOES TO READ THIS...
-
-// ALSO I ALREADY SAID I USE LINUX?
-
-// IF IT DOESNT RUN WELL ON WINDOWS, DONT BLAME ME, I DONT HAVE A WINDOWS.
-
-// I DONT CARE ABOUT MACOS
-
-// REQUISITES TO RUN THIS GAME: MY PC...
-
-// E5300, 4GB OF RAM, NO GPU.
-//  TODAY IS GETTING 300 FPS. - 2026-01-24.
-
-// TO COMPILE FOR LINUX: g++ engine.cpp -o engine -lsfml-graphics -lsfml-window -lsfml-system
-// TO COMPILE FOR WINDOWS (PROBALY, IDK): x86_64-w64-mingw32-g++ engine.cpp -o engine.exe SOME BULLSHIT DLL...
-
 using namespace std;
 
-// SFML MISC AND SETUP
 class Engine
 {
 public:
@@ -65,16 +31,10 @@ public:
         height = t_height;
     }
 
-    static void display()
+    static void render()
     {
-        window.clear();
-
-        if (canvas3d.enable3D)
-        {
-            canvas3d.apply(window, width, height, showFPS);
-        }
-        canvas.apply(window, width, height, showFPS);
-
+        canvas3d.apply(window, width, height, showFPS);
+        //canvas.apply(window, width, height, showFPS);
         window.display();
     }
 
@@ -97,8 +57,6 @@ public:
                 windowName);
         }
 
-        canvas3d.setup(window);
-
         if (!canvas.font.loadFromFile("fonts/arial.ttf")) // HERE YOU CAN GET THE FONT
         {
             std::cerr << "ERROR\n";
@@ -116,7 +74,7 @@ public:
         {
             if (event.type == sf::Event::Closed)
                 quitForce = true;
-
+                
             if (event.type == sf::Event::KeyPressed)
                 keysDown.insert(event.key.code);
 
@@ -158,7 +116,8 @@ public:
 
     bool quit()
     {
-        return quitForce || !window.isOpen();
+        if(quitForce || !window.isOpen()) return true;
+        return false;
     }
     void exit()
     {

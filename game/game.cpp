@@ -4,6 +4,8 @@
 
 #include "../engine/2dCollections.cpp"
 #include "../engine/3dCollections.cpp"
+#include "../engine/canvas.cpp"
+#include "../engine/canvas3d.cpp"
 #include "../engine/engine.cpp"
 #include "../engine/configsCollections.cpp"
 
