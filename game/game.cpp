@@ -1,5 +1,5 @@
-#include <iostream>           
-#include <SFML/Graphics.hpp>    
+#include <iostream>
+#include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
 #include "../engine/2dCollections.cpp"
@@ -26,7 +26,7 @@ int main()
     }
     else
     {
-        configs = t_configs; 
+        configs = t_configs;
     }
 
     // CONFIG TO ENGINE
@@ -39,11 +39,12 @@ int main()
     // Game configs
     engine.windowName = "Metal Himiko - V0.0";
 
-
-    engine.setStep(10);
-
-    engine.start();
     
+    engine.setStep(16);
+    engine.start();
+
+    engine.nextStep();
+
     intro(engine);
 
     engine.exit();

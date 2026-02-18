@@ -6,20 +6,15 @@
 
 using namespace std;
 
-
-
 class Engine
 {
 public:
-
     using clock = std::chrono::steady_clock;
-    
+
     unordered_set<sf::Keyboard::Key> keysDown;
     unordered_set<sf::Mouse::Button> mouseDown;
     sf::Vector2i mousePosition{0, 0};
     float mouseScrollDelta = 0.f;
-
-    inline static int timeGameStep = 16;
 
     inline static chrono::_V2::steady_clock::time_point last;
     inline static chrono::_V2::steady_clock::time_point now;
@@ -43,8 +38,9 @@ public:
 
     static void display()
     {
-        now = clock::now();
+        now = chrono::_V2::steady_clock::now();
         canvas3d.apply(window, width, height, showFPS);
+        window.resetGLStates();
         canvas.apply(window, width, height, showFPS);
         window.display();
     }
@@ -59,13 +55,13 @@ public:
             window.create(
                 sf::VideoMode::getDesktopMode(),
                 sf::String(windowName.c_str()),
-                sf::Style::Fullscreen,sf::ContextSettings(24));
+                sf::Style::Fullscreen, sf::ContextSettings(24));
         }
         else
         {
             window.create(
                 sf::VideoMode(width, height),
-                sf::String(windowName.c_str()),sf::Style::Close,sf::ContextSettings(24));
+                sf::String(windowName.c_str()), sf::Style::Default, sf::ContextSettings(24));
         }
 
         if (!canvas.font.loadFromFile("fonts/arial.ttf")) // HERE YOU CAN GET THE FONT
@@ -86,7 +82,7 @@ public:
         {
             if (event.type == sf::Event::Closed)
                 quitForce = true;
-                
+
             if (event.type == sf::Event::KeyPressed)
                 keysDown.insert(event.key.code);
 
@@ -98,6 +94,10 @@ public:
 
             if (event.type == sf::Event::MouseWheelScrolled)
                 mouseScrollDelta += event.mouseWheelScroll.delta;
+            if (event.type == sf::Event::Resized){
+
+                reshape(event.size.width, event.size.height);
+            }
         }
     }
 
@@ -128,7 +128,8 @@ public:
 
     bool quit()
     {
-        if(quitForce || !window.isOpen()) return true;
+        if (quitForce || !window.isOpen())
+            return true;
         return false;
     }
     void exit()
@@ -136,12 +137,19 @@ public:
         window.close();
     }
 
-    void setStep(int ms){
+    void setStep(int ms)
+    {
         fixedStep = chrono::milliseconds(ms);
     }
 
-    bool isStepped(){
+    bool isStepped()
+    {
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last);
         return duration >= fixedStep;
+    }
+
+    void nextStep()
+    {
+        last = now;
     }
 };

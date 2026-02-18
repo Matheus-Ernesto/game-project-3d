@@ -21,7 +21,7 @@ public:
         y = y;
     }
 
-    void setColor(float r, float g, float c)
+    void setColor(float r, float g, float b)
     {
         r = r;
         g = g;
