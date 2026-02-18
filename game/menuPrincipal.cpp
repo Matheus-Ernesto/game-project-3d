@@ -4,7 +4,7 @@
 
 using namespace std;
 
-int intro(Engine &engine)
+int menuPrincipal(Engine &engine)
 {
     engine.canvas.clearAll();
 

@@ -4,14 +4,12 @@
 
 using namespace std;
 
-class objectSF {
+class Texture2d
+{
 public:
     string name;
-    int type;
-    static constexpr int TEXT = 0;
-    static constexpr int CIRCLE = 0;
-    static constexpr int IMAGE = 0;
-}
+    sf::Texture texture;
+};
 
 // CANVAS FOR DRAWING ON WINDOW
 class Canvas
@@ -20,15 +18,14 @@ public:
     inline static int totalFrames = 0;
     inline static chrono::high_resolution_clock::time_point last = chrono::high_resolution_clock::now();
     inline static int fps = 0;
-    inline static sf::Font font
+    inline static sf::Font font;
 
     GUI gui;
-    
+
     vector<sf::Text> texts;
     vector<sf::CircleShape> circles;
     vector<sf::Sprite> sprites;
-    vector<unique_ptr<sf::Texture>> textures;
-    vector<objectSF> objects;
+    vector<Texture2d> textures;
 
     static constexpr int ALIGN_CENTER = 0;
 
@@ -98,100 +95,6 @@ public:
         draw(window);
     }
 
-    void add(Text text)
-    {
-        sf::Text textElement;
-        textElement.setFont(font);
-        sf::String sfText = sf::String::fromUtf8(
-            text.text.begin(),
-            text.text.end());
-        textElement.setString(sfText);
-        textElement.setCharacterSize(text.fontSize);
-        textElement.setFillColor(sf::Color(
-            static_cast<sf::Uint8>(text.r * 255),
-            static_cast<sf::Uint8>(text.g * 255),
-            static_cast<sf::Uint8>(text.b * 255)));
-        sf::FloatRect bounds = textElement.getLocalBounds();
-        switch (text.align)
-        {
-        case 0:
-            textElement.setOrigin(0.f, bounds.top);
-            break;
-
-        case 1:
-            textElement.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
-            break;
-
-        case 2:
-            textElement.setOrigin(bounds.left + bounds.width, bounds.top);
-            break;
-        }
-        textElement.setPosition(text.x, text.y);
-
-        texts.push_back(textElement);
-    }
-
-    void add(Circle circle)
-    {
-        sf::CircleShape circleElement(circle.radius);
-        circleElement.setFillColor(sf::Color(
-            static_cast<sf::Uint8>(circle.r * 255),
-            static_cast<sf::Uint8>(circle.g * 255),
-            static_cast<sf::Uint8>(circle.b * 255)));
-        sf::FloatRect bounds = circleElement.getLocalBounds();
-        switch (circle.align)
-        {
-        case 0:
-            circleElement.setOrigin(0.f, bounds.top);
-            break;
-
-        case 1:
-            circleElement.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
-            break;
-
-        case 2:
-            circleElement.setOrigin(bounds.left + bounds.width, bounds.top);
-            break;
-        }
-        circleElement.setPosition(circle.x, circle.y);
-
-        circles.push_back(circleElement);
-    }
-
-    void add(Image image)
-    {
-        auto texture = make_unique<sf::Texture>();
-        if (!texture->loadFromFile(image.path))
-        {
-            std::cerr << "Error" << std::endl;
-        }
-
-        sf::Sprite sprite(*texture);
-        sf::IntRect uvRect(image.x1, image.y1, image.x2, image.y2);
-        sprite.setTextureRect(uvRect);
-        sprite.setScale((float)image.width / uvRect.width, (float)image.height / uvRect.height);
-        sprite.setColor(sf::Color(255, 255, 255, image.transparency));
-        sf::FloatRect bounds = sprite.getLocalBounds();
-        switch (image.align)
-        {
-        case 0:
-            sprite.setOrigin(0.f, bounds.top);
-            break;
-
-        case 1:
-            sprite.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
-            break;
-
-        case 2:
-            sprite.setOrigin(bounds.left + bounds.width, bounds.top);
-            break;
-        }
-        sprite.setPosition(image.x, image.y);
-
-        textures.push_back(move(texture));
-        sprites.push_back(sprite);
-    }
-
     void clearAll()
     {
         texts.clear();
@@ -200,20 +103,141 @@ public:
         textures.clear();
     }
 
-    void update(){
-        for(auto& originalOBJ : gui.texts){
-            bool exists = false;
-            for (auto& memoryOBJ : objectSF)
+    void update()
+    {
+        texts.clear();
+        circles.clear();
+        sprites.clear();
+
+        for (auto &originalOBJ : gui.texts)
+        {
+            sf::Text textElement;
+            textElement.setFont(font);
+            sf::String sfText = sf::String::fromUtf8(
+                originalOBJ.text.begin(),
+                originalOBJ.text.end());
+            textElement.setString(sfText);
+            textElement.setCharacterSize(originalOBJ.fontSize);
+            textElement.setFillColor(sf::Color(
+                static_cast<sf::Uint8>(originalOBJ.r * 255),
+                static_cast<sf::Uint8>(originalOBJ.g * 255),
+                static_cast<sf::Uint8>(originalOBJ.b * 255)));
+            sf::FloatRect bounds = textElement.getLocalBounds();
+            switch (originalOBJ.align)
             {
-                if(memoryOBJ.name == originalOBJ.name){
-                    //update
+            case 0:
+                textElement.setOrigin(0.f, bounds.top);
+                break;
+
+            case 1:
+                textElement.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
+                break;
+
+            case 2:
+                textElement.setOrigin(bounds.left + bounds.width, bounds.top);
+                break;
+            }
+            textElement.setPosition(originalOBJ.x, originalOBJ.y);
+
+            texts.push_back(textElement);
+        }
+        for (auto &originalOBJ : gui.circles)
+        {
+            sf::CircleShape circleElement(originalOBJ.radius);
+            circleElement.setFillColor(sf::Color(
+                static_cast<sf::Uint8>(originalOBJ.r * 255),
+                static_cast<sf::Uint8>(originalOBJ.g * 255),
+                static_cast<sf::Uint8>(originalOBJ.b * 255)));
+            sf::FloatRect bounds = circleElement.getLocalBounds();
+            switch (originalOBJ.align)
+            {
+            case 0:
+                circleElement.setOrigin(0.f, bounds.top);
+                break;
+
+            case 1:
+                circleElement.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
+                break;
+
+            case 2:
+                circleElement.setOrigin(bounds.left + bounds.width, bounds.top);
+                break;
+            }
+            circleElement.setPosition(originalOBJ.x, originalOBJ.y);
+
+            circles.push_back(circleElement);
+        }
+
+        for (auto &originalOBJ : gui.images)
+        {
+            for (auto &textureLoaded : textures)
+            {
+                if (textureLoaded.name == originalOBJ.path)
+                {
+                    sf::Sprite sprite(textureLoaded.texture);
+                    sf::IntRect uvRect(originalOBJ.x1, originalOBJ.y1, originalOBJ.x2, originalOBJ.y2);
+                    sprite.setTextureRect(uvRect);
+                    sprite.setScale((float)originalOBJ.width / uvRect.width, (float)originalOBJ.height / uvRect.height);
+                    sprite.setColor(sf::Color(255, 255, 255, originalOBJ.transparency));
+                    sf::FloatRect bounds = sprite.getLocalBounds();
+                    switch (originalOBJ.align)
+                    {
+                    case 0:
+                        sprite.setOrigin(0.f, bounds.top);
+                        break;
+
+                    case 1:
+                        sprite.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
+                        break;
+
+                    case 2:
+                        sprite.setOrigin(bounds.left + bounds.width, bounds.top);
+                        break;
+                    }
+                    sprite.setPosition(originalOBJ.x, originalOBJ.y);
+
+                    sprites.push_back(sprite);
+                }
+                else
+                {
+
+                    sf::Texture texture;
+                    if (!texture.loadFromFile(originalOBJ.path))
+                    {
+                        std::cerr << "Error" << std::endl;
+                    }
+
+                    sf::Sprite sprite(texture);
+                    sf::IntRect uvRect(originalOBJ.x1, originalOBJ.y1, originalOBJ.x2, originalOBJ.y2);
+                    sprite.setTextureRect(uvRect);
+                    sprite.setScale((float)originalOBJ.width / uvRect.width, (float)originalOBJ.height / uvRect.height);
+                    sprite.setColor(sf::Color(255, 255, 255, originalOBJ.transparency));
+                    sf::FloatRect bounds = sprite.getLocalBounds();
+                    switch (originalOBJ.align)
+                    {
+                    case 0:
+                        sprite.setOrigin(0.f, bounds.top);
+                        break;
+
+                    case 1:
+                        sprite.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
+                        break;
+
+                    case 2:
+                        sprite.setOrigin(bounds.left + bounds.width, bounds.top);
+                        break;
+                    }
+                    sprite.setPosition(originalOBJ.x, originalOBJ.y);
+
+                    Texture2d textureCreated;
+
+                    textureCreated.name = originalOBJ.path;
+                    textureCreated.texture = texture;
+
+                    textures.push_back(textureCreated);
+                    sprites.push_back(sprite);
                 }
             }
-            if(!exists){
-                //create
-            }
-            
-
         }
     }
 };

@@ -45,7 +45,9 @@ int main()
 
     engine.nextStep();
 
-    intro(engine);
+    if(intro(engine) == 0){
+        menuPrincipal(engine);
+    }
 
     engine.exit();
     return 0;

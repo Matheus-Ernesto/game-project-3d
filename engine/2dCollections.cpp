@@ -18,15 +18,15 @@ public:
 
     void setPosition(float x, float y)
     {
-        x = x;
-        y = y;
+        this->x = x;
+        this->y = y;
     }
 
     void setColor(float r, float g, float b)
     {
-        r = r;
-        g = g;
-        b = b;
+        this->r = r;
+        this->g = g;
+        this->b = b;
     }
 };
 
@@ -57,15 +57,15 @@ public:
 
     void setPosition(float x, float y)
     {
-        x = x;
-        y = y;
+        this->x = x;
+        this->y = y;
     }
 
-    void setColor(float r, float g, float c)
+    void setColor(float r, float g, float b)
     {
-        r = r;
-        g = g;
-        b = b;
+        this->r = r;
+        this->g = g;
+        this->b = b;
     }
 };
 
@@ -123,4 +123,4 @@ public:
         cout << "err Obj " << name << " not found\n";
         return invalidObject;
     }
-}
+};
