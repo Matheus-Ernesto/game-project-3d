@@ -133,5 +133,9 @@ public:
         glCullFace(GL_BACK);
 
         draw(window);
-    };
+    }
+
+    void update(){
+
+    }
 };

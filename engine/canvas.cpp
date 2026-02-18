@@ -4,6 +4,15 @@
 
 using namespace std;
 
+class objectSF {
+public:
+    string name;
+    int type;
+    static constexpr int TEXT = 0;
+    static constexpr int CIRCLE = 0;
+    static constexpr int IMAGE = 0;
+}
+
 // CANVAS FOR DRAWING ON WINDOW
 class Canvas
 {
@@ -11,11 +20,15 @@ public:
     inline static int totalFrames = 0;
     inline static chrono::high_resolution_clock::time_point last = chrono::high_resolution_clock::now();
     inline static int fps = 0;
-    inline static sf::Font font;
+    inline static sf::Font font
+
+    GUI gui;
+    
     vector<sf::Text> texts;
     vector<sf::CircleShape> circles;
     vector<sf::Sprite> sprites;
     vector<unique_ptr<sf::Texture>> textures;
+    vector<objectSF> objects;
 
     static constexpr int ALIGN_CENTER = 0;
 
@@ -185,5 +198,22 @@ public:
         circles.clear();
         sprites.clear();
         textures.clear();
+    }
+
+    void update(){
+        for(auto& originalOBJ : gui.texts){
+            bool exists = false;
+            for (auto& memoryOBJ : objectSF)
+            {
+                if(memoryOBJ.name == originalOBJ.name){
+                    //update
+                }
+            }
+            if(!exists){
+                //create
+            }
+            
+
+        }
     }
 };

@@ -137,7 +137,7 @@ public:
                 return obj;
         }
         static Object3D invalidObject;
-        cout << "err Obj " << name << "not found\n";
+        cout << "err Obj " << name << " not found\n";
         return invalidObject;
     }
 };
