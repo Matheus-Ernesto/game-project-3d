@@ -3,8 +3,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>
-#include <GL/glu.h>
-#include <GL/gl.h>
 
 using namespace std;
 

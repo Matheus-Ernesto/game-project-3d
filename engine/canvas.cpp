@@ -66,9 +66,23 @@ public:
 
     void apply(sf::RenderWindow &window, int width, int height, bool showFps)
     {
+
         // FPS
         if (showFps)
         {
+            glClear(GL_COLOR_BUFFER_BIT);         // Limpa o buffer de cor (não precisa limpar profundidade para 2D)
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Cor de fundo preta
+                                                  // Configuração de projeção 2D
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glOrtho(0, window.getSize().x, window.getSize().y, 0, -1, 1); // Definindo projeção ortográfica para 2D
+
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+
+            // Desabilita o teste de profundidade para renderização 2D
+            glDisable(GL_DEPTH_TEST);
+
             totalFrames++;
             auto now = chrono::high_resolution_clock::now();
             auto diff = chrono::duration<double>(now - last).count();

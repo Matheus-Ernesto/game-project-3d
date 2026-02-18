@@ -11,6 +11,16 @@ int intro(Engine &engine)
     Object3D cube;
     cube.name = "cubo";
     engine.canvas3d.world.scene.add(cube);
+
+    Object3D cube2;
+    cube2.name = "cubo2";
+    cube2.pos_y = -2.f;
+    cube2.sca_x = 5.f;
+    cube2.sca_z = 5.f;
+    cube2.texture.r = 1.0f;
+    cube2.texture.g = 1.0f;
+    cube2.texture.b = 1.0f;
+    engine.canvas3d.world.scene.add(cube2);
     
     int color = 0;
 
@@ -83,7 +93,7 @@ int intro(Engine &engine)
             obj.texture.setColor(color);
         }
 
-        engine.render();
+        engine.display();
     }
     return 0;
 };

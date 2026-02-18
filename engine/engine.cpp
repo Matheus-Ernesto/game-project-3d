@@ -6,15 +6,25 @@
 
 using namespace std;
 
+
+
 class Engine
 {
 public:
+
+    using clock = std::chrono::steady_clock;
+    
     unordered_set<sf::Keyboard::Key> keysDown;
     unordered_set<sf::Mouse::Button> mouseDown;
     sf::Vector2i mousePosition{0, 0};
     float mouseScrollDelta = 0.f;
 
     inline static int timeGameStep = 16;
+
+    inline static chrono::_V2::steady_clock::time_point last;
+    inline static chrono::_V2::steady_clock::time_point now;
+    inline static chrono::milliseconds fixedStep;
+
     inline static bool fullscreen = false;
     inline static int width = 100;
     inline static int height = 100;
@@ -31,10 +41,11 @@ public:
         height = t_height;
     }
 
-    static void render()
+    static void display()
     {
+        now = clock::now();
         canvas3d.apply(window, width, height, showFPS);
-        //canvas.apply(window, width, height, showFPS);
+        canvas.apply(window, width, height, showFPS);
         window.display();
     }
 
@@ -47,20 +58,21 @@ public:
 
             window.create(
                 sf::VideoMode::getDesktopMode(),
-                windowName,
-                sf::Style::Fullscreen);
+                sf::String(windowName.c_str()),
+                sf::Style::Fullscreen,sf::ContextSettings(24));
         }
         else
         {
             window.create(
                 sf::VideoMode(width, height),
-                windowName);
+                sf::String(windowName.c_str()),sf::Style::Close,sf::ContextSettings(24));
         }
 
         if (!canvas.font.loadFromFile("fonts/arial.ttf")) // HERE YOU CAN GET THE FONT
         {
             std::cerr << "ERROR\n";
         }
+        last = chrono::_V2::steady_clock::now();
     }
 
     void pollEvents()
@@ -122,5 +134,14 @@ public:
     void exit()
     {
         window.close();
+    }
+
+    void setStep(int ms){
+        fixedStep = chrono::milliseconds(ms);
+    }
+
+    bool isStepped(){
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last);
+        return duration >= fixedStep;
     }
 };
