@@ -47,6 +47,12 @@ public:
 
     void start()
     {
+        sf::ContextSettings settings;
+        settings.majorVersion = 4;  // OpenGL versão principal
+        settings.minorVersion = 5;  // OpenGL versão secundária (opcional)
+        settings.depthBits = 24;    // Bits de profundidade
+        settings.stencilBits = 8;   // Bits de estêncil (opcional)
+        
         if (fullscreen)
         {
             width = sf::VideoMode::getDesktopMode().width;
@@ -55,13 +61,13 @@ public:
             window.create(
                 sf::VideoMode::getDesktopMode(),
                 sf::String(windowName.c_str()),
-                sf::Style::Fullscreen, sf::ContextSettings(24));
+                sf::Style::Fullscreen, settings);
         }
         else
         {
             window.create(
                 sf::VideoMode(width, height),
-                sf::String(windowName.c_str()), sf::Style::Default, sf::ContextSettings(24));
+                sf::String(windowName.c_str()), sf::Style::Default, settings);
         }
 
         if (!canvas.font.loadFromFile("fonts/arial.ttf")) // HERE YOU CAN GET THE FONT
