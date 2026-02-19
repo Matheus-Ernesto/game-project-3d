@@ -140,6 +140,10 @@ public:
         cout << "err Obj " << name << " not found\n";
         return invalidObject;
     }
+
+    void clearAll(){
+        objects3d.clear();
+    }
 };
 
 class World

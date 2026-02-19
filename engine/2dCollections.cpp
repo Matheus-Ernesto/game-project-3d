@@ -123,4 +123,10 @@ public:
         cout << "err Obj " << name << " not found\n";
         return invalidObject;
     }
+
+    void clearAll(){
+    texts.clear();
+    circles.clear();
+    images.clear();
+    }
 };

@@ -6,7 +6,7 @@ using namespace std;
 
 int intro(Engine &engine)
 {
-    engine.canvas.clearAll();
+    engine.canvas.gui.clearAll();
 
     Text titulo;
     titulo.text = "By Matheus Ernesto";
@@ -18,21 +18,15 @@ int intro(Engine &engine)
 
     engine.canvas.gui.add(titulo);
 
-    Object3D cube;
-    cube.name = "cube";
-
-    engine.canvas3d.world.scene.add(cube);
-
     int deltaTime = 0;
     int fade = 0;
 
     while (!engine.quit())
     {
-        engine.pollEvents();
-        engine.display();
-
+        
         if (engine.isStepped())
         {
+            engine.pollEvents();
             if(deltaTime <= 100){
                 float fadein = (float)fade/100.f;
                 engine.canvas.gui.getText("titulo1").setColor(fadein,fadein,fadein);
@@ -48,16 +42,17 @@ int intro(Engine &engine)
             }else if(deltaTime <= 400){
                 float fadeout = (200 - (float)fade)/100;
                 engine.canvas.gui.getText("titulo1").setColor(fadeout,fadeout,fadeout);
+            }else{
+                return 0;
             }
             deltaTime += 1;
             fade += 1;
-
-            engine.canvas3d.world.scene.getObject3D("cube").rot_x += 1.f;
 
             engine.nextStep();
             engine.canvas.update();
             engine.canvas3d.update();
         }
+        engine.display();
     }
     return 0;
 };
