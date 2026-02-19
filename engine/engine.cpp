@@ -152,4 +152,16 @@ public:
     {
         last = now;
     }
+
+    void setMousePosition(float x, float y){
+        int localX = x * width;
+        int localY = y * height;
+
+        sf::Mouse::setPosition(sf::Vector2i(localX,localY));
+    }
+    
+
+    void mouseVisible(bool visible){
+        window.setMouseCursorVisible(visible);
+    }
 };

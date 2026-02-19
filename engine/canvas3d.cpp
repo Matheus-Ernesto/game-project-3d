@@ -17,95 +17,102 @@ public:
 
     void draw(sf::RenderWindow &window)
     {
-        glEnable(GL_LIGHTING); // Habilita o sistema de iluminação
+        // Habilita o sistema de iluminação
+        glEnable(GL_LIGHTING); // Habilita a iluminação global
         glEnable(GL_LIGHT0);   // Habilita a luz 0
 
-        GLfloat light_position[] = {5.0f, 5.0f, 3.0f, 1.f}; // Luz mais central
+        // Posição da luz (a posição em espaço homogêneo (x, y, z, w) - w=1 para luz pontual)
+        GLfloat light_position[] = {5.0f, 5.0f, 3.0f, 1.0f};
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-        GLfloat light_diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f}; // Cor da luz (branca)
+        // Propriedades da luz (difusa, especular, ambiente)
+        GLfloat light_diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f}; // Cor difusa (branca)
         glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 
         GLfloat light_specular[] = {1.0f, 1.0f, 1.0f, 1.0f}; // Reflexão especular
         glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 
-        GLfloat light_ambient[] = {0.3f, 0.3f, 0.3f, 1.0f}; // Luz ambiente (suave)
+        GLfloat light_ambient[] = {0.3f, 0.3f, 0.3f, 1.0f}; // Cor ambiente (luz suave)
         glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 
+        // Atenuação da luz
+        GLfloat attenuation[] = {1.0f, 0.05f, 0.01f}; // Atenuação de luz
+        glLightfv(GL_LIGHT0, GL_CONSTANT_ATTENUATION, &attenuation[0]);
+        glLightfv(GL_LIGHT0, GL_LINEAR_ATTENUATION, &attenuation[1]);
+        glLightfv(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, &attenuation[2]);
+
+        // Para cada objeto na cena, defina as propriedades do material e desenhe o objeto
         for (auto &obj : world.scene.objects3d)
         {
-            GLfloat mat_diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
+            // Propriedades do material do objeto (difusa, especular, brilho)
+            GLfloat mat_diffuse[] = {obj.texture.r, obj.texture.g, obj.texture.b, 1.0f};
             glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
 
             GLfloat mat_specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
 
-            GLfloat mat_shininess[] = {30.0f}; // Brilho
+            GLfloat mat_shininess[] = {30.0f}; // Brilho do material
             glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
 
             glPushMatrix();
 
+            // Transformações para posicionar, escalar e rotacionar o objeto
             glTranslatef(obj.pos_x, obj.pos_y, obj.pos_z);
             glScalef(obj.sca_x, obj.sca_y, obj.sca_z);
             glRotatef(obj.rot_x, 1.0, 0.0, 0.0);
             glRotatef(obj.rot_y, 0.0, 1.0, 0.0);
             glRotatef(obj.rot_z, 0.0, 0.0, 1.0);
 
-            switch (obj.type)
+            if (obj.type == obj.CUBE)
             {
-            case obj.CUBE:
                 glBegin(GL_QUADS);
 
-                // Face frontal (vermelha)
-                glColor3f(obj.texture.r, obj.texture.g, obj.texture.b);
+                // Face frontal (normal para +Z)
+                glNormal3f(0.0f, 0.0f, 1.0f); // Normal para a face frontal
                 glVertex3f(-1.0f, -1.0f, 1.0f);
                 glVertex3f(1.0f, -1.0f, 1.0f);
                 glVertex3f(1.0f, 1.0f, 1.0f);
                 glVertex3f(-1.0f, 1.0f, 1.0f);
 
-                // Face traseira (verde)
-                glColor3f(obj.texture.r, obj.texture.g, obj.texture.b);
+                // Face traseira (normal para -Z)
+                glNormal3f(0.0f, 0.0f, -1.0f); // Normal para a face traseira
                 glVertex3f(-1.0f, -1.0f, -1.0f);
                 glVertex3f(-1.0f, 1.0f, -1.0f);
                 glVertex3f(1.0f, 1.0f, -1.0f);
                 glVertex3f(1.0f, -1.0f, -1.0f);
 
-                // Face superior (azul)
-                glColor3f(obj.texture.r, obj.texture.g, obj.texture.b);
+                // Face superior (normal para +Y)
+                glNormal3f(0.0f, 1.0f, 0.0f); // Normal para a face superior
                 glVertex3f(-1.0f, 1.0f, -1.0f);
                 glVertex3f(-1.0f, 1.0f, 1.0f);
                 glVertex3f(1.0f, 1.0f, 1.0f);
                 glVertex3f(1.0f, 1.0f, -1.0f);
 
-                // Face inferior (amarela)
-                glColor3f(obj.texture.r, obj.texture.g, obj.texture.b);
+                // Face inferior (normal para -Y)
+                glNormal3f(0.0f, -1.0f, 0.0f); // Normal para a face inferior
                 glVertex3f(-1.0f, -1.0f, -1.0f);
                 glVertex3f(1.0f, -1.0f, -1.0f);
                 glVertex3f(1.0f, -1.0f, 1.0f);
                 glVertex3f(-1.0f, -1.0f, 1.0f);
 
-                // Face esquerda (ciano)
-                glColor3f(obj.texture.r, obj.texture.g, obj.texture.b);
+                // Face esquerda (normal para -X)
+                glNormal3f(-1.0f, 0.0f, 0.0f); // Normal para a face esquerda
                 glVertex3f(-1.0f, -1.0f, -1.0f);
                 glVertex3f(-1.0f, -1.0f, 1.0f);
                 glVertex3f(-1.0f, 1.0f, 1.0f);
                 glVertex3f(-1.0f, 1.0f, -1.0f);
 
-                // Face direita (magenta)
-                glColor3f(obj.texture.r, obj.texture.g, obj.texture.b);
+                // Face direita (normal para +X)
+                glNormal3f(1.0f, 0.0f, 0.0f); // Normal para a face direita
                 glVertex3f(1.0f, -1.0f, -1.0f);
                 glVertex3f(1.0f, 1.0f, -1.0f);
                 glVertex3f(1.0f, 1.0f, 1.0f);
                 glVertex3f(1.0f, -1.0f, 1.0f);
 
                 glEnd();
-
-                glPopMatrix();
-                break;
-
-            default:
-                break;
             }
+
+            glPopMatrix();
         }
     }
 
@@ -132,10 +139,11 @@ public:
         glEnable(GL_CULL_FACE); // Desenha apenas as faces frontais
         glCullFace(GL_BACK);
 
+        // Chama a função de desenho com iluminação ativada
         draw(window);
     }
 
-    void update(){
-
+    void update()
+    {
     }
 };

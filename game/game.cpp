@@ -49,7 +49,8 @@ int main()
     engine.nextStep();
 
     int level = 0;
-    intro(engine);
+
+    //intro(engine);
     while (level >= 0 && !engine.quit())
     {
         switch (menuPrincipal(engine))
