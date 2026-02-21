@@ -33,17 +33,18 @@ public:
 class Image
 {
 public:
-    float x = 0.f, y = 0.f;
-    int align;
-    string name = "";
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-    int width;
-    int height;
-    float transparency;
-    string path;
+    float x = 0.5f; // Meio da tela na horizontal
+    float y = 0.5f; // Meio da tela na vertical
+    int align = 1;  // ALIGN_CENTER (assumindo que 1 = centro)
+    string name = "check_uv_map";
+    int x1 = 0;               // Começo da textura no x
+    int y1 = 0;               // Começo da textura no y
+    int x2 = 1024;            // Largura da textura
+    int y2 = 1024;            // Altura da textura
+    float width = 100.f;         // Largura na tela
+    float height = 100.f;        // Altura na tela
+    float transparency = 255; // Totalmente opaco
+    string path = "assets/check_uv_map.png";
 };
 
 class Circle
@@ -69,7 +70,8 @@ public:
     }
 };
 
-class GUI {
+class GUI
+{
 public:
     vector<Text> texts;
     vector<Circle> circles;
@@ -124,9 +126,10 @@ public:
         return invalidObject;
     }
 
-    void clearAll(){
-    texts.clear();
-    circles.clear();
-    images.clear();
+    void clearAll()
+    {
+        texts.clear();
+        circles.clear();
+        images.clear();
     }
 };

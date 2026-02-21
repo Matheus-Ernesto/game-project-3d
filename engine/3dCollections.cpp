@@ -13,7 +13,10 @@ class Model
 class Texture
 {
 public:
+    // Dados da textura
     float r = 1.f, g = 1.f, b = 1.f, a = 1.f;
+    std::string path = ""; // Caminho da textura (se vazio, é cor sólida)
+    int textureType = 0;   // Tipo de organização (0 = repetir, 1 = esticar, etc)
 
     static constexpr int WHITEBONE = 0;
     static constexpr int GREY = 1;
@@ -22,9 +25,12 @@ public:
     static constexpr int GREEN = 4;
     static constexpr int GLASSBLUE = 5;
     static constexpr int OTHER = 6;
+    static constexpr int TEXTURE_PNG = 7;
 
     void setColor(int type)
     {
+        // Limpa o caminho da textura (agora é cor sólida)
+        path = "";
 
         switch (type)
         {
@@ -34,49 +40,43 @@ public:
             b = 0.9f;
             a = 1.f;
             break;
-
         case GREY:
             r = 0.2f;
             g = 0.2f;
             b = 0.2f;
             a = 1.f;
             break;
-
         case RED:
             r = 1.f;
             g = 0.f;
             b = 0.f;
             a = 1.f;
             break;
-
         case BLUE:
             r = 0.f;
             g = 0.f;
             b = 1.f;
             a = 1.f;
             break;
-
         case GREEN:
             r = 0.f;
             g = 1.f;
             b = 0.f;
             a = 1.f;
             break;
-
         case GLASSBLUE:
             r = 0.2f;
             g = 0.6f;
             b = 1.f;
             a = 0.5f;
             break;
-
-        case OTHER:
-            r = 0.5f;
-            g = 0.5f;
-            b = 0.5f;
+        case TEXTURE_PNG:
+            // Para textura PNG, mantém a cor branca
+            r = 1.f;
+            g = 1.f;
+            b = 1.f;
             a = 1.f;
             break;
-
         default:
             r = 1.f;
             g = 1.f;
@@ -86,10 +86,31 @@ public:
         }
     }
 
+    void setTexture(const std::string &texturePath, int type = 0)
+    {
+        path = texturePath;
+        textureType = type;
+        // Para textura, usamos cor branca para não interferir
+        r = 1.f;
+        g = 1.f;
+        b = 1.f;
+        a = 1.f;
+    }
+
+    bool hasTexture() const
+    {
+        return !path.empty();
+    }
+
     vector<float> getColor() const
     {
         return {r, g, b, a};
     }
+};
+
+class Light
+{
+public:
 };
 
 class Object3D
@@ -109,6 +130,10 @@ public:
 
     static constexpr int CUBE = 0;
     static constexpr int MODEL = 1;
+    static constexpr int SPHERE_SUB1 = 2;
+    static constexpr int SPHERE_SUB2 = 3;
+    static constexpr int SPHERE_SUB3 = 4;
+    static constexpr int SPHERE_SUB4 = 5;
 };
 
 class Camera
@@ -117,6 +142,10 @@ public:
     float x = 0.f, y = 0.f, z = -10.f;
     float rotationX = 60.f, rotationY = 30.f, rotationZ = 0.f;
     float fov = 70.f, limitNear = 0.1f, limitFar = 1000.f;
+
+    void moveLensDirection()
+    {
+    }
 };
 
 class Scene
@@ -141,7 +170,8 @@ public:
         return invalidObject;
     }
 
-    void clearAll(){
+    void clearAll()
+    {
         objects3d.clear();
     }
 };

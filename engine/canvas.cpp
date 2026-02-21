@@ -11,6 +11,13 @@ public:
     sf::Texture texture;
 };
 
+class Font
+{
+public:
+    string name;
+    sf::Font font;
+};
+
 // CANVAS FOR DRAWING ON WINDOW
 class Canvas
 {
@@ -18,7 +25,7 @@ public:
     inline static int totalFrames = 0;
     inline static chrono::high_resolution_clock::time_point last = chrono::high_resolution_clock::now();
     inline static int fps = 0;
-    inline static sf::Font font;
+    inline static vector<Font> fonts;
 
     GUI gui;
 
@@ -85,7 +92,7 @@ public:
             }
 
             sf::Text text;
-            text.setFont(font);
+            text.setFont(fonts[0].font);
             text.setString("FPS: " + to_string(fps));
             text.setCharacterSize(18);
             text.setFillColor(sf::Color::Red);
@@ -112,7 +119,33 @@ public:
         for (auto &originalOBJ : gui.texts)
         {
             sf::Text textElement;
-            textElement.setFont(font);
+            bool loadedFont = false;
+            int pos = 0;
+            for (auto font : fonts)
+            {
+                pos++;
+                if (font.name == originalOBJ.pathFont)
+                {
+                    loadedFont = true;
+                    pos--;
+                    break;
+                }
+            }
+            if (!loadedFont)
+            {
+                cout << "loading " << originalOBJ.pathFont << ".\n";
+                Font fonte;
+                fonte.name = originalOBJ.pathFont;
+                if (!fonte.font.loadFromFile(originalOBJ.pathFont)) // HERE YOU CAN GET THE FONT
+                {
+                    std::cerr << "ERROR\n";
+                }
+                fonts.push_back(fonte);
+                pos = fonts.size();
+                pos--;
+            }
+
+            textElement.setFont(fonts[pos].font);
             sf::String sfText = sf::String::fromUtf8(
                 originalOBJ.text.begin(),
                 originalOBJ.text.end());
@@ -170,73 +203,119 @@ public:
 
         for (auto &originalOBJ : gui.images)
         {
-            for (auto &textureLoaded : textures)
+            Texture2d *texturePtr = nullptr;
+
+            // Procura a textura
+            for (auto &texture : textures)
             {
-                if (textureLoaded.name == originalOBJ.path)
+                if (texture.name == originalOBJ.path)
                 {
-                    sf::Sprite sprite(textureLoaded.texture);
-                    sf::IntRect uvRect(originalOBJ.x1, originalOBJ.y1, originalOBJ.x2, originalOBJ.y2);
-                    sprite.setTextureRect(uvRect);
-                    sprite.setScale((float)originalOBJ.width / uvRect.width, (float)originalOBJ.height / uvRect.height);
-                    sprite.setColor(sf::Color(255, 255, 255, originalOBJ.transparency));
-                    sf::FloatRect bounds = sprite.getLocalBounds();
-                    switch (originalOBJ.align)
-                    {
-                    case 0:
-                        sprite.setOrigin(0.f, bounds.top);
-                        break;
+                    texturePtr = &texture;
+                    break;
+                }
+            }
 
-                    case 1:
-                        sprite.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
-                        break;
+            // Se não encontrou, carrega
+            if (!texturePtr)
+            {
+                cout << "loading texture " << originalOBJ.path << ".\n";
+                sf::Texture novaTexture;
 
-                    case 2:
-                        sprite.setOrigin(bounds.left + bounds.width, bounds.top);
-                        break;
-                    }
-                    sprite.setPosition(originalOBJ.x, originalOBJ.y);
+                if (novaTexture.loadFromFile(originalOBJ.path))
+                {
+                    Texture2d textureCreated;
+                    textureCreated.name = originalOBJ.path;
+                    textureCreated.texture = novaTexture;
 
-                    sprites.push_back(sprite);
+                    textures.push_back(textureCreated);
+                    texturePtr = &textures.back(); // Ponteiro para a nova textura
+                    cout << "Texture loaded successfully!\n";
                 }
                 else
                 {
-
-                    sf::Texture texture;
-                    if (!texture.loadFromFile(originalOBJ.path))
-                    {
-                        std::cerr << "Error" << std::endl;
-                    }
-
-                    sf::Sprite sprite(texture);
-                    sf::IntRect uvRect(originalOBJ.x1, originalOBJ.y1, originalOBJ.x2, originalOBJ.y2);
-                    sprite.setTextureRect(uvRect);
-                    sprite.setScale((float)originalOBJ.width / uvRect.width, (float)originalOBJ.height / uvRect.height);
-                    sprite.setColor(sf::Color(255, 255, 255, originalOBJ.transparency));
-                    sf::FloatRect bounds = sprite.getLocalBounds();
-                    switch (originalOBJ.align)
-                    {
-                    case 0:
-                        sprite.setOrigin(0.f, bounds.top);
-                        break;
-
-                    case 1:
-                        sprite.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
-                        break;
-
-                    case 2:
-                        sprite.setOrigin(bounds.left + bounds.width, bounds.top);
-                        break;
-                    }
-                    sprite.setPosition(originalOBJ.x, originalOBJ.y);
-
-                    Texture2d textureCreated;
-
-                    textureCreated.name = originalOBJ.path;
-                    textureCreated.texture = texture;
-
-                    textures.push_back(textureCreated);
-                    sprites.push_back(sprite);
+                    std::cerr << "ERROR: Failed to load texture " << originalOBJ.path << std::endl;
+                    continue;
                 }
+            }
+
+            // Cria o sprite
+            if (texturePtr)
+            {
+                sf::Sprite sprite(texturePtr->texture);
+                sf::IntRect uvRect(originalOBJ.x1, originalOBJ.y1, originalOBJ.x2, originalOBJ.y2);
+                sprite.setTextureRect(uvRect);
+                sprite.setScale((float)originalOBJ.width / uvRect.width, (float)originalOBJ.height / uvRect.height);
+                sprite.setColor(sf::Color(255, 255, 255, originalOBJ.transparency));
+
+                sf::FloatRect bounds = sprite.getLocalBounds();
+                switch (originalOBJ.align)
+                {
+                case 0:
+                    sprite.setOrigin(0.f, bounds.top);
+                    break;
+                case 1:
+                    sprite.setOrigin(bounds.left + bounds.width / 2.f, bounds.top);
+                    break;
+                case 2:
+                    sprite.setOrigin(bounds.left + bounds.width, bounds.top);
+                    break;
+                }
+                sprite.setPosition(originalOBJ.x, originalOBJ.y);
+
+                sprites.push_back(sprite);
+            }
+        }
+    }
+    void loadFont(string path)
+    {
+        bool loadedFont = false;
+        for (auto font : fonts)
+        {
+            if (font.name == path)
+            {
+                loadedFont = true;
+            }
+        }
+        if (!loadedFont)
+        {
+            cout << "loading " << path << ".\n";
+            Font fonte;
+            fonte.name = path;
+            if (!fonte.font.loadFromFile(path)) // HERE YOU CAN GET THE FONT
+            {
+                std::cerr << "ERROR\n";
+            }
+            fonts.push_back(fonte);
+        }
+    }
+    void loadTexture(string path)
+    {
+        bool loadedTexture = false;
+        for (auto &texture : textures) // Use & para evitar cópia
+        {
+            if (texture.name == path)
+            {
+                loadedTexture = true;
+                break;
+            }
+        }
+
+        if (!loadedTexture)
+        {
+            cout << "loading texture " << path << ".\n";
+            sf::Texture novaTexture;
+
+            if (novaTexture.loadFromFile(path))
+            {
+                Texture2d textureCreated;
+                textureCreated.name = path;
+                textureCreated.texture = novaTexture;
+                textures.push_back(textureCreated);
+                cout << "Texture loaded successfully!\n";
+            }
+            else
+            {
+                std::cerr << "ERROR: Failed to load texture " << path << "\n";
             }
         }
     }

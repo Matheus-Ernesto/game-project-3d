@@ -9,7 +9,7 @@ using namespace std;
 class Engine
 {
 public:
-    using clock = std::chrono::steady_clock;
+    using clock = chrono::steady_clock;
 
     unordered_set<sf::Keyboard::Key> keysDown;
     unordered_set<sf::Mouse::Button> mouseDown;
@@ -48,11 +48,11 @@ public:
     void start()
     {
         sf::ContextSettings settings;
-        settings.majorVersion = 4;  // OpenGL versão principal
-        settings.minorVersion = 5;  // OpenGL versão secundária (opcional)
-        settings.depthBits = 24;    // Bits de profundidade
-        settings.stencilBits = 8;   // Bits de estêncil (opcional)
-        
+        settings.majorVersion = 4; // OpenGL versão principal
+        settings.minorVersion = 5; // OpenGL versão secundária (opcional)
+        settings.depthBits = 24;   // Bits de profundidade
+        settings.stencilBits = 8;  // Bits de estêncil (opcional)
+
         if (fullscreen)
         {
             width = sf::VideoMode::getDesktopMode().width;
@@ -70,10 +70,7 @@ public:
                 sf::String(windowName.c_str()), sf::Style::Default, settings);
         }
 
-        if (!canvas.font.loadFromFile("fonts/arial.ttf")) // HERE YOU CAN GET THE FONT
-        {
-            std::cerr << "ERROR\n";
-        }
+        canvas.loadFont("fonts/arial.ttf");
         last = chrono::_V2::steady_clock::now();
     }
 
@@ -100,7 +97,8 @@ public:
 
             if (event.type == sf::Event::MouseWheelScrolled)
                 mouseScrollDelta += event.mouseWheelScroll.delta;
-            if (event.type == sf::Event::Resized){
+            if (event.type == sf::Event::Resized)
+            {
 
                 reshape(event.size.width, event.size.height);
             }
@@ -159,15 +157,16 @@ public:
         last = now;
     }
 
-    void setMousePosition(float x, float y){
+    void setMousePosition(float x, float y)
+    {
         int localX = x * width;
         int localY = y * height;
 
-        sf::Mouse::setPosition(sf::Vector2i(localX,localY));
+        sf::Mouse::setPosition(sf::Vector2i(localX, localY));
     }
-    
 
-    void mouseVisible(bool visible){
+    void mouseVisible(bool visible)
+    {
         window.setMouseCursorVisible(visible);
     }
 };
