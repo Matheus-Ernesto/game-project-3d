@@ -9,7 +9,7 @@ class Text
 {
 public:
     float x = 0.f, y = 0.f;
-    float r = 1.f, g = 1.f, b = 1.f;
+    float r = 1.f, g = 1.f, b = 1.f, a = 1.f;
     int align = 0;
     string name = "";
     string text = "Sample";
@@ -27,6 +27,13 @@ public:
         this->r = r;
         this->g = g;
         this->b = b;
+    }
+    void setColor(float r, float g, float b, float a)
+    {
+        this->r = r;
+        this->g = g;
+        this->b = b;
+        this->a = a;
     }
 };
 

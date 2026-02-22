@@ -20,7 +20,7 @@
 #include "spec.h"
 
   // to be done after encryption, resp. before when encoding
-  SINCE (R_2004) {
+  SINCE (R_2004a) {
     IF_ENCODE_FROM_EARLIER {
       FIELD_VALUE (header_size) = 108;
       FIELD_VALUE (x04) = 4;
@@ -62,4 +62,3 @@
   // well, the padding is also encrypted, but ODA didn't grok that.
   // 12 byte encrypted via 0
   FIELD_TFFx (padding, (int)sizeof(FIELD_VALUE (padding)), 0) // @120
-

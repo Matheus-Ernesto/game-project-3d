@@ -1,7 +1,7 @@
 #!/bin/bash
 # json.test
 #
-# Copyright (C) 2018-2024 Free Software Foundation, Inc.
+# Copyright (C) 2018-2025 Free Software Foundation, Inc.
 #
 # This program is free software, licensed under the terms of the GNU
 # General Public License as published by the Free Software Foundation,
@@ -36,6 +36,7 @@ for d in $TODO $DATA; do
     rm "./$b.json" 2>/dev/null
 done
 
+# shellcheck disable=2157
 if [ -n "$VALGRIND" ] && [ -n "$LOG_COMPILER" ]; then
     TESTPROG="$LOG_COMPILER $LOG_FLAGS"
 elif [ -n "@WINE@" ]; then
@@ -116,6 +117,18 @@ for dwg in $DATA $TODO; do
         i=$((i+1))
     fi
 
+    minjson="$(basename "$dwg" .dwg).min.json"
+    echo "./dwgread${EXEEXT} -Ominjson -o$minjson $dwg && jq . $minjson"
+    if $TESTPROG "./dwgread${EXEEXT}" -Ominjson -o"$minjson" "$dwg" 2>/dev/null && \
+       @JSON_SED_NAN@ "$minjson" && \
+       $JQ . "$minjson" >>"$json.log" 2>&1
+    then
+       rm "./$json.log" "./$minjson"
+    else
+        cat "$json.log"
+        i=$((i+1))
+    fi
+
     geojson="$(basename "$dwg" .dwg).geojson"
     echo "./dwgread${EXEEXT}" -o"$geojson" "$dwg"
     if $TESTPROG "./dwgread${EXEEXT}" -Ogeojson -o"$geojson" "$dwg" 2>/dev/null && \
@@ -137,22 +150,24 @@ done
 
 # teigha supports r9-r2018. r2.10: Unsupported early .dwg file version
 can_teigha=1
+baseFileConverter=ODAFileConverter
 case $(uname) in
-    Darwin)  TeighaFileConverter=/Applications/ODAFileConverter.app/Contents/MacOS/ODAFileConverter ;;
-    Linux)   TeighaFileConverter=/usr/bin/ODAFileConverter ;;
-    Windows) TeighaFileConverter=ODAFileConverter ;;
+    Darwin)  ODAFileConverter=/Applications/ODAFileConverter.app/Contents/MacOS/ODAFileConverter ;;
+    Linux)   ODAFileConverter=/usr/bin/ODAFileConverter ;;
+    Windows) ODAFileConverter=ODAFileConverter ;;
     *)       can_teigha=0 ;;
 esac
-if [ -n "$can_teigha" ] && [ ! -x "$TeighaFileConverter" ]; then
+if [ -n "$can_teigha" ] && [ ! -x "$ODAFileConverter" ]; then
+    baseFileConverter=TeighaFileConverter
     case $(uname) in
-        Darwin)  TeighaFileConverter=/Applications/TeighaFileConverter.app/Contents/MacOS/TeighaFileConverter ;;
-        Linux)   TeighaFileConverter=/usr/bin/TeighaFileConverter ;;
-        Windows) TeighaFileConverter=TeighaFileConverter ;;
+        Darwin)  ODAFileConverter=/Applications/TeighaFileConverter.app/Contents/MacOS/TeighaFileConverter ;;
+        Linux)   ODAFileConverter=/usr/bin/TeighaFileConverter ;;
+        Windows) ODAFileConverter=TeighaFileConverter ;;
     esac
 fi
 
 check_oda() {
-    if [ -x "$TeighaFileConverter" ]
+    if [ -x "$ODAFileConverter" ]
     then
         b="$(basename "$dwg")"
         dir="$(dirname "$dwg")"
@@ -182,25 +197,27 @@ check_oda() {
             echo "./dwgwrite${EXEEXT} -y -v0 -o $b.dwg $b.json"
             $TESTPROG "./dwgwrite${EXEEXT}" -y -v0 -o "$b.dwg" "$b.json" 2>/dev/null
         fi
+        # shellcheck disable=SC2086,SC2154
         if [ -n "$can_teigha" ] && [ -f "$b.dwg" ]; then
-            echo TeighaFileConverter . .. "ACAD$r" DXF 0 1 "$b.dwg" from "$dwg"
-            $TeighaFileConverter . .. "ACAD$r" DXF 0 1 "$b.dwg" >/dev/null 2>/dev/null
+            echo $baseFileConverter . .. "ACAD$r" DXF 0 1 "$b.dwg" from "$dwg"
+            $ODAFileConverter . .. "ACAD$r" DXF 0 1 "$b.dwg" \
+                $ODAFileConverter_geometry >/dev/null 2>/dev/null
             if [ -e "../$b.dxf.err" ]; then
                 mv "../$b.dxf.err" "$b.json.err"
                 cat "$b.json.err"
                 i=$((i+1))
             fi
-            rm -f "../$b.dxf"
+            rm -f "../$b.dxf" "./$b.dwg" "./$b.json"
         else
-            rm -f "./$b.json.err" 2>/dev/null
+            rm -f "./$b.json.err" "./$b.dwg" "./$b.json" 2>/dev/null
         fi
     fi
 }
 
-if [ -n "$can_teigha" ] && [ -x "$TeighaFileConverter" ]
+if [ -n "$can_teigha" ] && [ -x "$ODAFileConverter" ]
 then
     echo ""
-    echo TeighaFileConverter roundtrip checks
+    echo $baseFileConverter roundtrip checks
     # example_r14: CRC does not match
     for dwg in sample_2000 example_2000 2000/Arc 2000/Text 2000/circle 2000/PolyLine2D 2000/RAY\
                2000/Spline r11/entities-3d r11/entities-2d
@@ -208,7 +225,7 @@ then
         check_oda
     done
 else
-    echo "(Teigha|ODA)FileConverter not installed"
+    echo "$baseFileConverter not installed"
 fi
 
 if [ -n "$JQ" ]

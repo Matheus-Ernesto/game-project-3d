@@ -189,13 +189,13 @@ bits_BD (Bit_Chain *restrict dat, struct _unknown_field *restrict g)
   // 4.0, 2.0, 0.36, 5.0, 4.131293495034893, 4701.847034571434,
   // 0.5024999976158142
   // hard-code some special values not properly converted and found.
-  if (!strcmp (g->value, "0.5"))
+  if (strEQc (g->value, "0.5"))
     d = 0.5;
-  else if (!strcmp (g->value, "10.0"))
+  else if (strEQc (g->value, "10.0"))
     d = 10.0;
-  else if (!strcmp (g->value, "11.0"))
+  else if (strEQc (g->value, "11.0"))
     d = 11.0;
-  else if (!strcmp (g->value, "63.5"))
+  else if (strEQc (g->value, "63.5"))
     d = 63.5;
   g->type = BITS_BD;
   // some more not found BD values
@@ -203,7 +203,7 @@ bits_BD (Bit_Chain *restrict dat, struct _unknown_field *restrict g)
     {
       if (strEQ (g->value, b->value))
         {
-          bit_write_bits (dat, b->bin);
+          bit_write_bits1 (dat, b->bin);
           return;
         }
     }
@@ -581,7 +581,7 @@ num_dxf (const struct _unknown_field *g, const struct _unknown_dxf *dxf) {
   int num_dxf = 0;
   struct _unknown_field *f = (struct _unknown_field *)dxf->fields;
   while (f->value) {
-    if (f->code == g->code && !strcmp(f->value, g->value))
+    if (f->code == g->code && strEQ (f->value, g->value))
       num_dxf++;
     f++;
   }
@@ -675,7 +675,7 @@ set_possible(struct _dxf *dxf, const struct _unknown_field *g, const int i)
 // The i-th bit of a string. See bit_read_B()
 // 0x1: 10000000,0 >> 8 = 1
 #define BIT(b, i) (((b)[(i) / 8] & (0x80 >> (i) % 8)) >> (7 - (i) % 8))
-//#define BIT(b,i) (((b)[(i)/8] >> (8-((i)%8))) & 1)
+// #define BIT(b,i) (((b)[(i)/8] >> (8-((i)%8))) & 1)
 
 // like memmem but for bits, not bytes.
 // search for the bits of small in big. returns the bit offset in big or -1.
@@ -821,11 +821,11 @@ close_pi (FILE *pi, long class_filled, long class_size, int k)
 int
 main (int argc, char *argv[])
 {
-  int i = 1, ic, j, num_classes;
-  long sum_filled = 0, sum_size = 0;
+  unsigned i = 1, ic, j, num_classes = 0;
+  unsigned long sum_filled = 0, sum_size = 0;
   char *class = NULL;
   char *file = NULL;
-#define MAX_CLASSES 100
+#define MAX_CLASSES 200
   char *classes[MAX_CLASSES]; // create files per classes
   struct _dxf *dxf = calloc (sizeof (unknown_dxf) / sizeof (unknown_dxf[0]),
                              sizeof (struct _dxf));
@@ -833,12 +833,12 @@ main (int argc, char *argv[])
   #include "alldxf_2.inc"
   // clang-format on
 
-  if (argc > 2 && !strcmp (argv[i], "--class"))
+  if (argc > 2 && strEQc (argv[i], "--class"))
     {
       class = argv[i + 1];
       i = 3;
     }
-  if (argc - i >= 2 && !strcmp (argv[i], "--file"))
+  if (argc - i >= 2 && strEQc (argv[i], "--file"))
     file = argv[i + 1];
   // process per class, not per logged instances.
   if (!class)
@@ -846,7 +846,7 @@ main (int argc, char *argv[])
       num_classes = 0;
       for (i = 0; unknown_dxf[i].name; i++)
         { // TODO: alldwg/alldxf needs to be sorted per class, not file.
-          if (class != unknown_dxf[i].name)
+          if (!class || !strEQ (class, unknown_dxf[i].name))
             {
               classes[num_classes++] = (char *)unknown_dxf[i].name;
               class = (char *)unknown_dxf[i].name;
@@ -875,15 +875,21 @@ main (int argc, char *argv[])
       uint16_t i_pi = 0;
 
       class = classes[ic];
-      // dirname should be examples/
+      // dirname should be examples, but can also be examples/.libs
       dn = dirname (argv[0]);
       printf ("dirname(%s): %s\n", argv[0], dn);
-      if (dn && !strcmp (basename (dn), "examples"))
+      if (dn && strstr (dn, "/examples/.libs"))
+        {
+          size_t l = strlen (dn);
+          strcpy (pi_fn, dn);
+          pi_fn[l - 5] = '\0';
+        }
+      else if (dn && strEQc (basename (dn), "examples"))
         {
           strcpy (pi_fn, dn);
           strcat (pi_fn, "/");
         }
-      else if (!strcmp (argv[0], "examples"))
+      else if (strEQc (argv[0], "examples"))
         {
           strcpy (pi_fn, "examples/");
         }
@@ -897,9 +903,9 @@ main (int argc, char *argv[])
         continue;
       for (i = 0; unknown_dxf[i].name; i++)
         {
-          int num_fields;
-          int num_found = -1;
-          int size = unknown_dxf[i].num_bits;
+          unsigned num_fields;
+          unsigned num_found = -1;
+          unsigned size = unknown_dxf[i].num_bits;
           struct _unknown_field *g
               = (struct _unknown_field *)unknown_dxf[i].fields;
           const int is16 = dxf_is16 (&unknown_dxf[i]);
@@ -909,11 +915,11 @@ main (int argc, char *argv[])
           int version = 0;
           char *s;
 
-          if (class && strcmp (class, unknown_dxf[i].name))
+          if (class && !strEQ (class, unknown_dxf[i].name))
             continue;
-          if (file && strcmp (file, unknown_dxf[i].dxf))
+          if (file && !strEQ (file, unknown_dxf[i].dxf))
             continue;
-          /*if (!strcmp(unknown_dxf[i].name, "TABLEGEOMETRY")) {
+          /*if (strEQc (unknown_dxf[i].name, "TABLEGEOMETRY")) {
             printf("skip TABLEGEOMETRY\n");
             continue;
           }*/
@@ -959,11 +965,11 @@ main (int argc, char *argv[])
               printf ("%d: %s\n", g[j].code, g[j].value);
               if (g[j].code == 102)
                 {
-                  if (!strcmp (g[j].value, "{ACAD_XDICTIONARY"))
+                  if (strEQc (g[j].value, "{ACAD_XDICTIONARY"))
                     is_dict = 1;
-                  else if (!strcmp (g[j].value, "{ACAD_REACTORS"))
+                  else if (strEQc (g[j].value, "{ACAD_REACTORS"))
                     is_react = 1;
-                  else if (!strcmp (g[j].value, "}"))
+                  else if (strEQc (g[j].value, "}"))
                     {
                       is_react = 0;
                       is_dict = 0;
@@ -1303,7 +1309,7 @@ main (int argc, char *argv[])
                   if (!num_found || is_common_entity_data (g[j].code))
                     {
                       piname = (char *)dwg_bits_name[g[j].type];
-                      if (!strcmp (piname, "HANDLE"))
+                      if (strEQc (piname, "HANDLE"))
                         piname = (char *)"H";
                       // unfound DXF field for the picat file.
                       // later could be used as hints for the picat solver

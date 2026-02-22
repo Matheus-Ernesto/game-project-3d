@@ -3,7 +3,7 @@
 
 // code, value, bits, pre_bits, num_bits, type, name, num, pos[]
 /* EXTRUDEDSURFACE 2D8 in test/test-data/2004/Surface.dxf */
-static struct _unknown_field unknown_dxf_EXTRUDEDSURFACE_1515[] = {
+static struct _unknown_field unknown_dxf_EXTRUDEDSURFACE_959[] = {
   //{ 5, "2D8", NULL, 0, BITS_UNKNOWN, "handle", 1, {-1,-1,-1,-1,-1} },
     { 102, "{ACAD_REACTORS", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
     { 330, "2E1", NULL, 0, BITS_UNKNOWN, "reactors[0]", 1, {-1,-1,-1,-1,-1} },
@@ -134,28 +134,28 @@ static struct _unknown_field unknown_dxf_EXTRUDEDSURFACE_1515[] = {
     { 11, "0.0", NULL, 0, BITS_UNKNOWN, "reference_vector_for_controlling_twist", 44, {-1,-1,-1,-1,-1} },
     { 21, "0.0", NULL, 0, BITS_UNKNOWN, "", 44, {-1,-1,-1,-1,-1} },
     { 31, "0.0", NULL, 0, BITS_UNKNOWN, "", 44, {-1,-1,-1,-1,-1} },
-  //{ 1001, "ACAD_STEPID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1071, "1", NULL, 0, BITS_UNKNOWN, "", 3, {-1,-1,-1,-1,-1} },
-  //{ 1001, "ACAD_OBJECT_CHANGE_GUID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "1", NULL, 0, BITS_UNKNOWN, "", 3, {-1,-1,-1,-1,-1} },
-  //{ 1071, "-1303595190", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "-1352", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "-3252", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "159", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "108", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "64", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "48", NULL, 0, BITS_UNKNOWN, "", 2, {-1,-1,-1,-1,-1} },
-  //{ 1070, "40", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "58", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "48", NULL, 0, BITS_UNKNOWN, "", 2, {-1,-1,-1,-1,-1} },
-  //{ 1070, "100", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1001, "ACAD", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1000, "AcDbSavedByObjectVersion", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1070, "0", NULL, 0, BITS_UNKNOWN, "", 2, {-1,-1,-1,-1,-1} },
+    { 1001, "ACAD_STEPID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1071, "1", NULL, 0, BITS_UNKNOWN, "", 3, {-1,-1,-1,-1,-1} },
+    { 1001, "ACAD_OBJECT_CHANGE_GUID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "1", NULL, 0, BITS_UNKNOWN, "", 3, {-1,-1,-1,-1,-1} },
+    { 1071, "-1303595190", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "-1352", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "-3252", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "159", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "108", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "64", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "48", NULL, 0, BITS_UNKNOWN, "", 2, {-1,-1,-1,-1,-1} },
+    { 1070, "40", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "58", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "48", NULL, 0, BITS_UNKNOWN, "", 2, {-1,-1,-1,-1,-1} },
+    { 1070, "100", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1001, "ACAD", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1000, "AcDbSavedByObjectVersion", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1070, "0", NULL, 0, BITS_UNKNOWN, "", 2, {-1,-1,-1,-1,-1} },
     { 0, NULL, NULL, 0, BITS_UNKNOWN, NULL, 0, {-1,-1,-1,-1,-1}}
 };
 /* EXTRUDEDSURFACE 2D8 in test/test-data/2018/Surface.dxf */
-static struct _unknown_field unknown_dxf_EXTRUDEDSURFACE_1516[] = {
+static struct _unknown_field unknown_dxf_EXTRUDEDSURFACE_960[] = {
   //{ 5, "2D8", NULL, 0, BITS_UNKNOWN, "handle", 1, {-1,-1,-1,-1,-1} },
     { 102, "{ACAD_REACTORS", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
     { 330, "2E1", NULL, 0, BITS_UNKNOWN, "reactors[0]", 1, {-1,-1,-1,-1,-1} },
@@ -244,7 +244,7 @@ static struct _unknown_field unknown_dxf_EXTRUDEDSURFACE_1516[] = {
     { 11, "0.0", NULL, 0, BITS_UNKNOWN, "reference_vector_for_controlling_twist", 44, {-1,-1,-1,-1,-1} },
     { 21, "0.0", NULL, 0, BITS_UNKNOWN, "", 44, {-1,-1,-1,-1,-1} },
     { 31, "0.0", NULL, 0, BITS_UNKNOWN, "", 44, {-1,-1,-1,-1,-1} },
-  //{ 1001, "ACAD_STEPID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1071, "1", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1001, "ACAD_STEPID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1071, "1", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
     { 0, NULL, NULL, 0, BITS_UNKNOWN, NULL, 0, {-1,-1,-1,-1,-1}}
 };

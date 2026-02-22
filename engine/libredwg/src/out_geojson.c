@@ -55,7 +55,7 @@
 #  define GEOJSON_PRECISION 6
 #endif
 #define FORMAT_RD "%0." _XSTR (GEOJSON_PRECISION) "f"
-//#define FORMAT_RD "%f"
+// #define FORMAT_RD "%f"
 #undef FORMAT_BD
 #define FORMAT_BD FORMAT_RD
 
@@ -424,7 +424,7 @@ dwg_geojson_feature (Bit_Chain *restrict dat, Dwg_Object *restrict obj,
   char tmp[64];
 
   PAIR_Sc (type, "Feature");
-  snprintf (tmp, sizeof (tmp), FORMAT_RLLx, obj->handle.value);
+  snprintf (tmp, sizeof (tmp), FORMAT_HV, obj->handle.value);
   PAIR_Sc (id, tmp);
   KEY (properties);
   SAMEHASH;
@@ -561,7 +561,7 @@ dwg_geojson_feature (Bit_Chain *restrict dat, Dwg_Object *restrict obj,
         }
     }
   // PAIR_NULL(ExtendedEntity);
-  snprintf (tmp, sizeof (tmp), FORMAT_RLLx, obj->handle.value);
+  snprintf (tmp, sizeof (tmp), FORMAT_HV, obj->handle.value);
   LASTPAIR_Sc (EntityHandle, tmp);
   ENDHASH;
 }

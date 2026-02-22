@@ -1,6 +1,6 @@
 dnl configure.ac
 
-dnl Copyright (C) 2010, 2014-2015, 2018-2023 Free Software Foundation, Inc.
+dnl Copyright (C) 2010, 2014-2015, 2018-2025 Free Software Foundation, Inc.
 dnl
 dnl This program is free software, licensed under the terms of the GNU
 dnl General Public License as published by the Free Software Foundation,
@@ -19,7 +19,7 @@ dnl AM_INIT_AUTOMAKE([1.11.6 gnu no-define])
 dnl parallel-tests:
 dnl: error: using '$(srcdir)' in TESTS is currently broken: '$(srcdir)/libredwg.spec'
 AM_INIT_AUTOMAKE([1.14 gnu no-define serial-tests dist-xz info-in-builddir])
-AC_DISABLE_STATIC
+LT_INIT
 
 # Keep this in sync with what is passed in AC_INIT
 TARBALL_VERSION_FILE=".tarball-version"
@@ -28,7 +28,19 @@ dnl one place. For information on how to properly maintain the library
 dnl version information, refer to the libtool manual, section "Updating
 dnl library version information":
 dnl http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
-AC_SUBST([LIBREDWG_SO_VERSION], [0:13:0])
+dnl Stay at 0 until we leave the beta stage.
+dnl- If the library source code has changed at all since the last update,
+dnl  then increment revision (‘c:r:a’ becomes ‘c:r+1:a’).
+dnl- If any interfaces have been added, removed, or changed since the last update,
+dnl  increment current, and set revision to 0.
+dnl- If any interfaces have been added since the last public release,
+dnl  then increment age.
+dnl- If any interfaces have been removed or changed since the last public release,
+dnl  then set age to 0.
+LIBREDWG_SO_VERSION=0:13:0
+AC_DEFINE_UNQUOTED([LIBREDWG_SO_VERSION], ["${LIBREDWG_SO_VERSION}"],
+          [Defined in configure.ac to the libtool version-info of the shared lib.])
+AC_SUBST([LIBREDWG_SO_VERSION])
 AC_SUBST([TARBALL_VERSION_FILE])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -38,9 +50,9 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AC_CONFIG_HEADERS([src/config.h])
-AC_MSG_CHECKING([git version])
+AC_MSG_CHECKING([PACKAGE_VERSION])
 AC_MSG_RESULT($PACKAGE_VERSION)
-AC_MSG_CHECKING([so version-info])
+AC_MSG_CHECKING([LIBREDWG_SO_VERSION])
 AC_MSG_RESULT($LIBREDWG_SO_VERSION)
 
 ISODATE=`date +%Y-%m-%d`
@@ -56,7 +68,6 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_EGREP
-LT_INIT
 AC_CHECK_PROGS([BASH], [bash])
 
 if test x$enable_shared = xyes; then
@@ -72,7 +83,7 @@ AC_C_RESTRICT
 dnl Checks for libraries
 AM_ICONV
 
-AC_CHECK_LIB([ps],[PS_open_file],
+AC_CHECK_LIB([ps -lm],[PS_open_file],
   libredwg_have_libps=yes,
   libredwg_have_libps=no)
 
@@ -94,7 +105,7 @@ if test yes = "$libredwg_have_libpcre2_16"; then
 fi
 AC_SUBST([PCRE2_CFLAGS])
 AC_SUBST([PCRE2_LIBS])
-  
+
 dnl PKG_CHECK_MODULES([LIBXML2], [libxml-2.0], [],
 dnl    AC_MSG_ERROR([Install libxml-2.0 first]))
 AC_CHECK_LIB([xml2],[newXMLEntity],
@@ -105,8 +116,8 @@ AC_CHECK_LIB([xml2],[newXMLEntity],
    ],
   [if pkg-config --exists libxml-2.0; then
     have_libxml2=yes;
-    XML2_CFLAGS=`pkg-config libxml-2.0 --cflags`
-    XML2_LIBS=`pkg-config libxml-2.0 --libs`
+    XML2_CFLAGS="`pkg-config libxml-2.0 --cflags`"
+    XML2_LIBS="`pkg-config libxml-2.0 --libs`"
   else
     AC_MSG_WARN([libxml-2.0 for test/xmlsuite not found])
   fi])
@@ -225,27 +236,49 @@ AC_ARG_ENABLE([release],AS_HELP_STRING([--enable-release],[
     [ax_is_release=yes
     AC_MSG_RESULT(IS_RELEASE override with --enable-release)])
 if test x$ax_is_release = xyes; then
+   if test x$have_libxml2 != xyes; then
+     AC_MSG_WARN([libxml-2.0 for test/xmlsuite missing])
+   fi
+   if test x$libredwg_have_libps != xyes; then
+     AC_MSG_WARN([pslib for dwg2ps missing with release])
+   fi
    AC_DEFINE([IS_RELEASE],1,[Define to 1 if this is a release,
-   skipping unstable DWG features, unknown DWG versions and objects.])
+skipping unstable DWG features, unknown DWG versions and objects.])
 fi
 AM_CONDITIONAL([IS_RELEASE], [test x$ax_is_release = xyes])
 
+dnl Detect emscripten
+if test `basename "$CC"` = emcc; then
+  ac_cv_prog_cc_emcc=yes
+else
+  ac_cv_prog_cc_emcc=no
+fi
 dnl Disable unwanted warnings here
 enable_Werror=no
 ax_enable_compile_warnings=yes
 dnl This is too intrusive for our DWG_TYPE_* switches
 ax_cv_check_cflags__Wswitch_enum=no
 dnl wasm does not support -fstack-protector yet
-if test x$enable_shared = xyes -a x$ac_compiler_gnu = xyes -a x$CC != xemcc; then
+if test x$enable_shared = xyes && \
+   test x$ac_compiler_gnu = xyes && \
+   test x$ac_cv_prog_cc_emcc != xyes
+then
   AX_COMPILER_FLAGS([WARN_CFLAGS],[AM_LDFLAGS],[$ax_is_release],
     [-fno-semantic-interposition -fwrapv -fno-common -fvisibility=hidden \
-     -fno-strict-aliasing -ftrivial-auto-var-init=zero \
+     -fno-strict-aliasing -ftrivial-auto-var-init=zero -fstrict-flex-arrays=3 \
      -fstack-protector-strong -fstack-clash-protection \
-     -fcf-protection=full -fno-delete-null-pointer-checks])
+     -fcf-protection=full -fno-delete-null-pointer-checks \
+     -Wno-alloc-size])
 else
   AX_COMPILER_FLAGS([WARN_CFLAGS],[AM_LDFLAGS],[$ax_is_release],
     [-fwrapv -fno-common -fvisibility=hidden -fno-strict-aliasing \
-     -fno-delete-null-pointer-checks])
+     -fno-delete-null-pointer-checks -Wno-alloc-size])
+  if test x$ac_cv_prog_cc_emcc = xyes; then
+    enable_werror=no
+    dnl AM_LDFLAGS="-s ALLOW_MEMORY_GROWTH=1"
+    AM_LDFLAGS=""
+    CFLAGS="$CFLAGS -Wno-limited-postlink-optimizations -Wno-cast-align"
+  fi
 fi
 dnl if test x$ax_cv_check_cflags__Wunused_but_set_variable = xyes; then
 dnl   WARN_CFLAGS="$WARN_CFLAGS -Wno-unused-but-set-variable"
@@ -274,6 +307,7 @@ AX_GCC_FUNC_ATTRIBUTE(malloc)
 AX_GCC_FUNC_ATTRIBUTE(returns_nonnull)
 AX_GCC_FUNC_ATTRIBUTE(noreturn)
 AX_GCC_FUNC_ATTRIBUTE(aligned)
+AX_GCC_FUNC_ATTRIBUTE(counted_by)
 if test x$ax_cv_check_cflags__Wformat_y2k = xyes || \
    test x$ax_cv_check_cflags__Wformat_2__Wformat_y2k = xyes
 then
@@ -481,6 +515,15 @@ AS_IF([test x$enable_bindings = xno],
   AC_MSG_RESULT([yes]),
   AC_MSG_RESULT([no (default)]))
 
+dnl --disable-docs
+AC_MSG_CHECKING([for --disable-docs])
+AC_ARG_ENABLE([docs],AS_HELP_STRING([--disable-docs],[
+    Disable docs generation, texlive is big (default: enabled).]),[],[enable_docs=yes])
+AM_CONDITIONAL([DISABLE_DOCS], [test x$enable_docs = xno])
+AS_IF([test x$enable_docs = xno],
+  AC_MSG_RESULT([yes]),
+  AC_MSG_RESULT([no (default)]))
+
 dnl --enable-check-less
 AC_MSG_CHECKING([for --enable-check-less])
 AC_ARG_ENABLE([check-less],AS_HELP_STRING([--enable-check-less],[
@@ -490,6 +533,7 @@ AC_ARG_ENABLE([check-less],AS_HELP_STRING([--enable-check-less],[
   AC_MSG_RESULT([yes])],
   AC_MSG_RESULT([no (default)]))
 AM_CONDITIONAL([CHECK_LESS], [test x$check_less = xyes])
+
 
 AC_MSG_CHECKING([for --with-mimalloc])
 if test "x$ac_cv_header_mimalloc_override_h" = "xyes"
@@ -686,20 +730,20 @@ fi
 
 if test x$enable_python != xno && test -n "$XML2_LIBS" && test x$cross_compiling = xno
 then
-  AC_MSG_CHECKING([for the libxml2 Python package])
-  ac_python_libxml2_result=`$PYTHON -c "import libxml2" 2>&1`
+  AC_MSG_CHECKING([for the lxml Python package])
+  ac_python_lxml_result=`$PYTHON -c "import lxml" 2>&1`
   if test $? -eq 0; then
-    ac_have_python_libxml2=1
+    ac_have_python_lxml=1
     AC_MSG_RESULT([yes])
   else
-    ac_have_python_libxml2=
+    ac_have_python_lxml=
     AC_MSG_RESULT([no])
     AC_MSG_WARN([disable test/xmlsuite.
 The import error was:
-$ac_python_libxml2_result])
+$ac_python_lxml_result])
   fi
 fi
-AM_CONDITIONAL([HAVE_PYTHON_LIBXML2], [test x$ac_have_python_libxml2 = x1])
+AM_CONDITIONAL([HAVE_PYTHON_LXML], [test x$ac_have_python_lxml = x1])
 
 if test -n "$PERL"; then
   ac_cv_perl="$PERL"
@@ -741,6 +785,12 @@ dnl only needed with python bindings
 AM_CONDITIONAL([HAVE_PATCH], [test -n "$PATCH"])
 dnl AC_MSG_WARN([srcdir: $srcdir ac_builddir: $ac_builddir builddir: $builddir])
 AM_CONDITIONAL([HAVE_INSRCDIR], [test x"$srcdir" = x"."])
+
+AC_CHECK_PROGS([ODAFILECONVERTER], [ODAFileConverter])
+if test -z "$ODAFILECONVERTER"; then
+  AC_CHECK_PROGS([ODAFILECONVERTER], [TeighaFileConverter])
+fi
+AM_CONDITIONAL([HAVE_ODA], [test -n "$ODAFILECONVERTER"])
 
 AC_CHECK_PROGS([CPPCHECK], [cppcheck])
 if test -n "$CPPCHECK"; then
@@ -999,7 +1049,7 @@ AM_COND_IF([DISABLE_BINDINGS], [],
            [AC_CONFIG_FILES([bindings/Makefile bindings/python/Makefile])])
 AM_COND_IF([DISABLE_BINDINGS], [],
            [AM_COND_IF([HAVE_PERL], [AC_CONFIG_FILES([bindings/perl/Makefile.PL])])])
-AM_COND_IF([HAVE_PYTHON_LIBXML2],  [AC_CONFIG_FILES([test/xmlsuite/Makefile])])
+AM_COND_IF([HAVE_PYTHON_LXML],  [AC_CONFIG_FILES([test/xmlsuite/Makefile])])
 AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doc/Doxyfile doc/footer])])
 AC_CONFIG_FILES([programs/dwgfilter], [chmod +x programs/dwgfilter])
 AC_CONFIG_FILES([programs/alive.test], [chmod +x programs/alive.test])

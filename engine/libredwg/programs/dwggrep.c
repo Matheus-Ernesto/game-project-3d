@@ -13,6 +13,7 @@
 /*
  * dwggrep.c: search a string in all text values in a DWG
  * TODO scan the dwg.spec for all text DXF codes, per object.
+ * TODO --recursive filewalker
  *
  * written by Reini Urban
  */
@@ -79,7 +80,7 @@ static short dxf[10];  // ensure zero-fill
 static char *type[10]; // ensure zero-fill
 
 /* the current version per spec block */
-static unsigned int cur_ver = 0;
+// static unsigned int cur_ver = 0;
 
 #ifdef HAVE_PCRE2_H
 #  undef USE_MATCH_CONTEXT
@@ -106,7 +107,8 @@ static pcre2_compile_context_16 *compile_context16 = NULL;
 static int
 usage (void)
 {
-  printf ("\nUsage: dwggrep [-cRr] pattern *.dwg\n");
+  printf ("\nUsage: dwggrep [-bcihntx] [--type TYPE] [--dxf NUM] [--help] "
+          "pattern *.dwg\n");
   return 1;
 }
 static int
@@ -140,7 +142,7 @@ help (void)
   printf ("  -t, --text                Search only in TEXT-like entities.\n");
   printf (
       "  -b, --blocks              Search also in all block definitions.\n");
-  printf ("       --tables              Search only in table names.\n");
+  printf ("  -n, --tables              Search only in table names.\n");
 #ifdef HAVE_GETOPT_LONG
   printf ("      --help                Display this help and exit\n");
   printf ("      --version             Output version information and exit\n"
@@ -424,19 +426,12 @@ match_DIMENSION (const char *restrict filename, const Dwg_Object *restrict obj)
 static int
 match_VIEWPORT (const char *restrict filename, const Dwg_Object *restrict obj)
 {
-  char *text;
   int found = 0;
+  char *text;
   MATCH_ENTITY (VIEWPORT, style_sheet, 1);
   return found;
 }
-static int
-match_LEADER (const char *restrict filename, const Dwg_Object *restrict obj)
-{
-  char *text;
-  int found = 0;
-  // MATCH_ENTITY (LEADER, text, 1);
-  return found;
-}
+
 static int
 match_MULTILEADER (const char *restrict filename,
                    const Dwg_Object *restrict obj)
@@ -457,7 +452,6 @@ match_3DSOLID (const char *restrict filename, const Dwg_Object *restrict obj)
 {
   char *text = NULL;
   int found = 0;
-  BITCODE_BL j;
   Dwg_Entity_3DSOLID *_obj;
 
   if (!obj || !obj->tio.entity)
@@ -473,7 +467,7 @@ match_3DSOLID (const char *restrict filename, const Dwg_Object *restrict obj)
     }
   /*
   if (!_obj->encr_sat_data) return 0;
-  for (j=0; j<_obj->num_blocks; j++)
+  for (BITCODE_BL j=0; j<_obj->num_blocks; j++)
     {
       //text = _obj->encr_sat_data[j];
       //if (text)
@@ -649,7 +643,7 @@ static int
 match_SCALE (const char *restrict filename, const Dwg_Object *restrict obj)
 {
   char *text;
-  int found = 0, i;
+  int found = 0;
   // const Dwg_Object_SCALE *_obj = obj->tio.object->tio.SCALE;
   MATCH_OBJECT (SCALE, name, 1);
   return found;
@@ -661,9 +655,8 @@ match_LAYER_INDEX (const char *restrict filename,
 {
   char *text;
   int found = 0;
-  BITCODE_BL i;
   const Dwg_Object_LAYER_INDEX *_obj = obj->tio.object->tio.LAYER_INDEX;
-  for (i = 0; i < _obj->num_entries; i++)
+  for (BITCODE_BL i = 0; i < _obj->num_entries; i++)
     {
       MATCH_OBJECT (LAYER_INDEX, entries[i].name, 8);
     }
@@ -844,7 +837,7 @@ match_VISUALSTYLE (const char *restrict filename,
                    const Dwg_Object *restrict obj)
 {
   char *text;
-  int found = 0, i;
+  int found = 0;
   // const Dwg_Object_VISUALSTYLE *_obj = obj->tio.object->tio.VISUALSTYLE;
   MATCH_OBJECT (VISUALSTYLE, description, 1);
   return found;
@@ -855,7 +848,7 @@ match_TABLESTYLE (const char *restrict filename,
                   const Dwg_Object *restrict obj)
 {
   char *text;
-  int found = 0, i;
+  int found = 0;
   // const Dwg_Object_TABLESTYLE *_obj = obj->tio.object->tio.TABLESTYLE;
   MATCH_OBJECT (TABLESTYLE, name, 2);
   return found;
@@ -1503,7 +1496,7 @@ static int
 match_OBJECTS (const char *restrict filename, Dwg_Data *restrict dwg)
 {
   int found = 0;
-  char *text;
+  // char *text;
 
   if (!dwg)
     return 0;
@@ -1618,7 +1611,7 @@ match_preR13_entities (const char *restrict filename,
                        const Dwg_Data *restrict dwg, const bool blocks)
 {
   int found = 0;
-  char *text;
+  // char *text;
 
   // TODO skip block entities for now
   if (blocks)
@@ -1691,7 +1684,7 @@ match_BLOCK_HEADER (const char *restrict filename,
   MATCH_OBJECT (BLOCK_HEADER, description, 4);
 
   if (verbose)
-    fprintf (stderr, "HDR: %d, HANDLE: " FORMAT_RLLx "\n", hdr->index,
+    fprintf (stderr, "HDR: %d, HANDLE: " FORMAT_HV "\n", hdr->index,
              hdr->handle.value);
   for (obj = get_first_owned_entity (hdr); obj;
        obj = get_next_owned_entity (hdr, obj)) // without subentities
@@ -1699,7 +1692,7 @@ match_BLOCK_HEADER (const char *restrict filename,
       if (!obj)
         break;
       if (verbose)
-        fprintf (stderr, "%s [%d], HANDLE: " FORMAT_RLLx "\n", obj->name,
+        fprintf (stderr, "%s [%d], HANDLE: " FORMAT_HV "\n", obj->name,
                  obj->index, obj->handle.value);
       if (numtype) // search for allowed --type and skip if not
         {
@@ -1811,7 +1804,6 @@ match_BLOCK_HEADER (const char *restrict filename,
           ELSEMATCH (TOLERANCE)
           ELSEMATCH (TABLE)
           ELSEMATCH (GEOPOSITIONMARKER)
-          ELSEMATCH (LEADER)
           ELSEMATCH (MULTILEADER)
           ELSEMATCH (LIGHT)
         }
@@ -1848,16 +1840,18 @@ main (int argc, char *argv[])
   int i = 1, j;
   char *filename;
   Dwg_Data dwg;
-  size_t plen;
-  int errcode;
 #ifdef HAVE_PCRE2_H
+  int errcode;
+  size_t plen;
   PCRE2_SIZE erroffset;
   int have_jit;
 #  ifdef HAVE_PCRE2_16
   BITCODE_TU pattern16;
 #  endif
 #endif
+#if 0
   int opt_recurse = 0;
+#endif
   int count = 0;
   int c;
 #ifdef HAVE_GETOPT_LONG
@@ -1868,7 +1862,7 @@ main (int argc, char *argv[])
           { "recursive", 0, 0, 'r' }, { "recursive", 0, 0, 'R' },
           { "type", 1, 0, 'y' },      { "dxf", 1, 0, 'd' },
           { "text", 0, 0, 't' },      { "blocks", 0, 0, 'b' },
-          { "tables", 0, 0, 0 },      { "help", 0, 0, 0 },
+          { "tables", 0, 0, 'n' },    { "help", 0, 0, 0 },
           { "version", 0, 0, 0 },     { NULL, 0, NULL, 0 } };
 #endif
 
@@ -1879,11 +1873,11 @@ main (int argc, char *argv[])
 
   while
 #ifdef HAVE_GETOPT_LONG
-      ((c = getopt_long (argc, argv, "ixchrRy:d:tb", long_options,
+      ((c = getopt_long (argc, argv, "ixchrRy:d:tbn", long_options,
                          &option_index))
        != -1)
 #else
-      ((c = getopt (argc, argv, "ixchrRy:d:tbvu")) != -1)
+      ((c = getopt (argc, argv, "ixchrRy:d:tbnvu")) != -1)
 #endif
     {
       if (c == -1)
@@ -1896,8 +1890,6 @@ main (int argc, char *argv[])
             return help ();
           if (!strcmp (long_options[option_index].name, "version"))
             return opt_version ();
-          if (!strcmp (long_options[option_index].name, "tables"))
-            opt_tables = 1;
           break;
 #else
         case 'v':
@@ -1917,15 +1909,20 @@ main (int argc, char *argv[])
         case 'h':
           opt_filename = 0;
           break;
+#if 0
         case 'r':
         case 'R':
           opt_recurse = 1;
           break;
+#endif
         case 't':
           opt_text = 1;
           break;
         case 'b':
           opt_blocks = 1;
+          break;
+        case 'n':
+          opt_tables = 1;
           break;
         case 'y':
           if (numtype >= 10)
@@ -1954,8 +1951,8 @@ main (int argc, char *argv[])
     return usage ();
 
   pattern = argv[i];
-  plen = strlen (pattern);
 #ifdef HAVE_PCRE2_H
+  plen = strlen (pattern);
   pcre2_config_8 (PCRE2_CONFIG_JIT, &have_jit);
   ri8 = pcre2_compile_8 ((PCRE2_SPTR8)pattern, /* pattern */
                          plen & 0xFFFFFFFF,    /* uint32_t */

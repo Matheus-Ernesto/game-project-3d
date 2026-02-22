@@ -38,7 +38,7 @@
     FIELD_RS (numheader_vars, 0); // 74,83,101,104,114,120,122,129,158,160,204,205
     FIELD_RC (dwg_version, 0); // 0
 
-    // The 3 entitity data sections
+    // The 3 entity data sections
     FIELD_RLx (entities_start, 0);
     FIELD_RLx (entities_end, 0);
     FIELD_RLx (blocks_start, 0);
@@ -69,7 +69,7 @@
   }
 
   /* Until R_2004 here follows the sections */
-  SINCE (R_2004) {
+  SINCE (R_2004a) {
     IF_ENCODE_FROM_EARLIER {
       FIELD_VALUE (app_dwg_version) = FIELD_VALUE (dwg_version);
       FIELD_VALUE (app_maint_version) = FIELD_VALUE (maint_version);

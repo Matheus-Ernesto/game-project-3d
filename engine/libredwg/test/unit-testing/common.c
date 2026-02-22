@@ -183,9 +183,10 @@ main (int argc, char *argv[])
           if (stat (*ptr, &attrib))
             {
               char tmp[80];
-              strcpy (tmp, prefix);
-              strcat (tmp, "/");
-              strcat (tmp, *ptr);
+              strncpy (tmp, prefix, sizeof (tmp));
+              strncat (tmp, "/", sizeof (prefix) - 1);
+              strncat (tmp, *ptr,
+                       sizeof (tmp) - sizeof (prefix) - strlen (*ptr) - 1);
               if (stat (tmp, &attrib))
                 fprintf (stderr, "Env var INPUT not defined, %s not found\n",
                          tmp);
@@ -195,6 +196,17 @@ main (int argc, char *argv[])
           else
             error += test_code (prefix, *ptr, cov);
         }
+      if (DWG_TYPE == DWG_TYPE_ATTDEF)
+        {
+          error += test_code_nodist (prefix,
+                                     "../test-old/2018/from_ACadSharp/"
+                                     "AecObjects.dwg",
+                                     cov);
+        }
+      // if (DWG_TYPE == DWG_TYPE_MULTILEADER)
+      //  {
+      //    error += test_code_nodist (prefix, "../issues/gh518/9.dwg", cov);
+      //  }
       // if no coverage
       if (!numpassed () && !numfailed ())
         {
@@ -276,6 +288,8 @@ main (int argc, char *argv[])
           if (DWG_TYPE == DWG_TYPE_GEODATA)
             {
               error += test_code (prefix, "2010/gh209_1.dwg", cov);
+              error += test_code_nodist (
+                  prefix, "../test-old/2018/from_ACadSharp/geoloc.dwg", cov);
             }
           if (DWG_TYPE == DWG_TYPE_PLOTSETTINGS)
             {
@@ -623,11 +637,22 @@ main (int argc, char *argv[])
               error += test_code_nodist (
                   prefix, "2007/blocks_and_tables_-_imperial.dwg", cov);
             }
-          if (DWG_TYPE == DWG_TYPE_VBA_PROJECT)
+          if (DWG_TYPE == DWG_TYPE_VBA_PROJECT
+              || DWG_TYPE == DWG_TYPE_PROXY_OBJECT
+              || DWG_TYPE == DWG_TYPE_PROXY_ENTITY)
             {
               error += test_code_nodist (
-                  prefix, // but here in section not in object
+                  prefix, // but here in section not in object.
                   "../test-old/2013/from_upcommons.upc.edu/DRAWINGS.dwg", cov);
+            }
+          if (DWG_TYPE == DWG_TYPE_SOLID_BACKGROUND)
+            {
+              error += test_code_nodist (prefix, "../issues/gh695/2.dwg", cov);
+            }
+          if (DWG_TYPE == DWG_TYPE_LARGE_RADIAL_DIMENSION)
+            {
+              error += test_code_nodist (
+                  prefix, "../test-old/2018/from_ezdxf/uncommon.dwg", cov);
             }
           if (DWG_TYPE == DWG_TYPE_RAPIDRTRENDERSETTINGS)
             {
@@ -677,6 +702,9 @@ main (int argc, char *argv[])
               error += test_code_nodist (
                   prefix,
                   "../test-old/2004/from_uloz.to/00_005_POHLADY_Kl_A.dwg",
+                  cov);
+              error += test_code_nodist (
+                  prefix, "../test-old/2018/from_ACadSharp/AecObjects.dwg",
                   cov);
             }
           if (DWG_TYPE == DWG_TYPE_OBJECT_PTR)
@@ -747,6 +775,155 @@ main (int argc, char *argv[])
                   prefix, "../test-old/2010/from_cadforum.cz/AMSTLSHAP2D.dwg",
                   cov);
             }
+#ifdef DEBUG_CLASSES
+          if (DWG_TYPE == DWG_TYPE_ABSHDRAWINGSETTING
+              || DWG_TYPE == DWG_TYPE_AEC_VARS_DWG_SETUP
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CONFIG
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_SET
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_2D_SECTION
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ANCHOR_BUB_TO_GRID
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ANCHOR_BUB_TO_GRID_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ANCHOR_ENT_TO_NODE
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ANCHOR_TAG_TO_ENT
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_BDG_ELEVLINE_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_BDG_SECTIONLINE_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_BDG_SECTIONLINE_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_BDG_SECTION_SUBDIV
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CEILING_GRID
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CEILING_GRID_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CEILING_GRID_RCP
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CLIP_VOLUME_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CLIP_VOLUME_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CLIP_VOLUME_RESULT_SUBDIV
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CLIP_VOLUME_RESULT
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_COLUMN_GRID
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_COLUMN_GRID_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CURTAIN_WALL_LAYOUT_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CURTAIN_WALL_LAYOUT_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CURTAIN_WALL_UNIT_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_CURTAIN_WALL_UNIT_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_DIM_GROUP_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_DISPLAYTHEME
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_DOOR_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_DOOR_NOMINAL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_DOOR_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_EDITINPLACEPROFILE
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ENT_REF
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_LAYOUT_CURVE
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_LAYOUT_GRID2D
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_LAYOUT_GRID3D
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_MASKBLOCK_REF
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_MASKBLOCK_REF_RCP
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_MASS_ELEM_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_MASS_ELEM_SCHEM
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_MASS_GROUP_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_MASS_GROUP_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_MATERIAL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_MVBLOCK_REF
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_MVBLOCK_REF_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_OPENING
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_OPENING_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_POLYGON_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_RAILING_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_RAILING_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ROOF_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ROOF_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ROOFSLAB_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ROOFSLAB_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_SCHEDULE_TABLE
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_SLAB_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_SLAB_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_SLICE
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_SPACE_DECOMPOSED
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_SPACE_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_STAIR_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_STAIR_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_WALL_GRAPH
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_WALL_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_WALL_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_WALL_SCHEM
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_WINDOW_ASSEMBLY_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_WINDOW_ASSEMBLY_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPWINDOWASSEMBLYPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPBDGELEVLINEPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPBDGELEVLINEPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPBDGSECTIONLINEPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPBDGSECTIONLINEPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPCEILINGGRIDPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPCEILINGGRIDPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPCOLUMNGRIDPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPCOLUMNGRIDPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPCURTAINWALLLAYOUTPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPCURTAINWALLLAYOUTPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPCURTAINWALLUNITPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPCURTAINWALLUNITPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPMVBLOCKREFPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPMVBLOCKREFPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPROOFPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPROOFPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPROOFSLABPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPROOFSLABPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPSLABPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPSLABPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPSPACEPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPSPACEPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPWALLPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPWALLPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPWINDOWASSEMBLYPLAN100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPWINDOWASSEMBLYPLAN50
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPZONE100
+              || DWG_TYPE == DWG_TYPE_AEC_AECDBDISPREPZONE50
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_WINDOW_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_WINDOW_NOMINAL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_WINDOW_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_REP_ZONE
+              || DWG_TYPE == DWG_TYPE_AECS_DISP_REP_MEMBER_LOGICAL
+              || DWG_TYPE == DWG_TYPE_AECS_DISP_REP_MEMBER_MODEL_DESIGN
+              || DWG_TYPE == DWG_TYPE_AECS_DISP_REP_MEMBER_PLAN_DESIGN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_ENT
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_LAYOUT_GRID2D
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_CLIP_VOLUME_RESULT
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_GRID_ASSEMBLY_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_GRID_ASSEMBLY_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_CLIP_VOLUME
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_ROOFSLAB
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_POLYGON_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_OPENING
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_SLICE
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_DOOR
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_DISPLAYTHEME
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_SLAB
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_ROOF
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_SPACE_DECOMPOSED
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_RAILING_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_RAILING_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_WINDOW
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_ZONE
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_SPACE_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_WALL_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_WALL_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_WALL_SCHEM
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_MASKBLOCK
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_STAIR_PLAN
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_STAIR_PLAN_OVERLAPPING
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_EDITINPLACEPROFILE_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_MATERIAL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_MEMBER
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_MEMBER_LOGICAL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_DIM
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_MASS_ELEM_MODEL
+              || DWG_TYPE == DWG_TYPE_AEC_DISP_PROPS_LAYOUT_CURVE
+              || DWG_TYPE == DWG_TYPE_AEC_VARS_ARCHBASE
+              || DWG_TYPE == DWG_TYPE_AEC_VARS_DWG_SETUP
+              || DWG_TYPE == DWG_TYPE_AEC_VARS_MUNICH
+              || DWG_TYPE == DWG_TYPE_BINRECORD || 0)
+            {
+              error += test_code_nodist (
+                  prefix,
+                  "../test-old/2004/from_uloz.to/00_005_POHLADY_Kl_A.dwg",
+                  cov);
+            }
+#endif
           if (DWG_TYPE == DWG_TYPE_ASSOCBLENDSURFACEACTIONBODY
               || DWG_TYPE == DWG_TYPE_ASSOCEXTENDSURFACEACTIONBODY
               || DWG_TYPE == DWG_TYPE_ASSOCFILLETSURFACEACTIONBODY
@@ -754,7 +931,6 @@ main (int argc, char *argv[])
               || DWG_TYPE == DWG_TYPE_ASSOCOFFSETSURFACEACTIONBODY
               || DWG_TYPE == DWG_TYPE_ASSOCPATCHSURFACEACTIONBODY
               || DWG_TYPE == DWG_TYPE_ASSOCTRIMSURFACEACTIONBODY
-              || DWG_TYPE == DWG_TYPE_SOLID_BACKGROUND
               || DWG_TYPE == DWG_TYPE_IBL_BACKGROUND
               || DWG_TYPE == DWG_TYPE_IMAGE_BACKGROUND
               || DWG_TYPE == DWG_TYPE_GRADIENT_BACKGROUND
@@ -767,8 +943,8 @@ main (int argc, char *argv[])
               || DWG_TYPE == DWG_TYPE_LIGHTLIST
               || DWG_TYPE == DWG_TYPE_LONG_TRANSACTION
               || DWG_TYPE == DWG_TYPE_OLEFRAME
-              || DWG_TYPE == DWG_TYPE_PROXY_ENTITY
-              || DWG_TYPE == DWG_TYPE_PROXY_OBJECT
+              // || DWG_TYPE == DWG_TYPE_PROXY_ENTITY
+              // || DWG_TYPE == DWG_TYPE_PROXY_OBJECT
               || DWG_TYPE == DWG_TYPE_RENDERSETTINGS
               || DWG_TYPE == DWG_TYPE_DGNUNDERLAY
               || DWG_TYPE == DWG_TYPE_DWFUNDERLAY
@@ -1526,6 +1702,19 @@ api_common_entity (dwg_object *obj)
         }                                                                     \
     }
 
+#define CHK_ENTITY_BINARY(ent, name, field, size)                             \
+  if (!dwg_dynapi_entity_value (ent, #name, #field, &field, NULL))            \
+    fail (#name "." #field);                                                  \
+  else if (!field)                                                            \
+    pass ();                                                                  \
+  else                                                                        \
+    {                                                                         \
+      if (memcmp (ent->field, field, size))                                   \
+        fail ("%s.%s", #name, #field);                                        \
+      else                                                                    \
+        ok ("%s.%s", #name, #field);                                          \
+    }
+
 // i must be defined as type of num
 #define CHK_ENTITY_3DPOINTS(ent, name, field, num)                            \
   if (!dwg_dynapi_entity_value (ent, #name, #field, &field, NULL))            \
@@ -2038,10 +2227,8 @@ api_common_object (dwg_object *obj)
 #define CHK_EVALEXPR(type)                                                    \
   CHK_SUBCLASS_TYPE (_obj->evalexpr, EvalExpr, parentid, BLd);                \
   CHK_SUBCLASS_TYPE (_obj->evalexpr, EvalExpr, major, BL);                    \
-  CHK_SUBCLASS_TYPE (_obj->evalexpr, EvalExpr, minor, BL);                    \
-  /* variant_DXF type */                                                      \
-  CHK_SUBCLASS_TYPE (_obj->evalexpr, EvalExpr, value_code, BSd);              \
-  /* variant_value's */                                                       \
+  CHK_SUBCLASS_TYPE (_obj->evalexpr, EvalExpr, minor, BL); /* variant_DXF type */                                                      \
+  CHK_SUBCLASS_TYPE (_obj->evalexpr, EvalExpr, value_code, BSd); /* variant_value's */                                                       \
   switch (_obj->evalexpr.value_code)                                          \
     {                                                                         \
     case 40:                                                                  \
@@ -2073,8 +2260,7 @@ api_common_object (dwg_object *obj)
 
 #define CHK_ACSH_HISTORYNODE()                                                \
   CHK_SUBCLASS_TYPE (_obj->history_node, ACSH_HistoryNode, major, BL);        \
-  CHK_SUBCLASS_TYPE (_obj->history_node, ACSH_HistoryNode, minor, BL);        \
-  /* last 16x nums 40-55 */                                                   \
+  CHK_SUBCLASS_TYPE (_obj->history_node, ACSH_HistoryNode, minor, BL); /* last 16x nums 40-55 */                                                   \
   if (!dwg_dynapi_subclass_value (&_obj->history_node, "ACSH_HistoryNode",    \
                                   "trans", &trans, NULL))                     \
     fail ("ACSH_HistoryNode.trans");                                          \

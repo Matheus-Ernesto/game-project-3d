@@ -1,7 +1,7 @@
 /*****************************************************************************/
 /*  LibreDWG - free implementation of the DWG file format                    */
 /*                                                                           */
-/*  Copyright (C) 2020-2023 Free Software Foundation, Inc.                   */
+/*  Copyright (C) 2020-2025 Free Software Foundation, Inc.                   */
 /*                                                                           */
 /*  This library is free software, licensed under the terms of the GNU       */
 /*  General Public License as published by the Free Software Foundation,     */
@@ -50,6 +50,17 @@
 static int dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat);
 static unsigned int loglevel;
 
+struct opt_s
+{
+  unsigned dwg : 1;
+  unsigned dxf : 1;
+  unsigned binary : 1;
+  unsigned json : 1;
+  unsigned geojson : 1;
+  unsigned verify : 1;
+  unsigned force_free : 1;
+};
+
 // accepts only ASCII strings, for fuzzing only
 #ifdef HAVE_SSCANF_S
 #  define SSCANF_S sscanf_s
@@ -59,15 +70,15 @@ static unsigned int loglevel;
 #  define FMT_NAME "%[a-zA-Z0-9_]"
 #  define FMT_TAG "%[^ !]"
 #  define FMT_TBL "\"%[a-zA-Z0-9._ -]\""
-#  define FMT_PATH "\"%[a-zA-Z0-9_. \\-]\""
-#  define FMT_ANY "\"%[^\"]"
+#  define FMT_PATH "\"%[a-zA-Z0-9_. \\-/]\""
+#  define FMT_ANY "\"%[^\"]\""
 #else
 #  define SSCANF_S sscanf
 #  define SZ
 #  define FMT_NAME "%119[a-zA-Z0-9_]"
 #  define FMT_TAG "%119[^ !]"
 #  define FMT_TBL "\"%119[a-zA-Z0-9._ -]\""
-#  define FMT_PATH "\"%119[a-zA-Z0-9_. \\-]\""
+#  define FMT_PATH "\"%119[a-zA-Z0-9_. \\-/]\""
 #  define FMT_ANY "\"%119[^\"]\""
 #endif
 
@@ -98,7 +109,7 @@ log_p (unsigned level, char *p)
 }
 
 static int
-help (void)
+help (struct opt_s *opt)
 {
   printf ("\nUsage: dwgadd [OPTIONS] -o outfile addfile\n");
   printf ("Create a DWG (or DXF, JSON) by adding entities with instructions "
@@ -115,18 +126,20 @@ help (void)
   printf ("  -v[0-9], --verbose [0-9]  verbosity\n");
   printf ("  --as rNNNN                save as version\n");
   printf ("           Valid versions:\n");
-  printf ("             r1.1, r1.2, r1.4, r2.6, r2.10, r9, r10, r11, r12, "
-          "r14, r2000 (default)\n");
-  printf ("           Planned versions:\n");
+  printf ("             r1.1, r1.2, r1.4, r2.6, r2.10, r9, r10, r11, r13,"
+          " r14, r2000 (default),\n");
+  if (!opt->dxf && !opt->binary && !opt->json)
+    printf ("           Planned versions:\n");
   printf ("             r2004, r2007, r2010, r2013, r2018\n");
   printf ("  -o outfile, --file outfile (default: stdout)\n");
 #else
   printf ("  -v[0-9]     verbosity\n");
   printf ("  -a rNNNN    save as version\n");
   printf ("              Valid versions:\n");
-  printf ("                r1.1, r1.2, r1.4, r2.6, r2.10, r9, r10, r11, r12, "
-          "r14, r2000 (default)\n");
-  printf ("              Planned versions:\n");
+  printf ("                r1.1, r1.2, r1.4, r2.6, r2.10, r9, r10, r11, r13, "
+          "r14, r2000 (default),\n");
+  if (!opt->dxf && !opt->binary && !opt->json)
+    printf ("              Planned versions:\n");
   printf ("                r2004, r2007, r2010, r2013, r2018\n");
   printf ("  -o outfile (default: stdout)\n");
 #endif
@@ -148,17 +161,8 @@ main (int argc, char *argv[])
   Bit_Chain out_dat = { 0 };
   const char *outfile = NULL;
   Dwg_Version_Type dwg_version = R_2000;
+  struct opt_s opt;
   // boolean options
-  struct opt_s
-  {
-    unsigned dwg : 1;
-    unsigned dxf : 1;
-    unsigned binary : 1;
-    unsigned json : 1;
-    unsigned geojson : 1;
-    unsigned verify : 1;
-    unsigned force_free : 1;
-  } opt;
   int retval = 0;
   int c;
   FILE *fp;
@@ -224,7 +228,7 @@ main (int argc, char *argv[])
           if (strEQc (long_options[option_index].name, "version"))
             return fn_version ();
           else if (strEQc (long_options[option_index].name, "help"))
-            return help ();
+            return help (&opt);
           else if (strEQc (long_options[option_index].name, "force-free"))
             opt.force_free = 1;
 #  ifndef DISABLE_DXF
@@ -251,6 +255,7 @@ main (int argc, char *argv[])
           dwg_version = dwg_version_as (optarg);
           if (dwg_version == R_INVALID)
             {
+              i = (optind > 0 && optind < argc) ? optind - 1 : 1;
               fprintf (stderr, "Invalid version '%s'\n", argv[i]);
               return usage ();
             }
@@ -273,7 +278,7 @@ main (int argc, char *argv[])
 #endif
           break;
         case 'h':
-          return help ();
+          return help (&opt);
         case '?':
           fprintf (stderr, "%s: invalid option '-%c' ignored\n", argv[0],
                    optopt);
@@ -332,6 +337,7 @@ main (int argc, char *argv[])
       if (!out_dat.fh)
         {
           LOG_ERROR ("Could not write %s", outfile)
+          free (dat.chain);
           exit (1);
         }
       out_dat.from_version = dwg.header.from_version;
@@ -607,6 +613,12 @@ fn_error (const char *msg)
   if (!hdr)                                                                   \
     fn_error ("Missing block header\n");
 
+#define ADD_INITIAL                                                           \
+  mspace = dwg_model_space_object (dwg);                                      \
+  hdr = mspace ? mspace->tio.object->tio.BLOCK_HEADER : NULL;                 \
+  orig_num = dwg->num_objects;                                                \
+  initial = 0
+
 static int
 dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
 {
@@ -726,24 +738,25 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
           p = next_line (p, end);
           continue;
         }
-
+      LOG_INSANE ("< \"%.*s\"...\n\n", 80, p);
       if (memBEGINc (p, "readdwg"))
         {
-          if (dwg)
+          if (!initial || dwg->num_objects)
             {
-              LOG_ERROR ("readdwg seen, but DWG already exists");
+              LOG_ERROR ("readdwg seen, but DWG already initialized");
               exit (1);
             }
           if (1 == SSCANF_S (p, "readdwg " FMT_PATH, text SZ))
             {
               LOG_INFO ("readdwg %s\n", text)
-              if ((error = dwg_read_file (text, *dwgp)) > DWG_ERR_CRITICAL)
+              if ((error = dwg_read_file (text, *dwgp)) >= DWG_ERR_CRITICAL)
                 {
                   LOG_ERROR ("Invalid readdwg \"%s\" => error 0x%x", text,
                              error);
                   exit (1);
                 }
               dwg = *dwgp;
+              ADD_INITIAL;
               p = next_line (p, end);
               continue;
             }
@@ -755,21 +768,22 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
         }
       else if (memBEGINc (p, "readdxf"))
         {
-          if (dwg)
+          if (!initial || dwg->num_objects)
             {
-              LOG_ERROR ("readdxf seen, but DWG already exists");
+              LOG_ERROR ("readdxf seen, but DWG already initialized");
               exit (1);
             }
           if (1 == SSCANF_S (p, "readdxf " FMT_PATH, text SZ))
             {
               LOG_INFO ("readdxf %s\n", text)
-              if ((error = dxf_read_file (text, *dwgp)) > DWG_ERR_CRITICAL)
+              if ((error = dxf_read_file (text, *dwgp)) >= DWG_ERR_CRITICAL)
                 {
                   LOG_ERROR ("Invalid readdxf \"%s\" => error 0x%x", text,
                              error);
                   exit (1);
                 }
               dwg = *dwgp;
+              ADD_INITIAL;
               p = next_line (p, end);
               continue;
             }
@@ -781,9 +795,9 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
         }
       else if (memBEGINc (p, "readjson"))
         {
-          if (dwg)
+          if (!initial || dwg->num_objects)
             {
-              LOG_ERROR ("readjson seen, but DWG already exists");
+              LOG_ERROR ("readjson seen, but DWG already initialized");
               exit (1);
             }
           if (1 == SSCANF_S (p, "readjson " FMT_PATH, text SZ))
@@ -795,14 +809,17 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
                 dat_read_file (&in_dat, in_dat.fh, text);
               if (!in_dat.fh
                   || (error = dwg_read_json (&in_dat, *dwgp))
-                         > DWG_ERR_CRITICAL)
+                         >= DWG_ERR_CRITICAL)
                 {
                   LOG_ERROR ("Invalid readjson \"%s\" => error 0x%x", text,
                              error);
+                  free (in_dat.chain);
                   exit (1);
                 }
               fclose (in_dat.fh);
+              free (in_dat.chain);
               dwg = *dwgp;
+              ADD_INITIAL;
               p = next_line (p, end);
               continue;
             }
@@ -814,7 +831,7 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
         }
       else if (memBEGINc (p, "imperial"))
         {
-          if (!initial)
+          if (!initial || dwg->num_objects)
             {
               LOG_ERROR ("`imperial' directive out of header section");
               exit (1);
@@ -829,7 +846,7 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
           double f_ver;
           char s_ver[16];
 
-          if (!initial)
+          if (!initial || dwg->num_objects)
             {
               LOG_ERROR ("`version' directive out of header section");
               exit (1);
@@ -851,7 +868,7 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
             }
           if (!i || version >= R_AFTER)
             {
-              fprintf (stderr, "Invalid version %.*s", 40, p);
+              fprintf (stderr, "Invalid version %.*s\n", 40, p);
               exit (1);
             }
           p = next_line (p, end);
@@ -865,11 +882,7 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
           else
             dwg_add_Document (dwg, imperial);
           *dwgp = dwg;
-
-          mspace = dwg_model_space_object (dwg);
-          hdr = mspace ? mspace->tio.object->tio.BLOCK_HEADER : NULL;
-          orig_num = dwg->num_objects;
-          initial = 0;
+          ADD_INITIAL;
           LOG_TRACE ("==========================================\n");
         }
 
@@ -1059,7 +1072,7 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
       {
         if (version < R_2_0b)
           fn_error ("Invalid entity ATTRIB <r2.0b\n");
-        if (insert.type == DWG_TYPE_UNUSED)
+        if (insert.type == DWG_TYPE_UNUSED || !insert.u.insert)
           {
             log_p (DWG_LOGLEVEL_ERROR, p);
             fn_error ("Missing INSERT for ATTRIB\n");
@@ -1120,8 +1133,8 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
           // clang-format off
         SET_ENT (xline, XLINE)
       // clang-format on
-      else if ((i = SSCANF_S (p, "text " FMT_ANY " (%lf %lf %lf) %lf\n", text,
-                              &pt1.x, &pt1.y, &pt1.z, &height))
+      else if ((i = SSCANF_S (p, "text " FMT_ANY " (%lf %lf %lf) %lf\n",
+                              text SZ, &pt1.x, &pt1.y, &pt1.z, &height))
                >= 5)
       {
         if (strlen (text) && text[strlen (text) - 1] == '"')
@@ -1162,8 +1175,14 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
         if (strlen (text) && text[strlen (text) - 1] == '"')
           text[strlen (text) - 1] = '\0'; // strip the \"
         CHK_MISSING_BLOCK_HEADER
-        ent = (lastent_t){ .u.block = dwg_add_BLOCK (hdr, text),
-                           .type = DWG_TYPE_BLOCK };
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid BLOCK name\n");
+        else
+          {
+            dwg_add_BLOCK_HEADER (dwg, text);
+            ent = (lastent_t){ .u.block = dwg_add_BLOCK (hdr, text),
+                               .type = DWG_TYPE_BLOCK };
+          }
       }
       else
           // clang-format off
@@ -1188,10 +1207,13 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
                    pt1.x, pt1.y, pt1.z, text, scale.x, scale.y, scale.z,
                    deg2rad (rot));
         CHK_MISSING_BLOCK_HEADER
-        insert = ent = (lastent_t){ .u.insert = dwg_add_INSERT (
-                                        hdr, &pt1, text, scale.x, scale.y,
-                                        scale.z, deg2rad (rot)),
-                                    .type = DWG_TYPE_INSERT };
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid BLOCK name\n");
+        else
+          insert = ent = (lastent_t){ .u.insert = dwg_add_INSERT (
+                                          hdr, &pt1, text, scale.x, scale.y,
+                                          scale.z, deg2rad (rot)),
+                                      .type = DWG_TYPE_INSERT };
       }
       else
           // clang-format off
@@ -1212,6 +1234,8 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
             hdr_s, pt1.x, pt1.y, pt1.z, text, scale.x, scale.y, scale.z,
             deg2rad (rot), i1, i2, f1, f2);
         CHK_MISSING_BLOCK_HEADER
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid block name\n");
         insert = ent
             = (lastent_t){ .u.minsert = dwg_add_MINSERT (
                                hdr, &pt1, text, scale.x, scale.y, scale.z,
@@ -1225,6 +1249,7 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
       else if (3
                == SSCANF_S (p, "point (%lf %lf %lf)", &pt1.x, &pt1.y, &pt1.z))
       {
+        LOG_INSANE ("> point (%%lf %%lf %%lf)\n");
         LOG_TRACE ("add_POINT %s (%f %f %f)\n", hdr_s, pt1.x, pt1.y, pt1.z);
         CHK_MISSING_BLOCK_HEADER
         ent = (lastent_t){ .u.point = dwg_add_POINT (hdr, &pt1),
@@ -1648,6 +1673,8 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
                             text SZ, s1 SZ, &u))
       {
         LOG_TRACE ("add_DICTIONARY \"%s\" \"%s\" %u\n", text, s1, u);
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid dictionary name\n");
         dict = ent = (lastent_t){ .u.dictionary = dwg_add_DICTIONARY (
                                       dwg, text, s1, (unsigned long)u),
                                   .type = DWG_TYPE_DICTIONARY };
@@ -1661,6 +1688,8 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
         if (dict.type != DWG_TYPE_DICTIONARY)
           fn_error ("xrecord: missing dictionary\n");
         LOG_TRACE ("add_XRECORD dictionary \"%s\"\n", text);
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid dictionary name\n");
         ent = (lastent_t){ .u.xrecord
                            = dwg_add_XRECORD (dict.u.dictionary, text),
                            .type = DWG_TYPE_XRECORD };
@@ -1688,6 +1717,9 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
       {
         LOG_TRACE ("add_VIEWPORT %s \"%s\"\n", hdr_s, text);
         CHK_MISSING_BLOCK_HEADER
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid table record name\n");
+        // add's a VX also if <r2004
         ent = (lastent_t){ .u.viewport = dwg_add_VIEWPORT (hdr, text),
                            .type = DWG_TYPE_VIEWPORT };
       }
@@ -1796,6 +1828,8 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
         if (version <= R_11)
           fn_error ("Invalid entity MLINESTYLE <r13\n");
         LOG_TRACE ("add_MLINESTYLE \"%s\"\n", text);
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid style name\n");
         ent = (lastent_t){ .u.mlinestyle = dwg_add_MLINESTYLE (dwg, text),
                            .type = DWG_TYPE_MLINESTYLE };
       }
@@ -1806,6 +1840,8 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
       else if (1 == SSCANF_S (p, "layer " FMT_TBL, text SZ))
       {
         LOG_TRACE ("add_LAYER \"%s\"\n", text);
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid table record name\n");
         ent = (lastent_t){ .u.layer = dwg_add_LAYER (dwg, text),
                            .type = DWG_TYPE_LAYER };
       }
@@ -1858,6 +1894,8 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
         if (version < R_11)
           fn_error ("Invalid table DIMSTYLE <r11\n");
         LOG_TRACE ("add_DIMSTYLE \"%s\"\n", text);
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid table record name\n");
         ent = (lastent_t){ .u.dimstyle = dwg_add_DIMSTYLE (dwg, text),
                            .type = DWG_TYPE_DIMSTYLE };
       }
@@ -1870,6 +1908,8 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
         if (version <= R_11)
           fn_error ("Invalid object GROUP < r13\n");
         LOG_TRACE ("add_GROUP \"%s\"\n", text);
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid group name\n");
         ent = (lastent_t){ .u.group = dwg_add_GROUP (dwg, text),
                            .type = DWG_TYPE_GROUP };
       }
@@ -1900,12 +1940,15 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
                             s1 SZ))
       {
         Dwg_Object *obj = dwg_ent_generic_to_object (ent.u.viewport, &error);
+        LOG_INSANE ("> layout viewport FMT_TBL FMT_ANY\n");
         if (version <= R_11)
           fn_error ("Invalid object LAYOUT <r13\n");
         if (ent.type != DWG_TYPE_VIEWPORT)
           fn_error ("layout viewport: last entity is not a viewport\n");
         if (strlen (s1) && text[strlen (s1) - 1] == '"')
           text[strlen (s1) - 1] = '\0'; // strip the \"
+        if (!dwg_is_valid_name (dwg, text))
+          fn_error ("Invalid table record name\n");
         if (!error)
           ent = (lastent_t){ .u.layout = dwg_add_LAYOUT (obj, text, s1),
                              .type = DWG_TYPE_LAYOUT };
@@ -2019,10 +2062,12 @@ dwg_add_dat (Dwg_Data **dwgp, Bit_Chain *dat)
       // clang-format on
       else if (2 == SSCANF_S (p, "HEADER." FMT_NAME " = %lf\n", s1 SZ, &f1))
       {
+        LOG_INSANE ("> HEADER.FMT_NAME = %%lf\n");
         if (2 == SSCANF_S (p, "HEADER." FMT_NAME " = %d\n", s1 SZ, &i1)
             && i1 == f1)
           {
             const Dwg_DYNAPI_field *f = dwg_dynapi_header_field (s1);
+            LOG_INSANE ("> HEADER.FMT_NAME = %%d\n");
             if (!f || f->is_string)
               {
                 log_p (DWG_LOGLEVEL_ERROR, p);

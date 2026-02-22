@@ -1,5 +1,5 @@
 SUBDIRS = unit-testing
-if HAVE_PYTHON_LIBXML2
+if HAVE_PYTHON_LXML
 if HAVE_LIBXML2
 SUBDIRS += xmlsuite
 endif
@@ -63,6 +63,12 @@ TESTDATA = \
     test-data/2000/circle.dwg \
     test-data/2000/circle.jpg \
     test-data/2000/circle.txt \
+    test-data/2000/entities-2d.dwg \
+    test-data/2000/entities-2d.dxf \
+    test-data/2000/entities-2d.scr \
+    test-data/2000/entities-3d.dwg \
+    test-data/2000/entities-3d.dxf \
+    test-data/2000/entities-3d.scr \
     test-data/2004/Arc.dwg \
     test-data/2004/Arc.jpg \
     test-data/2004/Arc.txt \

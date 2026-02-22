@@ -1,7 +1,7 @@
 /*****************************************************************************/
 /*  LibreDWG - free implementation of the DWG file format                    */
 /*                                                                           */
-/*  Copyright (C) 2009,2018-2024 Free Software Foundation, Inc.              */
+/*  Copyright (C) 2009,2018-2025 Free Software Foundation, Inc.              */
 /*                                                                           */
 /*  This library is free software, licensed under the terms of the GNU       */
 /*  General Public License as published by the Free Software Foundation,     */
@@ -242,58 +242,6 @@ bit_write_BB (Bit_Chain *dat, unsigned char value)
     }
 
   bit_advance_position (dat, 2);
-}
-
-/** Read 1-3 bits
- *  Keep reading bits until a zero bit is encountered, => 0,2,6,7.
- *  0: 0, 10: 2, 110: 6, 111: 7. 100 for 4 or 101 for 5 is invalid.
- */
-BITCODE_3B
-bit_read_3B (Bit_Chain *dat)
-{
-  BITCODE_3B result = bit_read_B (dat);
-  if (result)
-    {
-      BITCODE_3B next = bit_read_B (dat);
-      if (next)
-        {
-          next = bit_read_B (dat);
-          return next ? 7 : 6;
-        }
-      else
-        {
-          return 2;
-        }
-    }
-  else
-    {
-      return 0;
-    }
-}
-
-/** Write 1-3 bits
- */
-void
-bit_write_3B (Bit_Chain *dat, unsigned char value)
-{
-  if (value > 7)
-    {
-      loglevel = dat->opts & DWG_OPTS_LOGLEVEL;
-      LOG_ERROR ("Invalid bit_write_3B value %u > 7", value)
-      bit_write_B (dat, 0);
-      return;
-    }
-  bit_write_B (dat, value & 1);
-  if (value)
-    {
-      value >>= 1;
-      bit_write_B (dat, value & 1);
-      if (value)
-        {
-          value >>= 1;
-          bit_write_B (dat, value & 1);
-        }
-    }
 }
 
 /** Read 4 bits.
@@ -624,7 +572,6 @@ bit_read_BS (Bit_Chain *dat)
 void
 bit_write_BS (Bit_Chain *dat, BITCODE_BS value)
 {
-  // BITCODE_BS is defined as uint16_t, but better safe than sorry
   const uint16_t l = value;
   if (l > 256)
     {
@@ -750,9 +697,9 @@ bit_write_BOT (Bit_Chain *dat, BITCODE_BS value)
 }
 
 /** Read 1 bitlonglong (compacted uint64_t) for REQUIREDVERSIONS, preview_size.
- *  ODA doc bug. ODA say 1-3 bits until the first 0 bit. See 3BLL.
- *  The first 3 bits indicate the length l (see paragraph 2.1). Then
- *  l bytes follow, which represent the number (the least significant
+ *  ODA doc bug. ODA say 1-3 bits until the first 0 bit. See 3BLL below.
+ *  The first 3 bits indicate the length len (see paragraph 2.1). Then
+ *  len bytes follow, which represent the number (the least significant
  *  byte is first).
  */
 BITCODE_BLL
@@ -760,26 +707,131 @@ bit_read_BLL (Bit_Chain *dat)
 {
   unsigned int i, len;
   BITCODE_BLL result = 0ULL;
-  len = bit_read_BB (dat) << 1 | bit_read_B (dat);
+  len = (bit_read_BB (dat) << 1) | bit_read_B (dat);
   switch (len)
     {
     case 1:
       return bit_read_RC (dat);
     case 2:
       return bit_read_RS (dat);
+    // case 3:
+    //   return (bit_read_RC (dat) << 16) + bit_read_RS (dat);
     case 4:
       return bit_read_RL (dat);
     default:
-      CHK_OVERFLOW (__FUNCTION__, 0)
-      for (i = 0; i < len; i++)
+      CHK_OVERFLOW_PLUS (len, __FUNCTION__, 0)
+      // least significant byte first
+#if 1
+      for (i = 0; i < 8; i++)
         {
-          result <<= 8;
-          result |= bit_read_RC (dat);
+          result <<= 8; // fill all 8 bytes for the swap
+          if (i < len)
+            result |= bit_read_RC (dat); // but read only len
         }
+      return be64toh (result);
+#else
+      for (i = 0; i < len; i++)
+        result += bit_read_RC (dat) << i * 8;
       return result;
+#endif
     }
 }
 
+/** Write 1 bitlonglong (compacted data). max 7 byte by design.
+ */
+void
+bit_write_BLL (Bit_Chain *dat, BITCODE_BLL value)
+{
+  int i;
+  unsigned len = 0;
+  // 64bit into how many bytes? max 8 (count leading zeros)
+  BITCODE_BLL umax = 0xff00000000000000ULL;
+  if (value)
+    for (i = 8; i; i--, umax >>= 8)
+      {
+        if (value & umax)
+          {
+            len = (unsigned)i;
+            break;
+          }
+      }
+  // max len: 7
+  bit_write_B (dat, len & 4);
+  bit_write_B (dat, len & 2);
+  // or just bit_write_BB (dat, len >> 1);
+  bit_write_B (dat, len & 1);
+  switch (len)
+    {
+    case 1:
+      bit_write_RC (dat, value);
+      break;
+    case 2:
+      bit_write_RS (dat, value);
+      break;
+    case 4:
+      bit_write_RL (dat, value);
+      break;
+    default:
+      for (i = 0; i < (int)len; i++)
+        {
+          // least significant byte first
+          bit_write_RC (dat, value & 0xFF);
+          value >>= 8;
+        }
+    }
+}
+
+#if 0
+/** Read 1-3 bits. As falsely documented in ODA for BLL, but unused.
+ *  Keep reading bits until a zero bit is encountered, => 0,2,6,7.
+ *  0: 0, 10: 2, 110: 6, 111: 7. 100 for 4 or 101 for 5 is invalid.
+ */
+BITCODE_3B
+bit_read_3B (Bit_Chain *dat)
+{
+  BITCODE_3B result = bit_read_B (dat);
+  if (result)
+    {
+      BITCODE_3B next = bit_read_B (dat);
+      if (next)
+        {
+          next = bit_read_B (dat);
+          return next ? 7 : 6;
+        }
+      else
+        {
+          return 2;
+        }
+    }
+  else
+    {
+      return 0;
+    }
+}
+/** Write 1-3 bits
+ */
+void
+bit_write_3B (Bit_Chain *dat, unsigned char value)
+{
+  if (value > 7)
+    {
+      loglevel = dat->opts & DWG_OPTS_LOGLEVEL;
+      LOG_ERROR ("Invalid bit_write_3B value %u > 7", value)
+      bit_write_B (dat, 0);
+      return;
+    }
+  bit_write_B (dat, value & 1);
+  if (value)
+    {
+      value >>= 1;
+      bit_write_B (dat, value & 1);
+      if (value)
+        {
+          value >>= 1;
+          bit_write_B (dat, value & 1);
+        }
+    }
+}
 /** Read 1 bitlonglong (compacted uint64_t) as documented (but unused).
  *  The first 1-3 bits indicate the length l (see paragraph 2.1). Then
  *  l bytes follow, which represent the number (the least significant
@@ -792,39 +844,25 @@ bit_read_3BLL (Bit_Chain *dat)
   BITCODE_BLL result = 0ULL;
   len = bit_read_3B (dat);
   CHK_OVERFLOW (__FUNCTION__, 0)
-  for (i = 0; i < len; i++)
+  switch (len)
     {
-      result <<= 8;
-      result |= bit_read_RC (dat);
+    case 1:
+      return bit_read_RC (dat);
+    case 2:
+      return bit_read_RS (dat);
+    case 4:
+      return bit_read_RL (dat);
+    default:
+      for (i = 0; i < len; i++)
+        {
+          // least significant byte first
+          result |= bit_read_RC (dat);
+          result >>= 8;
+        }
+      return result;
     }
-  return result;
 }
 
-/** Write 1 bitlonglong (compacted data).
- */
-void
-bit_write_BLL (Bit_Chain *dat, BITCODE_BLL value)
-{
-  // 64bit into how many bytes?
-  int i;
-  int len = 0;
-  BITCODE_BLL umax = 0xf000000000000000ULL;
-  for (i = 16; i; i--, umax >>= 8)
-    {
-      if (value & umax)
-        {
-          len = i;
-          break;
-        }
-    }
-  bit_write_BB (dat, len << 2);
-  bit_write_B (dat, len & 1);
-  for (i = 0; i < len; i++)
-    {
-      bit_write_RC (dat, value & 0xFF);
-      value >>= 8;
-    }
-}
 void
 bit_write_3BLL (Bit_Chain *dat, BITCODE_BLL value)
 {
@@ -848,6 +886,7 @@ bit_write_3BLL (Bit_Chain *dat, BITCODE_BLL value)
       value >>= 8;
     }
 }
+#endif
 
 /** Read 1 bitdouble (compacted data).
  */
@@ -945,6 +984,8 @@ bit_read_MC (Bit_Chain *dat)
               byte[i] &= 0xbf;
             }
           result |= (((BITCODE_UMC)byte[i]) << j);
+          if (result == 0x80000000) // GH #1153 negation overflow
+            goto err_mc;
           return (negative ? -((BITCODE_MC)result) : (BITCODE_MC)result);
         }
       else
@@ -953,6 +994,7 @@ bit_read_MC (Bit_Chain *dat)
       result |= ((BITCODE_UMC)byte[i]) << j;
     }
 
+err_mc:
   loglevel = dat->opts & DWG_OPTS_LOGLEVEL;
   LOG_ERROR (
       "bit_read_MC: error parsing modular char. i=%d, j=%d, result=" FORMAT_UMC
@@ -1355,7 +1397,7 @@ bit_read_H (Bit_Chain *restrict dat, Dwg_Handle *restrict handle)
   else
     {
       handle->size = handle->code & 0xf;
-      handle->code = (handle->code & 0xf0) >> 4;
+      handle->code = (handle->code >> 4) & 0xf;
     }
 
   // size must not exceed 8
@@ -1368,18 +1410,22 @@ bit_read_H (Bit_Chain *restrict dat, Dwg_Handle *restrict handle)
     }
 
   u.v = UINT64_C (0);
+  /*
   for (int i = handle->size - 1; i >= 0; i--)
     u.c[i] = bit_read_RC (dat);
+  */
+  for (int i = 0; i < handle->size; i++)
+    u.v = (u.v << 8) | bit_read_RC (dat);
   handle->value = htole64 (u.v);
   return 0;
 }
 
 /** Write handle-references.
  * TODO
- * separate SoftPtr:   BB 0 + RLL
- *          HardPtr:   BB 1 + RLL
- *          SoftOwner: BB 2 + RLL
- *          HardOwner: BB 3 + RLL
+ * separate SoftPtr:   BB 0 + RL
+ *          HardPtr:   BB 1 + RL
+ *          SoftOwner: BB 2 + RL
+ *          HardOwner: BB 3 + RL
  * downconvert relative handles to abs. 4 to r2000
  */
 void
@@ -1413,7 +1459,7 @@ bit_write_H (Bit_Chain *restrict dat, Dwg_Handle *restrict handle)
   assert (sizeof (val) <= 8);
   memset (&val, 0, sizeof (val));
   val.v = htole64 (handle->value);
-  for (i = sizeof (val) - 1; i >= 0; i--)
+  for (i = 7; i >= 0; i--)
     if (val.p[i])
       break;
   size = handle->code << 4;
@@ -1444,9 +1490,9 @@ bit_H_to_dat (Bit_Chain *restrict dat, Dwg_Handle *restrict handle)
     }
   else
     {
-      LOG_ERROR ("Invalid handle size %u with " FORMAT_RLLx, handle->size,
+      LOG_ERROR ("Invalid handle size %u with " FORMAT_HV, handle->size,
                  handle->value)
-      bit_write_RLL_BE (dat, handle->value);
+      bit_write_RL_BE (dat, handle->value);
     }
   return;
 }
@@ -1588,10 +1634,9 @@ int
 bit_read_fixed (Bit_Chain *restrict dat, BITCODE_RC *restrict dest,
                 size_t length)
 {
-  if (dat->byte >= MAX_MEM_ALLOC ||
-      length >= MAX_MEM_ALLOC ||
-      (dat->bit ? (((dat->byte + length) * 8) + dat->bit > dat->size * 8)
-       : (dat->byte + length > dat->size)))
+  if (dat->byte >= MAX_MEM_ALLOC || length >= MAX_MEM_ALLOC
+      || (dat->bit ? (((dat->byte + length) * 8) + dat->bit > dat->size * 8)
+                   : (dat->byte + length > dat->size)))
     {
       loglevel = dat->opts & DWG_OPTS_LOGLEVEL;
       LOG_ERROR ("%s buffer overflow at pos %" PRIuSIZE " > size %" PRIuSIZE,
@@ -1611,9 +1656,7 @@ bit_read_fixed (Bit_Chain *restrict dat, BITCODE_RC *restrict dest,
   else
     {
       for (size_t i = 0; i < length; i++)
-        {
-          dest[i] = bit_read_RC (dat);
-        }
+        dest[i] = bit_read_RC (dat);
     }
   return 0;
 }
@@ -1731,7 +1774,7 @@ bit_write_TF (Bit_Chain *restrict dat, BITCODE_TF restrict chain,
  */
 void
 bit_write_TFv (Bit_Chain *restrict dat, BITCODE_TF restrict chain,
-              size_t length)
+               size_t length)
 {
   size_t len;
   if (!chain)
@@ -2029,7 +2072,7 @@ bit_wcs2dup (const BITCODE_TU restrict src)
     return NULL;
   len = bit_wcs2len (src);
   blen = (len + 1) * 2; // include the zero
-  d = malloc (blen);
+  d = (BITCODE_TU)malloc (blen);
   if (d)
     memcpy (d, src, blen);
   return d;
@@ -2111,12 +2154,15 @@ bit_embed_TU (BITCODE_TU restrict wstr)
 /** Write ASCIIZ text.
     Starting with r2004 as writer (not target version) acad always
     writes a terminating zero, and includes it in the length.
+    On DWG_OPTS_INJSON (imported from JSON), convert from UTF-8 to the
+   codepage.
  */
 void
 bit_write_TV (Bit_Chain *restrict dat, BITCODE_TV restrict chain)
 {
   size_t i;
   size_t length = (chain && *chain) ? strlen ((const char *)chain) : 0;
+  bool need_free = false;
   if (length > UINT16_MAX)
     {
       // silently truncate overlong strings for now
@@ -2125,16 +2171,33 @@ bit_write_TV (Bit_Chain *restrict dat, BITCODE_TV restrict chain)
       length = UINT16_MAX;
       chain[UINT16_MAX - 1] = '\0';
     }
+  // on utf-8 convert back to codepage
+  if (length && dat->opts & DWG_OPTS_INJSON)
+    {
+      size_t destlen = length * 2;
+      char *dest = (char *)malloc (destlen);
+      while (!bit_utf8_to_TV (dest, (unsigned char *)chain, destlen, length, 0,
+                              dat->codepage))
+        {
+          destlen *= 2;
+          dest = (char *)realloc (dest, destlen);
+        }
+      need_free = true;
+      chain = dest;
+      length = strlen (dest);
+    }
   if (dat->from_version < R_13b1)
     bit_write_RS (dat, (BITCODE_RS)length);
   else
     {
-      if (dat->version > R_13c3 && length)
-        length++;
+      if (dat->version > R_14 && length)
+        length++; // TV-ZERO
       bit_write_BS (dat, (BITCODE_BS)length);
     }
   for (i = 0; i < length; i++)
     bit_write_RC (dat, (unsigned char)chain[i]);
+  if (need_free)
+    free (chain);
 }
 
 static int
@@ -3109,8 +3172,8 @@ bit_utf8_to_TV (char *restrict dest, const unsigned char *restrict src,
   return d;
 }
 
-static inline char *
-bit_is_U_expand (char *p)
+static char *
+bit_is_U_expand (const char *p)
 {
   char *s;
   if (p && strlen (p) >= 7 && (s = strstr (p, "\\U+")) && ishex (s[3])
@@ -3120,8 +3183,8 @@ bit_is_U_expand (char *p)
     return NULL;
 }
 
-static inline char *
-bit_is_M_expand (char *p)
+static char *
+bit_is_M_expand (const char *p)
 {
   char *s;
   if (p && strlen (p) >= 8 && (s = strstr (p, "\\M+")) && s[3] >= '1'
@@ -3132,15 +3195,16 @@ bit_is_M_expand (char *p)
     return NULL;
 }
 
-char *
-bit_u_expand (char *src)
+/* src is expanded (ie really shrinked) internally.
+   It must not be a string literal though. */
+const char *
+bit_u_expand (const char *src)
 {
-  char *ret = src;
-  char *p = src;
+  const char *ret = src;
   char *s;
   // convert all \U+XXXX sequences to UTF-8. always gets shorter, so in-place
-  while ((s = bit_is_U_expand (p)) // jumps forward to next \U or \M
-         || (s = bit_is_M_expand (p)))
+  while ((s = bit_is_U_expand (src)) // jumps forward to next \U or \M
+         || (s = bit_is_M_expand (src)))
     {
       uint16_t wc;
       int i;
@@ -3205,16 +3269,22 @@ bit_TV_to_utf8_codepage (const char *restrict src, const BITCODE_RS codepage)
   const size_t srclen = strlen (src);
   size_t destlen = is_asian_cp ? srclen * 3 : trunc (srclen * 1.5);
   size_t i = 0;
-  char *str = (char *)calloc (1, destlen + 1);
+  char *str = (char *)calloc (destlen + 1, 1);
   unsigned char *tmp = (unsigned char *)src;
   uint16_t c = 0;
 
   if (!srclen)
-    return (char *)calloc (1, 1);
+    {
+      free (str);
+      return (char *)calloc (1, 1);
+    }
   if (!codepage)
-    return (char *)src;
+    {
+      free (str);
+      return (char *)src;
+    }
   //  UTF8 encode
-  while (i < destlen && (char*)tmp < &src[srclen] && (c = *tmp))
+  while (i < destlen && (char *)tmp < &src[srclen] && (c = *tmp))
     {
       wchar_t wc;
       tmp++;
@@ -3258,7 +3328,7 @@ bit_TV_to_utf8_codepage (const char *restrict src, const BITCODE_RS codepage)
     }
   EXTEND_SIZE (str, i + 1, destlen);
   str[i] = '\0';
-  return bit_u_expand (str);
+  return (char *)bit_u_expand (str);
 }
 
 /** converts old codepage'd strings to UTF-8.
@@ -3269,7 +3339,21 @@ EXPORT ATTRIBUTE_MALLOC char *
 bit_TV_to_utf8 (const char *restrict src, const BITCODE_RS codepage)
 {
   if (codepage == CP_UTF8)
-    return bit_u_expand ((char *)src);
+    {
+      if (bit_is_U_expand (src) || bit_is_M_expand (src))
+        {
+          // NOTE: src is expanded/shrinked internally.
+          const size_t srclen = strlen (src);
+          size_t destlen = 1 + trunc (srclen * 2);
+          char *dest = (char *)calloc (destlen, 1);
+          memcpy (dest, src, srclen + 1);
+          return (char *)bit_u_expand (dest);
+        }
+      else
+        {
+          return (char *)src;
+        }
+    }
   else if (!src)
     return NULL;
   {
@@ -3352,7 +3436,7 @@ bit_TV_to_utf8 (const char *restrict src, const BITCODE_RS codepage)
                 LOG_ERROR ("iconv \"%s\" failed with errno %d", src, errno);
                 iconv_close (cd);
                 free (odest);
-                return bit_u_expand (osrc);
+                return (char *)bit_u_expand (osrc);
               }
           }
       }
@@ -3364,7 +3448,7 @@ bit_TV_to_utf8 (const char *restrict src, const BITCODE_RS codepage)
         //*dest = '\0';
         iconv_close (cd);
         // always gets shorter, so inplace
-        return bit_u_expand (odest);
+        return (char *)bit_u_expand (odest);
       }
     else
       {
@@ -3396,7 +3480,7 @@ bit_utf8_to_TU (char *restrict str, const unsigned cquoted)
       LOG_WARN ("Overlong string truncated (len=%" PRIuSIZE ")", len);
       len = UINT16_MAX - 1;
     }
-  wstr = (BITCODE_TU)calloc (2, len + 1);
+  wstr = (BITCODE_TU)calloc (len + 1, 2);
   if (!wstr)
     {
       loglevel |= 1;
@@ -3426,39 +3510,47 @@ bit_utf8_to_TU (char *restrict str, const unsigned cquoted)
         }
       else if ((c & 0xe0) == 0xc0)
         {
-          /* ignore invalid utf8 for now */
           if (len >= 1)
             {
-              wstr[i++] = ((c & 0x1f) << 6) | (str[1] & 0x3f);
+              wstr[i++] = ((uint16_t)(c & 0x1f) << 6) | (*str++ & 0x3f);
               len--;
-              str++;
+            }
+          else
+            {
+              loglevel |= 1;
+              LOG_WARN ("utf-8: BAD_CONTINUATION_BYTE %s", &str[-1]);
             }
         }
       else if ((c & 0xf0) == 0xe0)
         {
           /* ignore invalid utf8? */
           if (len >= 2
-              && ((unsigned char)str[1] < 0x80 || (unsigned char)str[1] > 0xBF
-                  || (unsigned char)str[2] < 0x80
-                  || (unsigned char)str[2] > 0xBF))
+              && ((unsigned char)str[1] < 0x80 || (unsigned char)*str > 0xBF
+                  || (unsigned char)str[1] < 0x80
+                  || (unsigned char)str[1] > 0xBF))
             {
               loglevel |= 1;
-              LOG_WARN ("utf-8: BAD_CONTINUATION_BYTE %s", str);
+              LOG_WARN ("utf-8: BAD_CONTINUATION_BYTE %s", &str[-1]);
             }
-          else if (len >= 1 && c == 0xe0 && (unsigned char)str[1] < 0xa0)
+          else if (len >= 1 && c == 0xe0 && (unsigned char)*str < 0xa0)
             {
               loglevel |= 1;
-              LOG_WARN ("utf-8: NON_SHORTEST %s", str);
+              LOG_WARN ("utf-8: NON_SHORTEST %s", &str[-1]);
             }
           else if (len >= 2)
             {
-              wstr[i++] = ((c & 0x0f) << 12) | ((str[1] & 0x3f) << 6)
-                          | (str[2] & 0x3f);
+              wstr[i++] = ((uint16_t)(c & 0x0f) << 12)
+                          | ((uint16_t)(*str & 0x3f) << 6) | (str[1] & 0x3f);
               str++;
               str++;
               len--;
               len--;
             }
+        }
+      else
+        {
+          loglevel |= 1;
+          LOG_WARN ("utf-8: BAD_CONTINUATION_BYTE %s", &str[-1]);
         }
       /* everything above 0xf0 exceeds ucs-2, 4-6 byte seqs */
     }
@@ -3827,7 +3919,7 @@ bit_chain_init (Bit_Chain *dat, const size_t size)
       return;
 #endif
     }
-  dat->chain = (unsigned char *)calloc (1, size);
+  dat->chain = (unsigned char *)calloc (size, 1);
   if (!dat->chain)
     {
       loglevel = dat->opts & DWG_OPTS_LOGLEVEL;
@@ -3876,7 +3968,6 @@ bit_chain_alloc_size (Bit_Chain *dat, const size_t size)
 #else
           return;
 #endif
-          
         }
       tmp = (unsigned char *)realloc (dat->chain, dat->size + size);
       if (tmp)
@@ -3946,7 +4037,22 @@ bit_print (Bit_Chain *dat, size_t size)
 #define BIT(b, i) (((b)[(i) / 8] & (0x80 >> (i) % 8)) >> (7 - (i) % 8))
 
 void
-bit_write_bits (Bit_Chain *restrict dat, const char *restrict bits)
+bit_write_bits (Bit_Chain *restrict dat, const BITCODE_TF bits, size_t numbits)
+{
+  // BITCODE_TF p = (BITCODE_TF)bits;
+  unsigned char *last;
+  size_t i = 0;
+  if (!bits || !numbits)
+    return;
+  for (; i < (numbits / 8); i++)
+    bit_write_RC (dat, bits[i]);
+  last = &bits[numbits / 8];
+  for (i = 0; i < (numbits % 8); i++)
+    bit_write_B (dat, BIT (last, i));
+}
+
+void
+bit_write_bits1 (Bit_Chain *restrict dat, const char *restrict bits)
 {
   char *p = (char *)bits;
   for (; *p; p++)
@@ -4032,29 +4138,26 @@ bit_fprint_bits (FILE *fp, unsigned char *bits, size_t bitsize)
 }
 
 void
-bit_explore_chain (Bit_Chain *dat, size_t datsize)
+bit_explore_chain (Bit_Chain *dat, size_t from, size_t size)
 {
-  unsigned char sig, k;
-  size_t i;
+  unsigned char c;
+  size_t i, ob;
 
-  if (datsize > dat->size)
-    datsize = dat->size;
-
-  for (k = 0; k < 8; k++)
+  if (from + size > dat->size)
+    size = dat->size - from;
+  ob = dat->byte;
+  dat->byte = from;
+  if (from % 16 != 0)
+    printf ("\n[0x%04" PRI_SIZE_T_MODIFIER "X]: ", from);
+  for (i = from; i < from + size; i++)
     {
-      printf ("---------------------------------------------------------");
-      dat->byte = 0;
-      dat->bit = k;
-      for (i = 0; i < datsize - 1; i++)
-        {
-          if (i % 16 == 0)
-            printf ("\n[0x%04X]: ", (unsigned int)i & 0xffffffff);
-          sig = bit_read_RC (dat);
-          printf ("%c", sig >= ' ' && sig < 128 ? sig : '.');
-        }
-      puts ("");
+      if (i % 16 == 0)
+        printf ("\n[0x%04" PRI_SIZE_T_MODIFIER "X]: ", i);
+      c = bit_read_RC (dat);
+      printf ("%02x", c);
     }
-  puts ("---------------------------------------------------------");
+  dat->byte = ob;
+  puts ("");
 }
 
 uint16_t
@@ -4247,6 +4350,8 @@ in_hex2bin (unsigned char *restrict dest, char *restrict src, size_t destlen)
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // ...
   };
   const char *_end = pos + (destlen << 1);
+  if (!pos)
+    return 0;
   /* slower
   const char *_end4 = pos + ((destlen << 1) & ~0x3);
   const int64_t magic = INT64_C(0x1001001000000000);

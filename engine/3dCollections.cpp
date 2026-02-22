@@ -111,6 +111,101 @@ public:
 class Light
 {
 public:
+    // Posição
+    float pos_x = 0.0f;
+    float pos_y = 5.0f;
+    float pos_z = 5.0f;
+
+    // Cores da luz
+    float diffuse_r = 1.0f; // Vermelho da luz difusa
+    float diffuse_g = 1.0f; // Verde da luz difusa
+    float diffuse_b = 1.0f; // Azul da luz difusa
+    float diffuse_a = 1.0f; // Alpha da luz difusa
+
+    float ambient_r = 0.2f; // Vermelho da luz ambiente
+    float ambient_g = 0.2f; // Verde da luz ambiente
+    float ambient_b = 0.2f; // Azul da luz ambiente
+    float ambient_a = 1.0f; // Alpha da luz ambiente
+
+    float specular_r = 1.0f; // Vermelho da luz especular
+    float specular_g = 1.0f; // Verde da luz especular
+    float specular_b = 1.0f; // Azul da luz especular
+    float specular_a = 1.0f; // Alpha da luz especular
+
+    // Atenuação
+    float constant_attenuation = 1.0f;
+    float linear_attenuation = 0.05f;
+    float quadratic_attenuation = 0.01f;
+
+    // Tipo de luz: 0 = pontual, 1 = direcional, 2 = spot
+    int type = 0;
+
+    // Direção para luz direcional ou spot
+    float dir_x = 0.0f;
+    float dir_y = -1.0f;
+    float dir_z = 0.0f;
+
+    // Parâmetros de spot
+    float spot_cutoff = 45.0f;  // Ângulo de corte do spot (0-180)
+    float spot_exponent = 0.0f; // Concentração do spot
+
+    // Nome da luz (para referência)
+    std::string name = "default_light";
+
+    // Se a luz está ativa
+    bool enabled = true;
+
+    // Métodos auxiliares para configurar cores
+    void setDiffuse(float r, float g, float b, float a = 1.0f)
+    {
+        diffuse_r = r;
+        diffuse_g = g;
+        diffuse_b = b;
+        diffuse_a = a;
+    }
+
+    void setAmbient(float r, float g, float b, float a = 1.0f)
+    {
+        ambient_r = r;
+        ambient_g = g;
+        ambient_b = b;
+        ambient_a = a;
+    }
+
+    void setSpecular(float r, float g, float b, float a = 1.0f)
+    {
+        specular_r = r;
+        specular_g = g;
+        specular_b = b;
+        specular_a = a;
+    }
+
+    void setPosition(float x, float y, float z)
+    {
+        pos_x = x;
+        pos_y = y;
+        pos_z = z;
+    }
+
+    void setDirection(float x, float y, float z)
+    {
+        dir_x = x;
+        dir_y = y;
+        dir_z = z;
+    }
+
+    void setAttenuation(float constant, float linear, float quadratic)
+    {
+        constant_attenuation = constant;
+        linear_attenuation = linear;
+        quadratic_attenuation = quadratic;
+    }
+
+    void setSpot(float cutoff, float exponent)
+    {
+        spot_cutoff = cutoff;
+        spot_exponent = exponent;
+    }
 };
 
 class Object3D
@@ -152,10 +247,16 @@ class Scene
 {
 public:
     vector<Object3D> objects3d;
+    vector<Light> lights;
 
     void add(Object3D obj)
     {
         objects3d.push_back(obj);
+    }
+
+    void add(Light light)
+    {
+        lights.push_back(light);
     }
 
     Object3D &getObject3D(string name)
@@ -169,10 +270,22 @@ public:
         cout << "err Obj " << name << " not found\n";
         return invalidObject;
     }
+    Light &getLight(string name)
+    {
+        for (auto &obj : lights)
+        {
+            if (obj.name == name)
+                return obj;
+        }
+        static Light invalidObject;
+        cout << "err Light " << name << " not found\n";
+        return invalidObject;
+    }
 
     void clearAll()
     {
         objects3d.clear();
+        lights.clear();
     }
 };
 

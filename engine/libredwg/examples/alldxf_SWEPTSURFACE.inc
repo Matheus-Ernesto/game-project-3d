@@ -3,7 +3,7 @@
 
 // code, value, bits, pre_bits, num_bits, type, name, num, pos[]
 /* SWEPTSURFACE 411 in test/test-data/2018/Surface.dxf */
-static struct _unknown_field unknown_dxf_SWEPTSURFACE_1549[] = {
+static struct _unknown_field unknown_dxf_SWEPTSURFACE_975[] = {
   //{ 5, "411", NULL, 0, BITS_UNKNOWN, "handle", 1, {-1,-1,-1,-1,-1} },
     { 102, "{ACAD_REACTORS", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
     { 330, "414", NULL, 0, BITS_UNKNOWN, "reactors[0]", 1, {-1,-1,-1,-1,-1} },
@@ -109,12 +109,12 @@ static struct _unknown_field unknown_dxf_SWEPTSURFACE_1549[] = {
     { 11, "0.0", NULL, 0, BITS_UNKNOWN, "reference_vector_for_controlling_twist", 51, {-1,-1,-1,-1,-1} },
     { 21, "0.0", NULL, 0, BITS_UNKNOWN, "", 51, {-1,-1,-1,-1,-1} },
     { 31, "0.0", NULL, 0, BITS_UNKNOWN, "", 51, {-1,-1,-1,-1,-1} },
-  //{ 1001, "ACAD_STEPID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1071, "5", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1001, "ACAD_STEPID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1071, "5", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
     { 0, NULL, NULL, 0, BITS_UNKNOWN, NULL, 0, {-1,-1,-1,-1,-1}}
 };
 /* SWEPTSURFACE 5A1 in test/test-data/2018/Surface.dxf */
-static struct _unknown_field unknown_dxf_SWEPTSURFACE_1550[] = {
+static struct _unknown_field unknown_dxf_SWEPTSURFACE_976[] = {
   //{ 5, "5A1", NULL, 0, BITS_UNKNOWN, "handle", 1, {-1,-1,-1,-1,-1} },
     { 330, "1F", NULL, 0, BITS_UNKNOWN, "ownerhandle", 1, {-1,-1,-1,-1,-1} },
     { 100, "AcDbEntity", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
@@ -217,7 +217,7 @@ static struct _unknown_field unknown_dxf_SWEPTSURFACE_1550[] = {
     { 11, "0.0", NULL, 0, BITS_UNKNOWN, "reference_vector_for_controlling_twist", 51, {-1,-1,-1,-1,-1} },
     { 21, "0.0", NULL, 0, BITS_UNKNOWN, "", 51, {-1,-1,-1,-1,-1} },
     { 31, "0.0", NULL, 0, BITS_UNKNOWN, "", 51, {-1,-1,-1,-1,-1} },
-  //{ 1001, "ACAD_STEPID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
-  //{ 1071, "6", NULL, 0, BITS_UNKNOWN, "", 3, {-1,-1,-1,-1,-1} },
+    { 1001, "ACAD_STEPID", NULL, 0, BITS_UNKNOWN, "", 1, {-1,-1,-1,-1,-1} },
+    { 1071, "6", NULL, 0, BITS_UNKNOWN, "", 3, {-1,-1,-1,-1,-1} },
     { 0, NULL, NULL, 0, BITS_UNKNOWN, NULL, 0, {-1,-1,-1,-1,-1}}
 };

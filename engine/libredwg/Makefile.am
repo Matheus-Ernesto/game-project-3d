@@ -26,7 +26,9 @@ SUBDIRS += bindings
 endif
 endif
 if HAVE_MAKEINFO
+if !DISABLE_DOCS
 SUBDIRS += doc
+endif
 endif
 AM_DISTCHECK_CONFIGURE_FLAGS = --enable-release
 if DISABLE_BINDINGS
@@ -78,9 +80,24 @@ shell_sources = dwg.in dxf.in dxf-allcvt.sh test-dxf.sh dxf-check dxfb-check \
 	unknown regen-unknown full-regen-unknown regen-gperf regen-dynapi \
 	maintainer-clean-local distuninstallcheck dist-hook
 
-dist-hook:
+dist-hook: regen-dynapi
 	echo dist-hook distdir="$(distdir)"
 	echo $(VERSION) > $(distdir)/.tarball-version
+	test -f $(distdir)/test/xmlsuite/Makefile.in
+	test -f $(distdir)/bindings/python/Makefile.in
+	test -f $(distdir)/bindings/perl/Makefile.PL
+	test -f $(distdir)/programs/dwg2ps.1
+	test -f $(distdir)/examples/dwgadd.1
+if !HAVE_LIBPS
+	echo "Missing libps" && false
+endif
+if !HAVE_MAKEINFO
+	echo "Missing makeinfo" && false
+endif
+if DISABLE_DOCS
+	echo "config --disable-docs" && false
+endif
+
 # automake bug, GH #211 (howto enable skip_mode_fix? tried now info-in-builddir)
 #distcheck-hook:
 #	echo distcheck-hook distdir="$(distdir)"
@@ -88,19 +105,19 @@ dist-hook:
 #	chmod u+w "$(distdir)/doc/LibreDWG.info"
 
 UNKNOWN_LOG = unknown-`git describe --long --tags --dirty --always`.log
-UNKNOWN_SKIP = examples/alldwg.skip
+UNKNOWN_SKIP = alldwg.skip
 TIMEOUT_30 = @TIMEOUT_30@
 
 unknown:
 	-mv examples/alldwg.skip examples/alldwg.skip~
 	$(MAKE) -C src bits.lo && \
 	  $(MAKE) -C examples unknown$(EXEEXT) bd$(EXEEXT) bits$(EXEEXT) && \
-	  $(LTEXEC) examples/unknown$(EXEEXT) >$(UNKNOWN_LOG) 2>$(UNKNOWN_SKIP)
+	  $(LTEXEC) examples/unknown$(EXEEXT) >examples/$(UNKNOWN_LOG) 2>examples/$(UNKNOWN_SKIP)
 	if test -s examples/alldwg.skip; then true; \
 	else mv examples/alldwg.skip~ examples/alldwg.skip; fi
 if HAVE_PICAT
 if !HAVE_INSRCDIR
-	ln -s $(srcdir)/unknown.pi unknown.pi
+	test -e examples/unknown.pi || ln -s $(abs_srcdir)/examples/unknown.pi unknown.pi
 endif
 if HAVE_PARALLEL
 	-rm examples/*.pi.tmplog 2>/dev/null
@@ -141,8 +158,10 @@ full-regen-unknown:
 	$(MAKE) -C examples $@
 regen-man:
 	$(MAKE) -C programs $@
+	$(MAKE) -C examples $@
 man:
 	$(MAKE) -C programs $@
+	$(MAKE) -C examples $@
 manual:
 	$(MAKE) -C doc $@
 refman:
@@ -282,12 +301,19 @@ if HAVE_SHFMT
 	  $(SHFMT) $(SHFMT_FLAGS) -w $(top_srcdir)/$$s; done
 endif
 
+check-precommit:
+	if command -v prek; then \
+	  cd $(srcdir); prek run -a ; \
+	elif command -v pre-commit; then \
+	  cd $(srcdir); pre-commit run -a ; \
+	fi
+
 log-dwg: all
 	find $(srcdir)/test/test-data $(srcdir)/test/test-old $(srcdir)/test/issues \
-	     $(srcdir)/test/ossfuzz -type f -print0 -iname \*.dwg -size -40M | \
-          xargs -0 -n1 -P8 ./log "$d"
-	find $(srcdir)/test/ossfuzz/indwg* -type f -printf0 -size -40M | \
-	  xargs -0 -n1 -P8 ./log "$d"
+	     $(srcdir)/test/ossfuzz -type f -iname \*.dwg -size -40M | \
+          xargs -n1 -P8 ./log
+	find $(srcdir)/test/ossfuzz/indwg* -type f -size -40M | \
+	  xargs -n1 -P8 ./log
 
 check-ossfuzz: all
 	+find $(srcdir)/test/ossfuzz -type f -print0 -iname \*.dwg -size -40M | \
@@ -320,7 +346,9 @@ cover: gcov
 	gcov2perl test/*/*.gcov src/*.gcov programs/*.gcov examples/*.gcov
 	cover -no-gcov
 codecov: check
-	$(srcdir)/build-aux/codecov_io.sh -X test -X bindings
+	-(cd src && mkdir gcno && mv *.gcno gcno/ && \
+	  for g in .libs/*.gcda .libs/*.gcno; do ln -s $g; done)
+	-$(srcdir)/build-aux/codecov_io.sh -X test -X bindings
 coveralls: gcov
 	coveralls -e test -e bindings
 endif

@@ -2,7 +2,7 @@
 /*****************************************************************************/
 /*  LibreDWG - free implementation of the DWG file format                    */
 /*                                                                           */
-/*  Copyright (C) 2018-2023 Free Software Foundation, Inc.                   */
+/*  Copyright (C) 2018-2025 Free Software Foundation, Inc.                   */
 /*                                                                           */
 /*  This library is free software, licensed under the terms of the GNU       */
 /*  General Public License as published by the Free Software Foundation,     */
@@ -207,8 +207,8 @@
               LOG_OPTS_R11 (VERTEX, HAS_INDEX1);
               LOG_OPTS_R11 (VERTEX, HAS_INDEX2);
               LOG_OPTS_R11 (VERTEX, HAS_INDEX3);
-              LOG_OPTS_R11 (VERTEX, UNKNOWN_256);
               LOG_OPTS_R11 (VERTEX, HAS_INDEX4);
+              LOG_OPTS_R11 (VERTEX, UNKNOWN_512);
               LOG_OPTS_R11 (VERTEX, UNKNOWN_1024);
               LOG_OPTS_R11 (VERTEX, UNKNOWN_2048);
               LOG_OPTS_R11 (VERTEX, UNKNOWN_4096);
@@ -316,12 +316,12 @@
           {
             FIELD_CAST (preview_size, RL, BLL, 92);
           }
-        SINCE (R_2010)
+        SINCE (R_2010b)
           {
             FIELD_BLL (preview_size, 160);
           }
 #endif
-        if ((long)_ent->preview_size >= 0 &&
+        if ((int64_t)_ent->preview_size >= 0 &&
             _ent->preview_size < (obj->size ? obj->size : dat->size))
           {
             FIELD_BINARY (preview, _ent->preview_size, 310);
@@ -329,8 +329,9 @@
 #ifndef IS_FREE
         else
           {
-            LOG_ERROR ("Invalid preview_size: " FORMAT_BLL " kB",
-                      _ent->preview_size / 1000);
+            LOG_ERROR ("Invalid preview_size: " FORMAT_BLL " > %lu",
+                       _ent->preview_size,
+                       (unsigned long)(obj->size ? obj->size : dat->size));
             error |= DWG_ERR_VALUEOUTOFBOUNDS;
           }
 #endif
@@ -367,7 +368,7 @@
   SINCE (R_13b1) {
     // TODO: r13-r14: 6B flags + 6B common params
     FIELD_BB (entmode, 0);
-    FIELD_BL (num_reactors, 0); //ODA bug: BB as BS
+    FIELD_BL (num_reactors, 0); // ODA bug: BB as BS
   }
 
   VERSIONS (R_13b1, R_14) //ODA bug
@@ -378,7 +379,7 @@
         FIELD_VALUE (ltype_flags) = FIELD_VALUE (isbylayerlt) ? 0 : 3;
 #endif
     }
-  SINCE (R_2004) //ODA bug
+  SINCE (R_2004a) //ODA bug
     {
       FIELD_B (is_xdic_missing, 0);
     }
@@ -401,7 +402,7 @@
 
   // no ENC type as it's only used once, here, and we would need to write
   // handlers for all 3 importers, and 3 exporters.
-  SINCE (R_2004) // ENC (entity color encoding)
+  SINCE (R_2004a) // ENC (entity color encoding)
     {
       BITCODE_BS flags;
 #ifdef IS_JSON
@@ -488,14 +489,14 @@
   SINCE (R_13b1)
     FIELD_BD1 (ltype_scale, 48);
 #endif
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       // 00 BYLAYER, 01 BYBLOCK, 10 CONTINUOUS, 11 ltype handle
       FIELD_BB (ltype_flags, 0);
       // 00 BYLAYER, 01 BYBLOCK, 10 CONTINUOUS, 11 plotstyle handle
       FIELD_BB (plotstyle_flags, 0);
     }
-  SINCE (R_2007)
+  SINCE (R_2007a)
     {
 #ifndef DEBUG_CLASSES
 #ifdef IS_ENCODER
@@ -513,7 +514,7 @@
       }
       FIELD_RC0 (shadow_flags, 284); /* r2007+: 0 both, 1 receives, 2 casts, 3 no */
     }
-  SINCE (R_2010)
+  SINCE (R_2010b)
     {
       FIELD_B (has_full_visualstyle, 0); // DXF?
       FIELD_B (has_face_visualstyle, 0);
@@ -530,7 +531,7 @@
     }
   }
 
-  SINCE (R_2000) {
+  SINCE (R_2000b) {
     // DXF later after 6, see common_entity_handle_data.spec
     // Ideally CMC 60 should be deferred after layer 8, before linewt 370 also
 #ifndef IS_DXF

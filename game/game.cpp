@@ -11,6 +11,7 @@
 #include "utils.cpp"
 
 #include "intro.cpp"
+#include "intro2.cpp"
 #include "jogo.cpp"
 #include "configuracoes.cpp"
 #include "menuPrincipal.cpp"
@@ -51,6 +52,7 @@ int main()
     int level = 0;
 
     intro(engine);
+    intro2(engine);
     while (level >= 0 && !engine.quit())
     {
         switch (menuPrincipal(engine))

@@ -1000,12 +1000,12 @@ D2T,	DXF 41
 D2T,	DXF 43
 @item style
 T,	DXF 7
-@item t2
-T,	DXF 2
-@item t3
-T,	DXF 3
 @item text_value
 T,	DXF 1
+@item font_name
+T,	DXF 2
+@item bigfont_name
+T,	DXF 3
 @item offset_from_arc
 D2T,	DXF 44
 @item right_offset
@@ -1032,15 +1032,15 @@ BS,	DXF 71
 BS,	DXF 72
 @item text_position
 BS,	DXF 73
-@item font_19
+@item is_bold
 BS,	DXF 74
-@item bs2
+@item is_italic
 BS,	DXF 75
 @item is_underlined
 BS,	DXF 76
-@item bs1
+@item character_set
 BS,	DXF 77
-@item font
+@item pitch_and_family
 BS,	DXF 78
 @item is_shx
 BS,	DXF 79
@@ -1114,9 +1114,9 @@ H,	DXF 2
 @item is_partial
 B,	DXF 70
 @item arc_start_param
-BD,	DXF 41
+BD,	DXF 40
 @item arc_end_param
-BD,	DXF 42
+BD,	DXF 41
 @item has_leader
 B,	DXF 71
 @item leader1_pt
@@ -1164,32 +1164,34 @@ BS,	DXF 72
 BS,	DXF 74
 @item dataflags
 RC
-@item class_version
+@item is_locked_in_block
 RC,	DXF 280
-@item type
-RC,	DXF 70
+@item keep_duplicate_records
+RC
 @item tag
 T,	DXF 2
 @item field_length
-BS
+BS,	DXF 73
 @item flags
 RC,	DXF 70
 @item lock_position_flag
 B
 @item style
 H,	DXF 7
-@item mtext_style
-H,	DXF 340
+@item mtext_type
+RC,	DXF 70
+@item mtext
+Dwg_AcDbMTextObjectEmbedded
+@item is_really_locked
+B
 @item annotative_data_size
-BS,	DXF 70
-@item annotative_data_bytes
-RC
-@item annotative_app
-H
-@item annotative_short
 BS
-@item attdef_class_version
-RC
+@item annotative_data
+RC*
+@item annotative_flag
+BS
+@item annotative_style
+H
 @item prompt
 T,	DXF 3
 
@@ -1233,30 +1235,34 @@ BS,	DXF 72
 BS,	DXF 74
 @item dataflags
 RC
-@item class_version
+@item is_locked_in_block
 RC,	DXF 280
-@item type
-RC,	DXF 70
+@item keep_duplicate_records
+RC,	DXF 280
 @item tag
 T,	DXF 2
 @item field_length
-BS
+BS,	DXF 73
 @item flags
 RC,	DXF 70
 @item lock_position_flag
 B
 @item style
 H,	DXF 7
-@item mtext_style
-H,	DXF 340
+@item mtext_type
+RC,	DXF 70
+@item mtext
+Dwg_AcDbMTextObjectEmbedded
+@item is_really_locked
+B
 @item annotative_data_size
-BS,	DXF 70
-@item annotative_data_bytes
-RC
-@item annotative_app
-H
-@item annotative_short
 BS
+@item annotative_data
+RC*
+@item annotative_flag
+BS
+@item annotative_style
+H
 
 @end vtable
 @end indentedblock
@@ -2066,8 +2072,22 @@ RC,	DXF 280
 B,	DXF 290
 @item enable_frame_text
 B,	DXF 290
+@item ins_pt
+3BD
+@item alignment_pt
+2RD
 @item mtext
-struct _dwg_object*
+Dwg_AcDbMTextObjectEmbedded
+@item is_really_locked
+B
+@item annotative_data_size
+BS
+@item annotative_data
+RC*
+@item annotative_flag
+BS
+@item annotative_style
+H
 
 @end vtable
 @end indentedblock
@@ -2229,7 +2249,7 @@ BL,	DXF 90
 3BD,	DXF 11
 @item vvec
 3BD,	DXF 12
-@item size
+@item image_size
 2RD,	DXF 13
 @item display_props
 BS,	DXF 70
@@ -2376,14 +2396,14 @@ B,	DXF 75
 H,	DXF 3
 @item block
 H,	DXF 2
-@item first_arc_pt
-3BD,	DXF 15
-@item leader_len
+@item jog_angle
 BD,	DXF 40
-@item ovr_center
-3BD,	DXF 12
-@item jog_point
+@item jog_pt
 3BD,	DXF 13
+@item ovr_center
+3BD,	DXF 14
+@item chord_pt
+3BD,	DXF 15
 
 @end vtable
 @end indentedblock
@@ -3740,24 +3760,32 @@ BS,	DXF 72
 
 @item parent
 struct _dwg_object_entity*
+@item proxy_id
+BL,	DXF 90
 @item class_id
 BL,	DXF 91
-@item version
+@item dwg_versions
 BL,	DXF 95
 @item maint_version
-BL,	DXF 97
+BL,	DXF 95
+@item dwg_version
+BL,	DXF 95
 @item from_dxf
 B,	DXF 70
+@item proxy_data_size
+BL,	DXF 92
+@item proxy_data
+TF,	DXF 310
 @item data_numbits
-BL
-@item data_size
 BL,	DXF 93
+@item data_size
+BL
 @item data
 TF,	DXF 310
 @item num_objids
 BL
 @item objids
-H*,	DXF 340
+H*
 
 @end vtable
 @end indentedblock
@@ -4713,7 +4741,7 @@ struct _dwg_object_entity*
 @item flag
 RC,	DXF 70
 @item vertind
-BS,	DXF 71
+BSd,	DXF 71
 
 @end vtable
 @end indentedblock
@@ -4864,7 +4892,7 @@ BL,	DXF 90
 3BD,	DXF 11
 @item vvec
 3BD,	DXF 12
-@item size
+@item image_size
 2RD,	DXF 13
 @item display_props
 BS,	DXF 70
@@ -8525,13 +8553,11 @@ BL,	DXF 72
 @item num_hdls
 BL,	DXF 73
 @item hdls
-H*,	DXF 331
-@item shorts
-BS*,	DXF 74
+Dwg_BLOCKSTRETCHACTION_handles*
 @item num_codes
 BL,	DXF 75
 @item codes
-BL*,	DXF 76
+Dwg_BLOCKSTRETCHACTION_codes*
 @item action_offset_x
 BD,	DXF 140
 @item action_offset_y
@@ -8896,7 +8922,7 @@ B
 B
 @item xrefoverlaid
 B
-@item loaded_bit
+@item xref_loaded
 B
 @item num_owned
 BL
@@ -9472,7 +9498,7 @@ BS,	DXF 289
 @item DIMFXLON
 B,	DXF 290
 @item DIMTXTDIRECTION
-B,	DXF 295
+B,	DXF 294
 @item DIMALTMZF
 BD
 @item DIMALTMZS
@@ -9828,7 +9854,7 @@ struct _dwg_object_object*
 BL,	DXF 90
 @item pt0
 3BD,	DXF 10
-@item size
+@item image_size
 2RD,	DXF 13
 @item display_props
 BS,	DXF 70
@@ -10112,7 +10138,7 @@ H
 BS
 @item frozen
 B
-@item on
+@item off
 B
 @item frozen_in_new
 B
@@ -10797,7 +10823,7 @@ BD,	DXF 50
 @item enable_context
 B,	DXF 290
 @item context
-struct _dwg_object*
+Dwg_Object_SCALE
 
 @end vtable
 @end indentedblock
@@ -11179,24 +11205,28 @@ BS,	DXF 90
 
 @item parent
 struct _dwg_object_object*
+@item proxy_id
+BL,	DXF 90
 @item class_id
 BL,	DXF 91
-@item version
-BL,	DXF 71
+@item dwg_versions
+BL,	DXF 95
 @item maint_version
-BL,	DXF 97
+BL
+@item dwg_version
+BL
 @item from_dxf
 B,	DXF 70
 @item data_numbits
-BL
-@item data_size
 BL,	DXF 93
+@item data_size
+BL
 @item data
 TF,	DXF 310
 @item num_objids
 BL
 @item objids
-H*,	DXF 340
+H*
 
 @end vtable
 @end indentedblock
@@ -13192,6 +13222,44 @@ H
 @end vtable
 @end indentedblock
 
+@strong{Dwg_AcDbMTextObjectEmbedded} @anchor{Dwg_AcDbMTextObjectEmbedded}
+@vindex Dwg_AcDbMTextObjectEmbedded
+
+@indentedblock
+@vtable @code
+
+@item attachment
+BL
+@item ins_pt
+3BD
+@item x_axis_dir
+3BD
+@item rect_height
+BD
+@item rect_width
+BD
+@item extents_width
+BD
+@item extents_height
+BD
+@item column_type
+BL
+@item column_width
+BD
+@item gutter
+BD
+@item auto_height
+B
+@item flow_reversed
+B
+@item num_column_heights
+BL
+@item column_heights
+BD*
+
+@end vtable
+@end indentedblock
+
 @strong{Dwg_AcDs} @anchor{Dwg_AcDs}
 @vindex Dwg_AcDs
 
@@ -13724,6 +13792,42 @@ BD
 BS
 @item valuelist
 BD*
+
+@end vtable
+@end indentedblock
+
+@strong{Dwg_BLOCKSTRETCHACTION_codes} @anchor{Dwg_BLOCKSTRETCHACTION_codes}
+@vindex Dwg_BLOCKSTRETCHACTION_codes
+
+@indentedblock
+@vtable @code
+
+@item parent
+struct _dwg_object_BLOCKSTRETCHACTION*
+@item bl95
+BL,	DXF 95
+@item num_indexes
+BS,	DXF 76
+@item indexes
+BL*,	DXF 94
+
+@end vtable
+@end indentedblock
+
+@strong{Dwg_BLOCKSTRETCHACTION_handles} @anchor{Dwg_BLOCKSTRETCHACTION_handles}
+@vindex Dwg_BLOCKSTRETCHACTION_handles
+
+@indentedblock
+@vtable @code
+
+@item parent
+struct _dwg_object_BLOCKSTRETCHACTION*
+@item hdl
+H,	DXF 331
+@item num_indexes
+BS,	DXF 74
+@item indexes
+BL*,	DXF 94
 
 @end vtable
 @end indentedblock
@@ -14385,7 +14489,7 @@ BD,	DXF 53
 @item num_dashes
 BS,	DXF 79
 @item dashes
-BD*
+BD*,	DXF 49
 
 @end vtable
 @end indentedblock
@@ -14465,9 +14569,9 @@ BL,	DXF 97
 @item fitpts
 2RD*
 @item start_tangent
-2RD
+2RD,	DXF 12
 @item end_tangent
-2RD
+2RD,	DXF 13
 
 @end vtable
 @end indentedblock
@@ -14962,9 +15066,9 @@ struct _dwg_object_MLINESTYLE*
 BD,	DXF 49
 @item color
 CMC,	DXF 62
-@item lt_index
+@item lt.index
 BSd,	DXF 6
-@item lt_ltype
+@item lt.ltype
 H,	DXF 6
 
 @end vtable
@@ -15166,7 +15270,7 @@ BD
 
 @item parent
 struct _dwg_entity_PROXY_ENTITY*
-@item size
+@item data_size
 RL
 @item flags
 BS
@@ -15379,9 +15483,9 @@ BL,	DXF 90
 @vtable @code
 
 @item tag
-TU
+T16
 @item value
-TU
+T16
 
 @end vtable
 @end indentedblock

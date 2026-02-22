@@ -154,7 +154,8 @@ public:
             textElement.setFillColor(sf::Color(
                 static_cast<sf::Uint8>(originalOBJ.r * 255),
                 static_cast<sf::Uint8>(originalOBJ.g * 255),
-                static_cast<sf::Uint8>(originalOBJ.b * 255)));
+                static_cast<sf::Uint8>(originalOBJ.b * 255),
+                static_cast<sf::Uint8>(originalOBJ.a * 255)));
             sf::FloatRect bounds = textElement.getLocalBounds();
             switch (originalOBJ.align)
             {

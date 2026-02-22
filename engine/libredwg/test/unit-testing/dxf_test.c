@@ -58,7 +58,7 @@ test_subclass (const Dwg_Data *restrict dwg, const void *restrict ptr,
                const char *restrict subclass, const char *restrict fieldname,
                const char *restrict key, int index)
 {
-  Dwg_DYNAPI_field field;
+  Dwg_DYNAPI_field field = { 0 };
   enum RESBUF_VALUE_TYPE vtype;
   Dwg_Version_Type dwg_version = dwg->header.version;
 
@@ -407,7 +407,7 @@ test_object (const Dwg_Data *restrict dwg, const Dwg_Object *restrict obj,
   // check all fields against dxf->fields
   for (; f->value; f++)
     {
-      Dwg_DYNAPI_field field;
+      Dwg_DYNAPI_field field = { 0 };
       const Dwg_DYNAPI_field *fp, *fp1;
       enum RESBUF_VALUE_TYPE vtype;
       if (!f->name || !*f->name)
@@ -677,7 +677,8 @@ test_object (const Dwg_Data *restrict dwg, const Dwg_Object *restrict obj,
         DWG_VT_INT16:
           {
             BITCODE_BS value;
-            if (fp->is_malloc
+            if (fp->is_malloc // vector of shorts, RS[] or BS[]
+                && strlen (fp->type) == 2 && fp->type[1] == 'S'
                 && dwg_dynapi_entity_value (obj->tio.object->tio.APPID, name,
                                             f->name, &value, &field))
               {
@@ -707,7 +708,8 @@ test_object (const Dwg_Data *restrict dwg, const Dwg_Object *restrict obj,
         DWG_VT_INT32:
           {
             BITCODE_BL value;
-            if (fp->is_malloc
+            if (fp->is_malloc // vector of longs, RL[] or BL[]
+                && strlen (fp->type) == 2 && fp->type[1] == 'L'
                 && dwg_dynapi_entity_value (obj->tio.object->tio.APPID, name,
                                             f->name, &value, &field))
               {
@@ -745,7 +747,8 @@ test_object (const Dwg_Data *restrict dwg, const Dwg_Object *restrict obj,
         DWG_VT_INT64:
           {
             BITCODE_RLL value;
-            if (fp->is_malloc
+            if (fp->is_malloc // vector of LL's, RLL[] or BLL[]
+                && strlen (fp->type) == 3 && fp->type[1] == 'L'
                 && dwg_dynapi_entity_value (obj->tio.object->tio.APPID, name,
                                             f->name, &value, &field))
               {
@@ -809,7 +812,7 @@ test_dxf (const struct _unknown_dxf *dxf, const char *restrict name,
           const char *restrict dwgfile)
 {
   int error = 0;
-  static char prev_dwgfile[128];
+  static char prev_dwgfile[256];
   static Dwg_Data dwg;
   BITCODE_BL i;
   char *trace;
@@ -869,7 +872,7 @@ main (int argc, char *argv[])
   int big = 0;
   int is_docker = 0;
   char *docker;
-// clang-format off
+  // clang-format off
   #include "../../examples/alldxf_2.inc"
   // clang-format on
 
@@ -959,7 +962,7 @@ main (int argc, char *argv[])
         }
       if (stat (dwgfile, &attrib)) // not found
         {
-          char path[80];
+          char path[256];
           char *top_srcdir = getenv ("top_srcdir");
           // fixup wrong alldxf_0.inc paths
           if (len > 3 && dwgfile[0] == '.' && dwgfile[1] == '.'
@@ -967,12 +970,12 @@ main (int argc, char *argv[])
             memmove (dwgfile, &dwgfile[3], len - 2); // include the final \0
           if (top_srcdir)
             {
-              strcpy (path, top_srcdir);
-              strcat (path, "/");
+              strncpy (path, top_srcdir, sizeof (path) - 1);
+              strncat (path, "/", sizeof (path) - 1);
             }
           else
-            strcpy (path, "../../../");
-          strcat (path, dwgfile);
+            strncpy (path, "../../../", sizeof (path) - 1);
+          strncat (path, dwgfile, sizeof (path) - 1);
           if (stat (path, &attrib))
             LOG_WARN ("%s not found\n", path)
           else

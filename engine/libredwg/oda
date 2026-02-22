@@ -48,7 +48,7 @@ case $r in
        r="$(examples/odaversion "$d")"
        ;;
 esac
-if [ x$r = x11 ]; then r=12; fi
+if [ "$r" = "11" ]; then r=12; fi
 
 if [ ! -f "$dir/$b.dwg" ]; then
     if [ -f "$srcdir/test/test-data/$dir/$b.dwg" ]; then
@@ -62,17 +62,17 @@ if [ -f "$dir/$b.dwg" ] && [ -n "$r" ]; then
     # teigha supports r9-r2018. r2.10: Unsupported early .dwg file version
     can_teigha=1
     case $(uname) in
-        Darwin)  TeighaFileConverter=/Applications/ODAFileConverter.app/Contents/MacOS/ODAFileConverter ;;
-        Linux)   TeighaFileConverter=/usr/bin/ODAFileConverter ;;
-        Windows) TeighaFileConverter=ODAFileConverter ;;
+        Darwin)  ODAFileConverter=/Applications/ODAFileConverter.app/Contents/MacOS/ODAFileConverter ;;
+        Linux)   ODAFileConverter=/usr/bin/ODAFileConverter ;;
+        Windows) ODAFileConverter=ODAFileConverter ;;
         *)       can_teigha=0 ;;
     esac
     baseFileConverter=ODAFileConverter
-    if [ ! -x "$TeighaFileConverter" ]; then
+    if [ ! -x "$ODAFileConverter" ]; then
         case $(uname) in
-            Darwin)  TeighaFileConverter=/Applications/TeighaFileConverter.app/Contents/MacOS/TeighaFileConverter ;;
-            Linux)   TeighaFileConverter=/usr/bin/TeighaFileConverter ;;
-            Windows) TeighaFileConverter=TeighaFileConverter ;;
+            Darwin)  ODAFileConverter=/Applications/TeighaFileConverter.app/Contents/MacOS/TeighaFileConverter ;;
+            Linux)   ODAFileConverter=/usr/bin/TeighaFileConverter ;;
+            Windows) ODAFileConverter=TeighaFileConverter ;;
         esac
         baseFileConverter=TeighaFileConverter
     fi
@@ -80,21 +80,22 @@ if [ -f "$dir/$b.dwg" ] && [ -n "$r" ]; then
         r2\.*)     can_teigha=0 ;;
         r1\.*)     can_teigha=0 ;;
     esac
-    if [ -x "$TeighaFileConverter" ] && [ "$can_teigha" = "1" ]; then
+    # shellcheck disable=SC2086,SC2154
+    if [ -x "$ODAFileConverter" ] && [ "$can_teigha" = "1" ]; then
         echo timeout 30 "$baseFileConverter" "$dir" . "ACAD$r" DXF 0 1 "$b.dwg"
-        timeout 30 "$TeighaFileConverter" "$dir" . "ACAD$r" DXF 0 1 "$b.dwg" \
-                >/dev/null 2>/dev/null
+        timeout 30 "$ODAFileConverter" "$dir" . "ACAD$r" DXF 0 1 "$b.dwg" \
+                $ODAFileConverter_geometry >/dev/null 2>/dev/null
         # rm "$b.json.err" 2>/dev/null
         if [ -e "$dir/$b.dxf.err" ]; then
-            mv "$dir/$b.dxf.err" "$b.json.err"
-            cat "$b.json.err"
+            mv "$dir/$b.dxf.err" "$b.dwg.err"
+            cat "$b.dwg.err"
             exitcode=1
         else
             echo no oda error
         fi
     else
         # rm "$b.json.err" 2>/dev/null
-        if [ ! -x "$TeighaFileConverter" ]; then
+        if [ ! -x "$ODAFileConverter" ]; then
             echo "$baseFileConverter not installed"
         fi
     fi

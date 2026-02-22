@@ -2,7 +2,7 @@
 /*****************************************************************************/
 /*  LibreDWG - free implementation of the DWG file format                    */
 /*                                                                           */
-/*  Copyright (C) 2018-2023 Free Software Foundation, Inc.                   */
+/*  Copyright (C) 2018-2025 Free Software Foundation, Inc.                   */
 /*                                                                           */
 /*  This library is free software, licensed under the terms of the GNU       */
 /*  General Public License as published by the Free Software Foundation,     */
@@ -37,7 +37,7 @@
   SINCE (R_13b1) {
     HEADER_VALUE_TV (DWGCODEPAGE, 3, codepage);
   }
-  SINCE (R_2004) {
+  SINCE (R_2004a) {
     // usually only since 2010
     HEADER_VALUE_T0 (TITLE, 1, dwg->summaryinfo.TITLE);
     HEADER_VALUE_T0 (SUBJECT, 1, dwg->summaryinfo.SUBJECT);
@@ -57,7 +57,7 @@
           }
       }
   }
-  SINCE (R_2013) {
+  SINCE (R_2013b) {
     HEADER_BLL (REQUIREDVERSIONS, 160);
   }
   UNTIL (R_9) {
@@ -74,7 +74,7 @@
   }
   HEADER_2D (LIMMIN);
   HEADER_2D (LIMMAX);
-  PRE (R_9) { // tested r2.6
+  PRE (R_10) { // tested r2.6 and r9
     HEADER_2D (VIEWCTR);
     HEADER_RD (VIEWSIZE, 40);
     HEADER_RS (SNAPMODE, 70);
@@ -152,7 +152,7 @@
     HEADER_T (DIMPOST, 1);
     HEADER_T (DIMAPOST, 1);
   }
-  SINCE (R_2010) {
+  SINCE (R_2010b) {
     HEADER_T0 (DIMALTMZS, 1);
     HEADER_T0 (DIMMZS, 1);
   }
@@ -162,7 +162,7 @@
     HEADER_RD (DIMALTF, 40);
     HEADER_RD (DIMLFAC, 40);
   }
-  SINCE (R_9) {
+  SINCE (R_10) {
     HEADER_RS (DIMTOFL, 70);
     HEADER_RD (DIMTVP, 40);
     HEADER_RS (DIMTIX, 70);
@@ -197,7 +197,7 @@
     HEADER_HANDLE_NAME (DIMTXSTY, 7, STYLE);
     HEADER_RS (DIMAUNIT, 70);
   }
-  SINCE (R_2000) {
+  SINCE (R_2000b) {
     HEADER_RS (DIMADEC, 70);
     HEADER_RD (DIMALTRND, 40);
     HEADER_RS (DIMAZIN, 70);
@@ -212,7 +212,7 @@
     HEADER_BSd (DIMLWE, 70);
     HEADER_RS (DIMTMOVE, 70);
   }
-  SINCE (R_2007) {
+  SINCE (R_2007a) {
     HEADER_BD (DIMFXL, 40);
     HEADER_B (DIMFXLON, 70);
     HEADER_BD (DIMJOGANG, 40);
@@ -223,8 +223,9 @@
     HEADER_HANDLE_NAME (DIMLTEX1, 6, LTYPE);
     HEADER_HANDLE_NAME (DIMLTEX2, 6, LTYPE);
   }
-  SINCE (R_2010)
+  SINCE (R_2010b)
     HEADER_RS (DIMTXTDIRECTION, 70);
+
   HEADER_RS (LUNITS, 70);
   HEADER_RS (LUPREC, 70);
   HEADER_RS (AXISMODE, 70);
@@ -238,12 +239,12 @@
   SINCE (R_11b1)
     HEADER_RD (PELEVATION, 40);
   HEADER_RD (THICKNESS, 40);
-  PRE (R_9) {
+  PRE (R_10) {
     HEADER_3D (VIEWDIR);
   }
   HEADER_RS (LIMCHECK, 70);
   UNTIL (R_14) {
-    HEADER_RS0 (BLIPMODE, 70); //documented but nowhere found
+    HEADER_RS (BLIPMODE, 70); //documented but nowhere found
   }
   HEADER_RD (CHAMFERA, 40);
   HEADER_RD (CHAMFERB, 40);
@@ -255,15 +256,15 @@
     ENDSEC ();
     return 0;
   }
-  PRE (R_9)
+  PRE (R_10)
     HEADER_RS (FASTZOOM, 70);
   HEADER_RS (SKPOLY, 70);
 
   HEADER_TIMEBLL (TDCREATE, 40);
-  SINCE (R_2000)
+  SINCE (R_2000b)
     HEADER_TIMEBLL (TDUCREATE, 40);
   HEADER_TIMEBLL (TDUPDATE, 40);
-  SINCE (R_2000)
+  SINCE (R_2000b)
     HEADER_TIMEBLL (TDUUPDATE, 40);
   HEADER_TIMEBLL (TDINDWG, 40);
   HEADER_TIMEBLL (TDUSRTIMER, 40);
@@ -278,32 +279,40 @@
     HEADER_RS (COORDS, 70); // 2
   SINCE (R_9) {
     HEADER_RS (SPLFRAME, 70);
-    HEADER_RS (SPLINETYPE, 70);
+    SINCE (R_10) {
+      HEADER_RS (SPLINETYPE, 70);
+    }
     HEADER_RS (SPLINESEGS, 70);
   }
   VERSIONS (R_9, R_14) {
     HEADER_RS (ATTDIA, 70);   // default 1
     HEADER_RS (ATTREQ, 70);
-    HEADER_RS (HANDLING, 70); // default 1
+  }
+  VERSIONS (R_10, R_14) {
+    HEADER_RS (HANDLING, 70); // default 1 >r10
   }
   //HEADER_H (HANDSEED, 5); //default: 20000, before r13: 0xB8BC
-  SINCE (R_9) {
+  SINCE (R_10) {
     FIELD_DATAHANDLE (HANDSEED, 0, 5);
+  }
+  SINCE (R_10) {
     HEADER_RS (SURFTAB1, 70); // 6
     HEADER_RS (SURFTAB2, 70); // 6
     HEADER_RS (SURFTYPE, 70); // 6
     HEADER_RS (SURFU, 70); // 6
     HEADER_RS (SURFV, 70); // 6
   }
-  SINCE (R_2000) {
+  SINCE (R_2000b) {
     HEADER_HANDLE_NAME (UCSBASE, 2, UCS);
   }
   VERSION (R_10) {
     HEADER_RS (FLATLAND, 70);
   }
-  SINCE (R_9) {
+  SINCE (R_10) {
     HEADER_HANDLE_NAME (UCSNAME, 2, UCS);
     HEADER_3D (UCSORG);
+  }
+  SINCE (R_10) {
     PRE (R_11)
     {
       HEADER_9 (UCSXORI);
@@ -317,7 +326,7 @@
       HEADER_3D (UCSYDIR);
     }
   }
-  SINCE (R_2000) {
+  SINCE (R_2000b) {
     HEADER_HANDLE_NAME (UCSORTHOREF, 2, UCS);
     HEADER_RS (UCSORTHOVIEW, 70);
     HEADER_3D (UCSORGTOP);
@@ -334,7 +343,7 @@
     HEADER_3D (PUCSXDIR);
     HEADER_3D (PUCSYDIR);
   }
-  SINCE (R_2000) {
+  SINCE (R_2000b) {
     HEADER_HANDLE_NAME (PUCSORTHOREF, 2, UCS);
     HEADER_RS (PUCSORTHOVIEW, 70);
     HEADER_3D (PUCSORGTOP);
@@ -356,12 +365,13 @@
   HEADER_RD (USERR4, 40);
   HEADER_RD (USERR5, 40);
 
-  SINCE (R_9)
-    HEADER_RS (WORLDVIEW, 70);
   UNTIL (R_10) {
     ENDSEC ();
     return 0;
   }
+
+  SINCE (R_11)
+    HEADER_RS (WORLDVIEW, 70);
 
   //VERSION (R_13b1) {
   //  HEADER_RS (WIREFRAME, 70); //Undocumented
@@ -403,8 +413,10 @@
   SINCE (R_13c3) {
     HEADER_RS (PROXYGRAPHICS, 70);
     HEADER_RS (MEASUREMENT, 70);
+  } else if (dat->version >= R_13 && _obj->PROXYGRAPHICS > 0) {
+    HEADER_RS (PROXYGRAPHICS, 70);
   }
-  SINCE (R_2000) {
+  SINCE (R_2000b) {
     HEADER_RS (CELWEIGHT, 370);
     HEADER_RS (ENDCAPS, 280);
     HEADER_RS (JOINSTYLE, 280);
@@ -425,16 +437,16 @@
     HEADER_B (OLESTARTUP, 290);
   }
 
-  SINCE (R_2004) {
+  SINCE (R_2004a) {
     HEADER_RC (SORTENTS, 280);
     HEADER_RC (INDEXCTL, 280);
     HEADER_RC (HIDETEXT, 280);
-    SINCE (R_2010) {
+    SINCE (R_2010b) {
       HEADER_RC (XCLIPFRAME, 280);
     } else {
       HEADER_B (XCLIPFRAME, 290);
     }
-    PRE (R_2007) {
+    PRE (R_2007a) {
       HEADER_RC (DIMASSOC, 280);
     }
     HEADER_RC (HALOGAP, 280);
@@ -446,7 +458,7 @@
     HEADER_T (PROJECTNAME, 1);
   }
 
-  SINCE (R_2007) {
+  SINCE (R_2007a) {
     HEADER_B (CAMERADISPLAY, 290);
     HEADER_BD (LENSLENGTH, 40);
     HEADER_BD (CAMERAHEIGHT, 40);

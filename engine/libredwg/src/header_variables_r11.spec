@@ -2,7 +2,7 @@
 /*****************************************************************************/
 /*  LibreDWG - free implementation of the DWG file format                    */
 /*                                                                           */
-/*  Copyright (C) 2018-2024 Free Software Foundation, Inc.                   */
+/*  Copyright (C) 2018-2025 Free Software Foundation, Inc.                   */
 /*                                                                           */
 /*  This library is free software, licensed under the terms of the GNU       */
 /*  General Public License as published by the Free Software Foundation,     */
@@ -12,7 +12,8 @@
 /*****************************************************************************/
 
 /*
- * header_variables_r11.spec: DWG pre-R13 header variables specification
+ * header_variables_r11.spec: DWG pre-R13 header variables specification.
+ * For DXF see header_variables_dxf.spec
  * written by Reini Urban
  * modified by Michal Josef Špaček
  */
@@ -159,7 +160,7 @@
 #ifndef IS_JSON
   FIELD_TFF (MENUEXT, 46, 0);
 #endif
-  DECODER {    
+  DECODER {
     if (_obj->MENUEXT[1]) {
       size_t len = strlen ((char*)&_obj->MENUEXT[1]) + 1;
       _obj->MENU = (char*)realloc (_obj->MENU, strlen (_obj->MENU) + len + 1);
@@ -351,6 +352,10 @@
   FIELD_RD (unit2_ratio, 0);
   FIELD_RD (unit3_ratio, 0);
   FIELD_RD (unit4_ratio, 0);
+  DECODER {
+    if (FIELD_VALUE (unit1_name))
+      free (FIELD_VALUE (unit1_name));
+  }
   FIELD_TFv (unit1_name, 32, 1);
   FIELD_TFv (unit2_name, 32, 1);
   FIELD_TFv (unit3_name, 32, 1);

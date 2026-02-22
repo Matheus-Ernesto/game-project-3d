@@ -1,7 +1,7 @@
 /*****************************************************************************/
 /*  LibreDWG - free implementation of the DWG file format                    */
 /*                                                                           */
-/*  Copyright (C) 2013,2018-2023 Free Software Foundation, Inc.              */
+/*  Copyright (C) 2013,2018-2025 Free Software Foundation, Inc.              */
 /*                                                                           */
 /*  This library is free software, licensed under the terms of the GNU       */
 /*  General Public License as published by the Free Software Foundation,     */
@@ -48,6 +48,8 @@
 #include "encode.h"
 #include "hash.h"
 
+#undef NEED_VPORT_FOR_MODEL_LAYOUT
+
 /** We don't pass in Dwg_Object*'s, so we don't know if the object
  *  is >= r2007 or <r13 or what. Default is r2000.
  *  So we need some dwg_api_init_version(&dwg) to store the version.
@@ -90,6 +92,52 @@ dwg_add_VERTEX_PFACE_FACE (Dwg_Entity_POLYLINE_PFACE *restrict pline,
                            const dwg_face vertind) __nonnull_all;
 
 // #endif
+
+/* Generic version api */
+EXPORT const char *
+dwg_api_version_string (void)
+{
+  return PACKAGE_VERSION;
+}
+EXPORT int
+dwg_api_version (void)
+{
+  return LIBREDWG_VERSION;
+}
+EXPORT int
+dwg_api_version_major (void)
+{
+  return LIBREDWG_VERSION_MAJOR;
+}
+EXPORT int
+dwg_api_version_minor (void)
+{
+  return LIBREDWG_VERSION_MINOR;
+}
+EXPORT bool
+dwg_api_version_is_release (void)
+{
+#ifdef IS_RELEASE
+  const char *s = PACKAGE_VERSION;
+  int count_dots = 0; // 0.13.3 vs 0.13.3.7539.2_0c711
+  if (!s)
+    return false;
+  while (*s)
+    {
+      if (*s == '.')
+        count_dots++;
+      s++;
+    }
+  return count_dots < 3; // not patched, has a tag.
+#else
+  return false;
+#endif
+}
+EXPORT const char *
+dwg_api_so_version (void)
+{
+  return LIBREDWG_SO_VERSION;
+}
 
 /**
  * Return an object fieldvalue
@@ -154,10 +202,12 @@ CAST_DWG_OBJECT_TO_ENTITY (VERTEX_2D)
 CAST_DWG_OBJECT_TO_ENTITY (VERTEX_3D)
 CAST_DWG_OBJECT_TO_OBJECT (BLOCK_HEADER)
 
+// clang-format: on
 #endif
 
 #ifndef __AFL_COMPILER
 
+// clang-format: off
 dwg_get_OBJECT (ent__3dface, _3DFACE)
 dwg_get_OBJECT (ent__3dsolid, _3DSOLID)
 dwg_get_OBJECT (ent_arc, ARC)
@@ -203,6 +253,7 @@ dwg_get_OBJECT (ent_vert_pface_face, VERTEX_PFACE_FACE)
 dwg_get_OBJECT (ent_viewport, VIEWPORT)
 
 /* Start auto-generated content. Do not touch. */
+// clang-format: off
 /* untyped > 500 */
 dwg_get_OBJECT (ent__3dline, _3DLINE)
 dwg_get_OBJECT (ent_camera, CAMERA)
@@ -220,6 +271,7 @@ dwg_get_OBJECT (ent_ole2frame, OLE2FRAME)
 dwg_get_OBJECT (ent_pdfunderlay, PDFUNDERLAY)
 dwg_get_OBJECT (ent_repeat, REPEAT)
 dwg_get_OBJECT (ent_sectionobject, SECTIONOBJECT)
+dwg_get_OBJECT (ent_wipeout, WIPEOUT)
 /* unstable */
 dwg_get_OBJECT (ent_arc_dimension, ARC_DIMENSION)
 dwg_get_OBJECT (ent_helix, HELIX)
@@ -228,33 +280,32 @@ dwg_get_OBJECT (ent_layoutprintconfig, LAYOUTPRINTCONFIG)
 dwg_get_OBJECT (ent_planesurface, PLANESURFACE)
 dwg_get_OBJECT (ent_pointcloud, POINTCLOUD)
 dwg_get_OBJECT (ent_pointcloudex, POINTCLOUDEX)
-dwg_get_OBJECT (ent_wipeout, WIPEOUT)
 #  ifdef DEBUG_CLASSES
-  dwg_get_OBJECT (ent_alignmentparameterentity, ALIGNMENTPARAMETERENTITY)
-  dwg_get_OBJECT (ent_arcalignedtext, ARCALIGNEDTEXT)
-  dwg_get_OBJECT (ent_basepointparameterentity, BASEPOINTPARAMETERENTITY)
-  dwg_get_OBJECT (ent_extrudedsurface, EXTRUDEDSURFACE)
-  dwg_get_OBJECT (ent_flipgripentity, FLIPGRIPENTITY)
-  dwg_get_OBJECT (ent_flipparameterentity, FLIPPARAMETERENTITY)
-  dwg_get_OBJECT (ent_geopositionmarker, GEOPOSITIONMARKER)
-  dwg_get_OBJECT (ent_lineargripentity, LINEARGRIPENTITY)
-  dwg_get_OBJECT (ent_linearparameterentity, LINEARPARAMETERENTITY)
-  dwg_get_OBJECT (ent_loftedsurface, LOFTEDSURFACE)
-  dwg_get_OBJECT (ent_mpolygon, MPOLYGON)
-  dwg_get_OBJECT (ent_navisworksmodel, NAVISWORKSMODEL)
-  dwg_get_OBJECT (ent_nurbsurface, NURBSURFACE)
-  dwg_get_OBJECT (ent_pointparameterentity, POINTPARAMETERENTITY)
-  dwg_get_OBJECT (ent_polargripentity, POLARGRIPENTITY)
-  dwg_get_OBJECT (ent_revolvedsurface, REVOLVEDSURFACE)
-  dwg_get_OBJECT (ent_rotationgripentity, ROTATIONGRIPENTITY)
-  dwg_get_OBJECT (ent_rotationparameterentity, ROTATIONPARAMETERENTITY)
-  dwg_get_OBJECT (ent_rtext, RTEXT)
-  dwg_get_OBJECT (ent_sweptsurface, SWEPTSURFACE)
-  dwg_get_OBJECT (ent_table, TABLE)
-  dwg_get_OBJECT (ent_visibilitygripentity, VISIBILITYGRIPENTITY)
-  dwg_get_OBJECT (ent_visibilityparameterentity, VISIBILITYPARAMETERENTITY)
-  dwg_get_OBJECT (ent_xygripentity, XYGRIPENTITY)
-  dwg_get_OBJECT (ent_xyparameterentity, XYPARAMETERENTITY)
+dwg_get_OBJECT (ent_alignmentparameterentity, ALIGNMENTPARAMETERENTITY)
+dwg_get_OBJECT (ent_arcalignedtext, ARCALIGNEDTEXT)
+dwg_get_OBJECT (ent_basepointparameterentity, BASEPOINTPARAMETERENTITY)
+dwg_get_OBJECT (ent_extrudedsurface, EXTRUDEDSURFACE)
+dwg_get_OBJECT (ent_flipgripentity, FLIPGRIPENTITY)
+dwg_get_OBJECT (ent_flipparameterentity, FLIPPARAMETERENTITY)
+dwg_get_OBJECT (ent_geopositionmarker, GEOPOSITIONMARKER)
+dwg_get_OBJECT (ent_lineargripentity, LINEARGRIPENTITY)
+dwg_get_OBJECT (ent_linearparameterentity, LINEARPARAMETERENTITY)
+dwg_get_OBJECT (ent_loftedsurface, LOFTEDSURFACE)
+dwg_get_OBJECT (ent_mpolygon, MPOLYGON)
+dwg_get_OBJECT (ent_navisworksmodel, NAVISWORKSMODEL)
+dwg_get_OBJECT (ent_nurbsurface, NURBSURFACE)
+dwg_get_OBJECT (ent_pointparameterentity, POINTPARAMETERENTITY)
+dwg_get_OBJECT (ent_polargripentity, POLARGRIPENTITY)
+dwg_get_OBJECT (ent_revolvedsurface, REVOLVEDSURFACE)
+dwg_get_OBJECT (ent_rotationgripentity, ROTATIONGRIPENTITY)
+dwg_get_OBJECT (ent_rotationparameterentity, ROTATIONPARAMETERENTITY)
+dwg_get_OBJECT (ent_rtext, RTEXT)
+dwg_get_OBJECT (ent_sweptsurface, SWEPTSURFACE)
+dwg_get_OBJECT (ent_table, TABLE)
+dwg_get_OBJECT (ent_visibilitygripentity, VISIBILITYGRIPENTITY)
+dwg_get_OBJECT (ent_visibilityparameterentity, VISIBILITYPARAMETERENTITY)
+dwg_get_OBJECT (ent_xygripentity, XYGRIPENTITY)
+dwg_get_OBJECT (ent_xyparameterentity, XYPARAMETERENTITY)
 #  endif
 
 dwg_get_OBJECT (obj_appid, APPID)
@@ -333,6 +384,7 @@ dwg_get_OBJECT (obj_sectionviewstyle, SECTIONVIEWSTYLE)
 dwg_get_OBJECT (obj_section_manager, SECTION_MANAGER)
 dwg_get_OBJECT (obj_sortentstable, SORTENTSTABLE)
 dwg_get_OBJECT (obj_spatial_filter, SPATIAL_FILTER)
+dwg_get_OBJECT (obj_sun, SUN)
 dwg_get_OBJECT (obj_tablegeometry, TABLEGEOMETRY)
 dwg_get_OBJECT (obj_vba_project, VBA_PROJECT)
 dwg_get_OBJECT (obj_visualstyle, VISUALSTYLE)
@@ -427,7 +479,6 @@ dwg_get_OBJECT (obj_section_settings, SECTION_SETTINGS)
 dwg_get_OBJECT (obj_skylight_background, SKYLIGHT_BACKGROUND)
 dwg_get_OBJECT (obj_solid_background, SOLID_BACKGROUND)
 dwg_get_OBJECT (obj_spatial_index, SPATIAL_INDEX)
-dwg_get_OBJECT (obj_sun, SUN)
 dwg_get_OBJECT (obj_tablestyle, TABLESTYLE)
 dwg_get_OBJECT (obj_textobjectcontextdata, TEXTOBJECTCONTEXTDATA)
 dwg_get_OBJECT (obj_assocarraymodifyparameters, ASSOCARRAYMODIFYPARAMETERS)
@@ -480,12 +531,812 @@ dwg_get_OBJECT (obj_assocarrayrectangularparameters, ASSOCARRAYRECTANGULARPARAME
   dwg_get_OBJECT (obj_sunstudy, SUNSTUDY)
   dwg_get_OBJECT (obj_tablecontent, TABLECONTENT)
   dwg_get_OBJECT (obj_tvdeviceproperties, TVDEVICEPROPERTIES)
-// dwg_get_OBJECT (obj_acdsrecord, ACDSRECORD)
-// dwg_get_OBJECT (obj_acdsschema, ACDSSCHEMA)
-// dwg_get_OBJECT (obj_npocollection, NPOCOLLECTION)
-// dwg_get_OBJECT (obj_rapidrtrenderenvironment, RAPIDRTRENDERENVIRONMENT)
-// dwg_get_OBJECT (obj_xrefpanelobject, XREFPANELOBJECT)
+  //dwg_get_OBJECT (obj_abshdrawingsettings, ABSHDRAWINGSETTINGS)
+  //dwg_get_OBJECT (obj_acaecustobj, ACAECUSTOBJ)
+  //dwg_get_OBJECT (obj_acaeeemgrobj, ACAEEEMGROBJ)
+  //dwg_get_OBJECT (obj_acamcomp, ACAMCOMP)
+  //dwg_get_OBJECT (obj_acamcompdef, ACAMCOMPDEF)
+  //dwg_get_OBJECT (obj_acamcompdefmgr, ACAMCOMPDEFMGR)
+  //dwg_get_OBJECT (obj_acamcontextmodeler, ACAMCONTEXTMODELER)
+  //dwg_get_OBJECT (obj_acamgdimstd, ACAMGDIMSTD)
+  //dwg_get_OBJECT (obj_acamgfilterdat, ACAMGFILTERDAT)
+  //dwg_get_OBJECT (obj_acamgholechartstdcsn, ACAMGHOLECHARTSTDCSN)
+  //dwg_get_OBJECT (obj_acamgholechartstddin, ACAMGHOLECHARTSTDDIN)
+  //dwg_get_OBJECT (obj_acamgholechartstdiso, ACAMGHOLECHARTSTDISO)
+  //dwg_get_OBJECT (obj_acamglaystd, ACAMGLAYSTD)
+  //dwg_get_OBJECT (obj_acamgrcompdef, ACAMGRCOMPDEF)
+  //dwg_get_OBJECT (obj_acamgrcompdefset, ACAMGRCOMPDEFSET)
+  //dwg_get_OBJECT (obj_acamgtitlestd, ACAMGTITLESTD)
+  //dwg_get_OBJECT (obj_acammvdbackupobject, ACAMMVDBACKUPOBJECT)
+  //dwg_get_OBJECT (obj_acamproject, ACAMPROJECT)
+  //dwg_get_OBJECT (obj_acamshaftcompdef, ACAMSHAFTCOMPDEF)
+  //dwg_get_OBJECT (obj_acamstdpcompdef, ACAMSTDPCOMPDEF)
+  //dwg_get_OBJECT (obj_acamwblocktempents, ACAMWBLOCKTEMPENTS)
+  //dwg_get_OBJECT (obj_acarrayjigentity, ACARRAYJIGENTITY)
+  //dwg_get_OBJECT (obj_accmcontext, ACCMCONTEXT)
+  //dwg_get_OBJECT (obj_acdbcircarcres, ACDBCIRCARCRES)
+  //dwg_get_OBJECT (obj_acdbdimensionres, ACDBDIMENSIONRES)
+  //dwg_get_OBJECT (obj_acdbentitycache, ACDBENTITYCACHE)
+  //dwg_get_OBJECT (obj_acdblineres, ACDBLINERES)
+  //dwg_get_OBJECT (obj_acdbstdpartres_arc, ACDBSTDPARTRES_ARC)
+  //dwg_get_OBJECT (obj_acdbstdpartres_line, ACDBSTDPARTRES_LINE)
+  //dwg_get_OBJECT (obj_acdb_hatchscalecontextdata_class, ACDB_HATCHSCALECONTEXTDATA_CLASS)
+  //dwg_get_OBJECT (obj_acdb_hatchviewcontextdata_class, ACDB_HATCHVIEWCONTEXTDATA_CLASS)
+  //dwg_get_OBJECT (obj_acdb_proxy_entity_data, ACDB_PROXY_ENTITY_DATA)
+  //dwg_get_OBJECT (obj_acdsrecord, ACDSRECORD)
+  //dwg_get_OBJECT (obj_acdsschema, ACDSSCHEMA)
+  //dwg_get_OBJECT (obj_acgrefacadmaster, ACGREFACADMASTER)
+  //dwg_get_OBJECT (obj_acgrefmaster, ACGREFMASTER)
+  //dwg_get_OBJECT (obj_acimintsysvar, ACIMINTSYSVAR)
+  //dwg_get_OBJECT (obj_acimrealsysvar, ACIMREALSYSVAR)
+  //dwg_get_OBJECT (obj_acimstrsysvar, ACIMSTRSYSVAR)
+  //dwg_get_OBJECT (obj_acimsysvarman, ACIMSYSVARMAN)
+  //dwg_get_OBJECT (obj_acmanootationviewstandardansi, ACMANOOTATIONVIEWSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmanootationviewstandardcsn, ACMANOOTATIONVIEWSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmanootationviewstandarddin, ACMANOOTATIONVIEWSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmanootationviewstandardiso, ACMANOOTATIONVIEWSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmaplegenddbobject, ACMAPLEGENDDBOBJECT)
+  //dwg_get_OBJECT (obj_acmaplegenditemdbobject, ACMAPLEGENDITEMDBOBJECT)
+  //dwg_get_OBJECT (obj_acmapmapviewportdbobject, ACMAPMAPVIEWPORTDBOBJECT)
+  //dwg_get_OBJECT (obj_acmapprintlayoutelementdbobjectcontainer, ACMAPPRINTLAYOUTELEMENTDBOBJECTCONTAINER)
+  //dwg_get_OBJECT (obj_acmballoon, ACMBALLOON)
+  //dwg_get_OBJECT (obj_acmbom, ACMBOM)
+  //dwg_get_OBJECT (obj_acmbomrow, ACMBOMROW)
+  //dwg_get_OBJECT (obj_acmbomrowstruct, ACMBOMROWSTRUCT)
+  //dwg_get_OBJECT (obj_acmbomstandardansi, ACMBOMSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmbomstandardcsn, ACMBOMSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmbomstandarddin, ACMBOMSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmbomstandardiso, ACMBOMSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmcenterlinestandardansi, ACMCENTERLINESTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmcenterlinestandardcsn, ACMCENTERLINESTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmcenterlinestandarddin, ACMCENTERLINESTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmcenterlinestandardiso, ACMCENTERLINESTANDARDISO)
+  //dwg_get_OBJECT (obj_acmdatadictionary, ACMDATADICTIONARY)
+  //dwg_get_OBJECT (obj_acmdataentry, ACMDATAENTRY)
+  //dwg_get_OBJECT (obj_acmdataentryblock, ACMDATAENTRYBLOCK)
+  //dwg_get_OBJECT (obj_acmdatumid, ACMDATUMID)
+  //dwg_get_OBJECT (obj_acmdatumstandardansi, ACMDATUMSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmdatumstandardcsn, ACMDATUMSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmdatumstandarddin, ACMDATUMSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmdatumstandardiso, ACMDATUMSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmdatumstandardiso2012, ACMDATUMSTANDARDISO2012)
+  //dwg_get_OBJECT (obj_acmdetailstandardansi, ACMDETAILSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmdetailstandardcsn, ACMDETAILSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmdetailstandarddin, ACMDETAILSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmdetailstandardiso, ACMDETAILSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmdetailtandardcustom, ACMDETAILTANDARDCUSTOM)
+  //dwg_get_OBJECT (obj_acmdimbreakpersreactor, ACMDIMBREAKPERSREACTOR)
+  //dwg_get_OBJECT (obj_acmedrawingman, ACMEDRAWINGMAN)
+  //dwg_get_OBJECT (obj_acmeview, ACMEVIEW)
+  //dwg_get_OBJECT (obj_acme_database, ACME_DATABASE)
+  //dwg_get_OBJECT (obj_acme_document, ACME_DOCUMENT)
+  //dwg_get_OBJECT (obj_acmfcframe, ACMFCFRAME)
+  //dwg_get_OBJECT (obj_acmfcfstandardansi, ACMFCFSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmfcfstandardcsn, ACMFCFSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmfcfstandarddin, ACMFCFSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmfcfstandardiso, ACMFCFSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmfcfstandardiso2004, ACMFCFSTANDARDISO2004)
+  //dwg_get_OBJECT (obj_acmfcfstandardiso2012, ACMFCFSTANDARDISO2012)
+  //dwg_get_OBJECT (obj_acmidstandardansi, ACMIDSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmidstandardcsn, ACMIDSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmidstandarddin, ACMIDSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmidstandardiso, ACMIDSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmidstandardiso2004, ACMIDSTANDARDISO2004)
+  //dwg_get_OBJECT (obj_acmidstandardiso2012, ACMIDSTANDARDISO2012)
+  //dwg_get_OBJECT (obj_acmnotestandardansi, ACMNOTESTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmnotestandardcsn, ACMNOTESTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmnotestandarddin, ACMNOTESTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmnotestandardiso, ACMNOTESTANDARDISO)
+  //dwg_get_OBJECT (obj_acmpartlist, ACMPARTLIST)
+  //dwg_get_OBJECT (obj_acmpickobj, ACMPICKOBJ)
+  //dwg_get_OBJECT (obj_acmsectionstandardansi, ACMSECTIONSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmsectionstandardcsn2002, ACMSECTIONSTANDARDCSN2002)
+  //dwg_get_OBJECT (obj_acmsectionstandardcustom, ACMSECTIONSTANDARDCUSTOM)
+  //dwg_get_OBJECT (obj_acmsectionstandarddin, ACMSECTIONSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmsectionstandardiso, ACMSECTIONSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmsectionstandardiso2001, ACMSECTIONSTANDARDISO2001)
+  //dwg_get_OBJECT (obj_acmstandardansi, ACMSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmstandardcsn, ACMSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmstandarddin, ACMSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmstandardiso, ACMSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmsurfstandardansi, ACMSURFSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmsurfstandardcsn, ACMSURFSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmsurfstandarddin, ACMSURFSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmsurfstandardiso, ACMSURFSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmsurfstandardiso2002, ACMSURFSTANDARDISO2002)
+  //dwg_get_OBJECT (obj_acmsurfsym, ACMSURFSYM)
+  //dwg_get_OBJECT (obj_acmtaperstandardansi, ACMTAPERSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmtaperstandardcsn, ACMTAPERSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmtaperstandarddin, ACMTAPERSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmtaperstandardiso, ACMTAPERSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmthreadlinestandardansi, ACMTHREADLINESTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmthreadlinestandardcsn, ACMTHREADLINESTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmthreadlinestandarddin, ACMTHREADLINESTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmthreadlinestandardiso, ACMTHREADLINESTANDARDISO)
+  //dwg_get_OBJECT (obj_acmweldstandardansi, ACMWELDSTANDARDANSI)
+  //dwg_get_OBJECT (obj_acmweldstandardcsn, ACMWELDSTANDARDCSN)
+  //dwg_get_OBJECT (obj_acmweldstandarddin, ACMWELDSTANDARDDIN)
+  //dwg_get_OBJECT (obj_acmweldstandardiso, ACMWELDSTANDARDISO)
+  //dwg_get_OBJECT (obj_acmweldsym, ACMWELDSYM)
+  //dwg_get_OBJECT (obj_acrfattgenmgr, ACRFATTGENMGR)
+  //dwg_get_OBJECT (obj_acrfinsadj, ACRFINSADJ)
+  //dwg_get_OBJECT (obj_acrfinsadjustermgr, ACRFINSADJUSTERMGR)
+  //dwg_get_OBJECT (obj_acrfmcadapiattholder, ACRFMCADAPIATTHOLDER)
+  //dwg_get_OBJECT (obj_acrfobjattmgr, ACRFOBJATTMGR)
+  //dwg_get_OBJECT (obj_acsh_subent_material_class, ACSH_SUBENT_MATERIAL_CLASS)
+  //dwg_get_OBJECT (obj_ac_am_2d_xref_mgr, AC_AM_2D_XREF_MGR)
+  //dwg_get_OBJECT (obj_ac_am_basic_view, AC_AM_BASIC_VIEW)
+  //dwg_get_OBJECT (obj_ac_am_basic_view_def, AC_AM_BASIC_VIEW_DEF)
+  //dwg_get_OBJECT (obj_ac_am_complex_hide_situation, AC_AM_COMPLEX_HIDE_SITUATION)
+  //dwg_get_OBJECT (obj_ac_am_comp_view_def, AC_AM_COMP_VIEW_DEF)
+  //dwg_get_OBJECT (obj_ac_am_comp_view_inst, AC_AM_COMP_VIEW_INST)
+  //dwg_get_OBJECT (obj_ac_am_dirty_nodes, AC_AM_DIRTY_NODES)
+  //dwg_get_OBJECT (obj_ac_am_hide_situation, AC_AM_HIDE_SITUATION)
+  //dwg_get_OBJECT (obj_ac_am_mapper_cache, AC_AM_MAPPER_CACHE)
+  //dwg_get_OBJECT (obj_ac_am_master_view_def, AC_AM_MASTER_VIEW_DEF)
+  //dwg_get_OBJECT (obj_ac_am_mvd_dep_mgr, AC_AM_MVD_DEP_MGR)
+  //dwg_get_OBJECT (obj_ac_am_override_filter, AC_AM_OVERRIDE_FILTER)
+  //dwg_get_OBJECT (obj_ac_am_props_override, AC_AM_PROPS_OVERRIDE)
+  //dwg_get_OBJECT (obj_ac_am_shaft_hide_situation, AC_AM_SHAFT_HIDE_SITUATION)
+  //dwg_get_OBJECT (obj_ac_am_stdp_view_def, AC_AM_STDP_VIEW_DEF)
+  //dwg_get_OBJECT (obj_ac_am_transform_ghost, AC_AM_TRANSFORM_GHOST)
+  //dwg_get_OBJECT (obj_adappl, ADAPPL)
+  //dwg_get_OBJECT (obj_aecc_alignment_design_check_set, AECC_ALIGNMENT_DESIGN_CHECK_SET)
+  //dwg_get_OBJECT (obj_aecc_alignment_label_set, AECC_ALIGNMENT_LABEL_SET)
+  //dwg_get_OBJECT (obj_aecc_alignment_label_set_ext, AECC_ALIGNMENT_LABEL_SET_EXT)
+  //dwg_get_OBJECT (obj_aecc_alignment_parcel_node, AECC_ALIGNMENT_PARCEL_NODE)
+  //dwg_get_OBJECT (obj_aecc_alignment_style, AECC_ALIGNMENT_STYLE)
+  //dwg_get_OBJECT (obj_aecc_appurtenance_style, AECC_APPURTENANCE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_assembly_style, AECC_ASSEMBLY_STYLE)
+  //dwg_get_OBJECT (obj_aecc_building_site_style, AECC_BUILDING_SITE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_cant_diagram_view_style, AECC_CANT_DIAGRAM_VIEW_STYLE)
+  //dwg_get_OBJECT (obj_aecc_catchment_style, AECC_CATCHMENT_STYLE)
+  //dwg_get_OBJECT (obj_aecc_class_node, AECC_CLASS_NODE)
+  //dwg_get_OBJECT (obj_aecc_contourview, AECC_CONTOURVIEW)
+  //dwg_get_OBJECT (obj_aecc_corridor_style, AECC_CORRIDOR_STYLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment, AECC_DISP_REP_ALIGNMENT)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_cant_label_group, AECC_DISP_REP_ALIGNMENT_CANT_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_csv, AECC_DISP_REP_ALIGNMENT_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_curve_label, AECC_DISP_REP_ALIGNMENT_CURVE_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_designspeed_label_group, AECC_DISP_REP_ALIGNMENT_DESIGNSPEED_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_geompt_label_group, AECC_DISP_REP_ALIGNMENT_GEOMPT_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_indexed_pi_label, AECC_DISP_REP_ALIGNMENT_INDEXED_PI_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_minor_station_label_group, AECC_DISP_REP_ALIGNMENT_MINOR_STATION_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_pi_label, AECC_DISP_REP_ALIGNMENT_PI_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_spiral_label, AECC_DISP_REP_ALIGNMENT_SPIRAL_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_staequ_label_group, AECC_DISP_REP_ALIGNMENT_STAEQU_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_station_label_group, AECC_DISP_REP_ALIGNMENT_STATION_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_station_offset_label, AECC_DISP_REP_ALIGNMENT_STATION_OFFSET_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_superelevation_label_group, AECC_DISP_REP_ALIGNMENT_SUPERELEVATION_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_table, AECC_DISP_REP_ALIGNMENT_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_tangent_label, AECC_DISP_REP_ALIGNMENT_TANGENT_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_alignment_vertical_geompt_labeling, AECC_DISP_REP_ALIGNMENT_VERTICAL_GEOMPT_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_appurtenance, AECC_DISP_REP_APPURTENANCE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_appurtenance_csv, AECC_DISP_REP_APPURTENANCE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_appurtenance_labeling, AECC_DISP_REP_APPURTENANCE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_appurtenance_profile_labeling, AECC_DISP_REP_APPURTENANCE_PROFILE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_assembly, AECC_DISP_REP_ASSEMBLY)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_auto_corridor_feature_line, AECC_DISP_REP_AUTO_CORRIDOR_FEATURE_LINE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_auto_corridor_feature_line_profile, AECC_DISP_REP_AUTO_CORRIDOR_FEATURE_LINE_PROFILE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_auto_corridor_feature_line_section, AECC_DISP_REP_AUTO_CORRIDOR_FEATURE_LINE_SECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_auto_feature_line, AECC_DISP_REP_AUTO_FEATURE_LINE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_auto_feature_line_csv, AECC_DISP_REP_AUTO_FEATURE_LINE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_auto_feature_line_profile, AECC_DISP_REP_AUTO_FEATURE_LINE_PROFILE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_auto_feature_line_section, AECC_DISP_REP_AUTO_FEATURE_LINE_SECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_buildingsite, AECC_DISP_REP_BUILDINGSITE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_buildingutil_connector, AECC_DISP_REP_BUILDINGUTIL_CONNECTOR)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_cant_diagram_view, AECC_DISP_REP_CANT_DIAGRAM_VIEW)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_catchment_area, AECC_DISP_REP_CATCHMENT_AREA)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_catchment_area_label, AECC_DISP_REP_CATCHMENT_AREA_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_corridor, AECC_DISP_REP_CORRIDOR)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_crossing_pipe_profile_labeling, AECC_DISP_REP_CROSSING_PIPE_PROFILE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_crossing_pressure_pipe_profile_labeling, AECC_DISP_REP_CROSSING_PRESSURE_PIPE_PROFILE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_csvstationslider, AECC_DISP_REP_CSVSTATIONSLIDER)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_face, AECC_DISP_REP_FACE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_feature, AECC_DISP_REP_FEATURE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_feature_label, AECC_DISP_REP_FEATURE_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_feature_line, AECC_DISP_REP_FEATURE_LINE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_feature_line_csv, AECC_DISP_REP_FEATURE_LINE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_feature_line_profile, AECC_DISP_REP_FEATURE_LINE_PROFILE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_feature_line_section, AECC_DISP_REP_FEATURE_LINE_SECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_fitting, AECC_DISP_REP_FITTING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_fitting_csv, AECC_DISP_REP_FITTING_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_fitting_labeling, AECC_DISP_REP_FITTING_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_fitting_profile_labeling, AECC_DISP_REP_FITTING_PROFILE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_flow_segment_label, AECC_DISP_REP_FLOW_SEGMENT_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_general_segment_label, AECC_DISP_REP_GENERAL_SEGMENT_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_grading, AECC_DISP_REP_GRADING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_graph, AECC_DISP_REP_GRAPH)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_graphprofile_networkpart, AECC_DISP_REP_GRAPHPROFILE_NETWORKPART)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_graphprofile_pressurepart, AECC_DISP_REP_GRAPHPROFILE_PRESSUREPART)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_grid_surface, AECC_DISP_REP_GRID_SURFACE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_grid_surface_csv, AECC_DISP_REP_GRID_SURFACE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_horgeometry_band_label_group, AECC_DISP_REP_HORGEOMETRY_BAND_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_hydro_region, AECC_DISP_REP_HYDRO_REGION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_interference_check, AECC_DISP_REP_INTERFERENCE_CHECK)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_interference_part, AECC_DISP_REP_INTERFERENCE_PART)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_interference_part_section, AECC_DISP_REP_INTERFERENCE_PART_SECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_intersection, AECC_DISP_REP_INTERSECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_intersection_location_labeling, AECC_DISP_REP_INTERSECTION_LOCATION_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_labeling, AECC_DISP_REP_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_legend_table, AECC_DISP_REP_LEGEND_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_line_between_points_label, AECC_DISP_REP_LINE_BETWEEN_POINTS_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_lotline_csv, AECC_DISP_REP_LOTLINE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_masshaulline, AECC_DISP_REP_MASSHAULLINE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_mass_haul_view, AECC_DISP_REP_MASS_HAUL_VIEW)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_matchline_labeling, AECC_DISP_REP_MATCHLINE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_match_line, AECC_DISP_REP_MATCH_LINE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_material_section, AECC_DISP_REP_MATERIAL_SECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_network, AECC_DISP_REP_NETWORK)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_note_label, AECC_DISP_REP_NOTE_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_offset_elev_label, AECC_DISP_REP_OFFSET_ELEV_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_parcel_boundary, AECC_DISP_REP_PARCEL_BOUNDARY)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_parcel_face_label, AECC_DISP_REP_PARCEL_FACE_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_parcel_segment, AECC_DISP_REP_PARCEL_SEGMENT)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_parcel_segment_label, AECC_DISP_REP_PARCEL_SEGMENT_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_parcel_segment_table, AECC_DISP_REP_PARCEL_SEGMENT_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_parcel_table, AECC_DISP_REP_PARCEL_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pipe, AECC_DISP_REP_PIPE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pipenetwork_band_label_group, AECC_DISP_REP_PIPENETWORK_BAND_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pipe_csv, AECC_DISP_REP_PIPE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pipe_labeling, AECC_DISP_REP_PIPE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pipe_profile_labeling, AECC_DISP_REP_PIPE_PROFILE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pipe_section_labeling, AECC_DISP_REP_PIPE_SECTION_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pipe_table, AECC_DISP_REP_PIPE_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_point_ent, AECC_DISP_REP_POINT_ENT)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_point_group, AECC_DISP_REP_POINT_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_point_table, AECC_DISP_REP_POINT_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pressurepipenetwork, AECC_DISP_REP_PRESSUREPIPENETWORK)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pressure_part_table, AECC_DISP_REP_PRESSURE_PART_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pressure_pipe, AECC_DISP_REP_PRESSURE_PIPE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pressure_pipe_csv, AECC_DISP_REP_PRESSURE_PIPE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pressure_pipe_labeling, AECC_DISP_REP_PRESSURE_PIPE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pressure_pipe_profile_labeling, AECC_DISP_REP_PRESSURE_PIPE_PROFILE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_pressure_pipe_section_labeling, AECC_DISP_REP_PRESSURE_PIPE_SECTION_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_profile, AECC_DISP_REP_PROFILE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_profiledata_band_label_group, AECC_DISP_REP_PROFILEDATA_BAND_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_profile_projection, AECC_DISP_REP_PROFILE_PROJECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_profile_projection_label, AECC_DISP_REP_PROFILE_PROJECTION_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_profile_view, AECC_DISP_REP_PROFILE_VIEW)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_profile_view_depth_label, AECC_DISP_REP_PROFILE_VIEW_DEPTH_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_quantity_takeoff_aggregate_earthwork_table, AECC_DISP_REP_QUANTITY_TAKEOFF_AGGREGATE_EARTHWORK_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_right_of_way, AECC_DISP_REP_RIGHT_OF_WAY)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_sampleline_labeling, AECC_DISP_REP_SAMPLELINE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_sample_line, AECC_DISP_REP_SAMPLE_LINE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_sample_line_group, AECC_DISP_REP_SAMPLE_LINE_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section, AECC_DISP_REP_SECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_sectionaldata_band_label_group, AECC_DISP_REP_SECTIONALDATA_BAND_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_sectiondata_band_label_group, AECC_DISP_REP_SECTIONDATA_BAND_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_sectionsegment_band_label_group, AECC_DISP_REP_SECTIONSEGMENT_BAND_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_corridor, AECC_DISP_REP_SECTION_CORRIDOR)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_corridor_point_label_group, AECC_DISP_REP_SECTION_CORRIDOR_POINT_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_gradebreak_label_group, AECC_DISP_REP_SECTION_GRADEBREAK_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_minor_offset_label_group, AECC_DISP_REP_SECTION_MINOR_OFFSET_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_offset_label_group, AECC_DISP_REP_SECTION_OFFSET_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_pipenetwork, AECC_DISP_REP_SECTION_PIPENETWORK)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_pressurepipenetwork, AECC_DISP_REP_SECTION_PRESSUREPIPENETWORK)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_projection, AECC_DISP_REP_SECTION_PROJECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_projection_label, AECC_DISP_REP_SECTION_PROJECTION_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_segment_label_group, AECC_DISP_REP_SECTION_SEGMENT_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_view, AECC_DISP_REP_SECTION_VIEW)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_view_depth_label, AECC_DISP_REP_SECTION_VIEW_DEPTH_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_section_view_quantity_takeoff_table, AECC_DISP_REP_SECTION_VIEW_QUANTITY_TAKEOFF_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_sheet, AECC_DISP_REP_SHEET)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_spanning_pipe_labeling, AECC_DISP_REP_SPANNING_PIPE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_spanning_pipe_profile_labeling, AECC_DISP_REP_SPANNING_PIPE_PROFILE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_station_elev_label, AECC_DISP_REP_STATION_ELEV_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_structure, AECC_DISP_REP_STRUCTURE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_structure_csv, AECC_DISP_REP_STRUCTURE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_structure_labeling, AECC_DISP_REP_STRUCTURE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_structure_profile_labeling, AECC_DISP_REP_STRUCTURE_PROFILE_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_structure_section_labeling, AECC_DISP_REP_STRUCTURE_SECTION_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_subassembly, AECC_DISP_REP_SUBASSEMBLY)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_superelevation_band_label_group, AECC_DISP_REP_SUPERELEVATION_BAND_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_superelevation_diagram_view, AECC_DISP_REP_SUPERELEVATION_DIAGRAM_VIEW)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_surface_contour_label_group, AECC_DISP_REP_SURFACE_CONTOUR_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_surface_elevation_label, AECC_DISP_REP_SURFACE_ELEVATION_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_surface_slope_label, AECC_DISP_REP_SURFACE_SLOPE_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_survey_figure_label_group, AECC_DISP_REP_SURVEY_FIGURE_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_svfigure, AECC_DISP_REP_SVFIGURE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_svfigure_csv, AECC_DISP_REP_SVFIGURE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_svfigure_profile, AECC_DISP_REP_SVFIGURE_PROFILE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_svfigure_section, AECC_DISP_REP_SVFIGURE_SECTION)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_svfigure_segment_label, AECC_DISP_REP_SVFIGURE_SEGMENT_LABEL)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_svnetwork, AECC_DISP_REP_SVNETWORK)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_tangent_intersection_table, AECC_DISP_REP_TANGENT_INTERSECTION_TABLE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_tin_surface, AECC_DISP_REP_TIN_SURFACE)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_tin_surface_csv, AECC_DISP_REP_TIN_SURFACE_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_valignment_crestcurve_label_group, AECC_DISP_REP_VALIGNMENT_CRESTCURVE_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_valignment_csv, AECC_DISP_REP_VALIGNMENT_CSV)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_valignment_hageompt_label_group, AECC_DISP_REP_VALIGNMENT_HAGEOMPT_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_valignment_line_label_group, AECC_DISP_REP_VALIGNMENT_LINE_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_valignment_minor_station_label_group, AECC_DISP_REP_VALIGNMENT_MINOR_STATION_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_valignment_pvi_label_group, AECC_DISP_REP_VALIGNMENT_PVI_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_valignment_sagcurve_label_group, AECC_DISP_REP_VALIGNMENT_SAGCURVE_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_valignment_station_label_group, AECC_DISP_REP_VALIGNMENT_STATION_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_verticalgeometry_band_label_group, AECC_DISP_REP_VERTICALGEOMETRY_BAND_LABEL_GROUP)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_viewframe_labeling, AECC_DISP_REP_VIEWFRAME_LABELING)
+  //dwg_get_OBJECT (obj_aecc_disp_rep_view_frame, AECC_DISP_REP_VIEW_FRAME)
+  //dwg_get_OBJECT (obj_aecc_featureline_style, AECC_FEATURELINE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_feature_style, AECC_FEATURE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_fitting_style, AECC_FITTING_STYLE)
+  //dwg_get_OBJECT (obj_aecc_format_manager_object, AECC_FORMAT_MANAGER_OBJECT)
+  //dwg_get_OBJECT (obj_aecc_gradeview, AECC_GRADEVIEW)
+  //dwg_get_OBJECT (obj_aecc_grading_criteria, AECC_GRADING_CRITERIA)
+  //dwg_get_OBJECT (obj_aecc_grading_criteria_set, AECC_GRADING_CRITERIA_SET)
+  //dwg_get_OBJECT (obj_aecc_grading_group, AECC_GRADING_GROUP)
+  //dwg_get_OBJECT (obj_aecc_grading_style, AECC_GRADING_STYLE)
+  //dwg_get_OBJECT (obj_aecc_import_storm_sewer_defaults, AECC_IMPORT_STORM_SEWER_DEFAULTS)
+  //dwg_get_OBJECT (obj_aecc_interference_style, AECC_INTERFERENCE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_intersection_style, AECC_INTERSECTION_STYLE)
+  //dwg_get_OBJECT (obj_aecc_label_collector_style, AECC_LABEL_COLLECTOR_STYLE)
+  //dwg_get_OBJECT (obj_aecc_label_node, AECC_LABEL_NODE)
+  //dwg_get_OBJECT (obj_aecc_label_radial_line_style, AECC_LABEL_RADIAL_LINE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_label_text_iterator_curve_or_spiral_style, AECC_LABEL_TEXT_ITERATOR_CURVE_OR_SPIRAL_STYLE)
+  //dwg_get_OBJECT (obj_aecc_label_text_iterator_style, AECC_LABEL_TEXT_ITERATOR_STYLE)
+  //dwg_get_OBJECT (obj_aecc_label_text_style, AECC_LABEL_TEXT_STYLE)
+  //dwg_get_OBJECT (obj_aecc_label_vector_arrow_style, AECC_LABEL_VECTOR_ARROW_STYLE)
+  //dwg_get_OBJECT (obj_aecc_legend_table_style, AECC_LEGEND_TABLE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_mass_haul_line_style, AECC_MASS_HAUL_LINE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_mass_haul_view_style, AECC_MASS_HAUL_VIEW_STYLE)
+  //dwg_get_OBJECT (obj_aecc_matchline_style, AECC_MATCHLINE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_material_style, AECC_MATERIAL_STYLE)
+  //dwg_get_OBJECT (obj_aecc_network_part_catalog_def_node, AECC_NETWORK_PART_CATALOG_DEF_NODE)
+  //dwg_get_OBJECT (obj_aecc_network_part_family_item, AECC_NETWORK_PART_FAMILY_ITEM)
+  //dwg_get_OBJECT (obj_aecc_network_part_list, AECC_NETWORK_PART_LIST)
+  //dwg_get_OBJECT (obj_aecc_network_rule, AECC_NETWORK_RULE)
+  //dwg_get_OBJECT (obj_aecc_parcel_node, AECC_PARCEL_NODE)
+  //dwg_get_OBJECT (obj_aecc_parcel_style, AECC_PARCEL_STYLE)
+  //dwg_get_OBJECT (obj_aecc_part_size_filter, AECC_PART_SIZE_FILTER)
+  //dwg_get_OBJECT (obj_aecc_pipe_rules, AECC_PIPE_RULES)
+  //dwg_get_OBJECT (obj_aecc_pipe_style, AECC_PIPE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_pipe_style_extension, AECC_PIPE_STYLE_EXTENSION)
+  //dwg_get_OBJECT (obj_aecc_pointcloud_style, AECC_POINTCLOUD_STYLE)
+  //dwg_get_OBJECT (obj_aecc_pointview, AECC_POINTVIEW)
+  //dwg_get_OBJECT (obj_aecc_point_style, AECC_POINT_STYLE)
+  //dwg_get_OBJECT (obj_aecc_pressure_part_list, AECC_PRESSURE_PART_LIST)
+  //dwg_get_OBJECT (obj_aecc_pressure_pipe_style, AECC_PRESSURE_PIPE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_profilesectionentity_style, AECC_PROFILESECTIONENTITY_STYLE)
+  //dwg_get_OBJECT (obj_aecc_profile_design_check_set, AECC_PROFILE_DESIGN_CHECK_SET)
+  //dwg_get_OBJECT (obj_aecc_profile_label_set, AECC_PROFILE_LABEL_SET)
+  //dwg_get_OBJECT (obj_aecc_profile_style, AECC_PROFILE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_profile_view_band_style_set, AECC_PROFILE_VIEW_BAND_STYLE_SET)
+  //dwg_get_OBJECT (obj_aecc_profile_view_data_band_style, AECC_PROFILE_VIEW_DATA_BAND_STYLE)
+  //dwg_get_OBJECT (obj_aecc_profile_view_horizontal_geometry_band_style, AECC_PROFILE_VIEW_HORIZONTAL_GEOMETRY_BAND_STYLE)
+  //dwg_get_OBJECT (obj_aecc_profile_view_pipe_network_band_style, AECC_PROFILE_VIEW_PIPE_NETWORK_BAND_STYLE)
+  //dwg_get_OBJECT (obj_aecc_profile_view_sectional_data_band_style, AECC_PROFILE_VIEW_SECTIONAL_DATA_BAND_STYLE)
+  //dwg_get_OBJECT (obj_aecc_profile_view_style, AECC_PROFILE_VIEW_STYLE)
+  //dwg_get_OBJECT (obj_aecc_profile_view_superelevation_diagram_band_style, AECC_PROFILE_VIEW_SUPERELEVATION_DIAGRAM_BAND_STYLE)
+  //dwg_get_OBJECT (obj_aecc_profile_view_vertical_geometry_band_style, AECC_PROFILE_VIEW_VERTICAL_GEOMETRY_BAND_STYLE)
+  //dwg_get_OBJECT (obj_aecc_quantity_takeoff_criteria, AECC_QUANTITY_TAKEOFF_CRITERIA)
+  //dwg_get_OBJECT (obj_aecc_roadwaylink_style, AECC_ROADWAYLINK_STYLE)
+  //dwg_get_OBJECT (obj_aecc_roadwaymarker_style, AECC_ROADWAYMARKER_STYLE)
+  //dwg_get_OBJECT (obj_aecc_roadwayshape_style, AECC_ROADWAYSHAPE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_roadway_style_set, AECC_ROADWAY_STYLE_SET)
+  //dwg_get_OBJECT (obj_aecc_root_settings_node, AECC_ROOT_SETTINGS_NODE)
+  //dwg_get_OBJECT (obj_aecc_sample_line_group_style, AECC_SAMPLE_LINE_GROUP_STYLE)
+  //dwg_get_OBJECT (obj_aecc_sample_line_style, AECC_SAMPLE_LINE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_section_label_set, AECC_SECTION_LABEL_SET)
+  //dwg_get_OBJECT (obj_aecc_section_style, AECC_SECTION_STYLE)
+  //dwg_get_OBJECT (obj_aecc_section_view_band_style_set, AECC_SECTION_VIEW_BAND_STYLE_SET)
+  //dwg_get_OBJECT (obj_aecc_section_view_data_band_style, AECC_SECTION_VIEW_DATA_BAND_STYLE)
+  //dwg_get_OBJECT (obj_aecc_section_view_road_surface_band_style, AECC_SECTION_VIEW_ROAD_SURFACE_BAND_STYLE)
+  //dwg_get_OBJECT (obj_aecc_section_view_style, AECC_SECTION_VIEW_STYLE)
+  //dwg_get_OBJECT (obj_aecc_settings_node, AECC_SETTINGS_NODE)
+  //dwg_get_OBJECT (obj_aecc_sheet_style, AECC_SHEET_STYLE)
+  //dwg_get_OBJECT (obj_aecc_slope_pattern_style, AECC_SLOPE_PATTERN_STYLE)
+  //dwg_get_OBJECT (obj_aecc_station_format_style, AECC_STATION_FORMAT_STYLE)
+  //dwg_get_OBJECT (obj_aecc_structure_rules, AECC_STRUCTURE_RULES)
+  //dwg_get_OBJECT (obj_aecc_stucture_style, AECC_STUCTURE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_superelevation_diagram_view_style, AECC_SUPERELEVATION_DIAGRAM_VIEW_STYLE)
+  //dwg_get_OBJECT (obj_aecc_surface_style, AECC_SURFACE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_svfigure_style, AECC_SVFIGURE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_svnetwork_style, AECC_SVNETWORK_STYLE)
+  //dwg_get_OBJECT (obj_aecc_table_style, AECC_TABLE_STYLE)
+  //dwg_get_OBJECT (obj_aecc_tag_manager, AECC_TAG_MANAGER)
+  //dwg_get_OBJECT (obj_aecc_tree_node, AECC_TREE_NODE)
+  //dwg_get_OBJECT (obj_aecc_user_defined_attribute_classification, AECC_USER_DEFINED_ATTRIBUTE_CLASSIFICATION)
+  //dwg_get_OBJECT (obj_aecc_valignment_style_extension, AECC_VALIGNMENT_STYLE_EXTENSION)
+  //dwg_get_OBJECT (obj_aecc_view_frame_style, AECC_VIEW_FRAME_STYLE)
+  //dwg_get_OBJECT (obj_aecs_disp_props_member, AECS_DISP_PROPS_MEMBER)
+  //dwg_get_OBJECT (obj_aecs_disp_props_member_logical, AECS_DISP_PROPS_MEMBER_LOGICAL)
+  //dwg_get_OBJECT (obj_aecs_disp_props_member_plan, AECS_DISP_PROPS_MEMBER_PLAN)
+  //dwg_get_OBJECT (obj_aecs_disp_props_member_plan_sketch, AECS_DISP_PROPS_MEMBER_PLAN_SKETCH)
+  //dwg_get_OBJECT (obj_aecs_disp_props_member_projected, AECS_DISP_PROPS_MEMBER_PROJECTED)
+  //dwg_get_OBJECT (obj_aecs_disp_rep_member_elevation_design, AECS_DISP_REP_MEMBER_ELEVATION_DESIGN)
+  //dwg_get_OBJECT (obj_aecs_disp_rep_member_elevation_detail, AECS_DISP_REP_MEMBER_ELEVATION_DETAIL)
+  //dwg_get_OBJECT (obj_aecs_disp_rep_member_logical, AECS_DISP_REP_MEMBER_LOGICAL)
+  //dwg_get_OBJECT (obj_aecs_disp_rep_member_model_design, AECS_DISP_REP_MEMBER_MODEL_DESIGN)
+  //dwg_get_OBJECT (obj_aecs_disp_rep_member_model_detail, AECS_DISP_REP_MEMBER_MODEL_DETAIL)
+  //dwg_get_OBJECT (obj_aecs_disp_rep_member_plan_design, AECS_DISP_REP_MEMBER_PLAN_DESIGN)
+  //dwg_get_OBJECT (obj_aecs_disp_rep_member_plan_detail, AECS_DISP_REP_MEMBER_PLAN_DETAIL)
+  //dwg_get_OBJECT (obj_aecs_disp_rep_member_plan_sketch, AECS_DISP_REP_MEMBER_PLAN_SKETCH)
+  //dwg_get_OBJECT (obj_aecs_member_node_shape, AECS_MEMBER_NODE_SHAPE)
+  //dwg_get_OBJECT (obj_aecs_member_style, AECS_MEMBER_STYLE)
+  //dwg_get_OBJECT (obj_aec_2dsection_style, AEC_2DSECTION_STYLE)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepbdgelevlineplan100, AEC_AECDBDISPREPBDGELEVLINEPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepbdgelevlineplan50, AEC_AECDBDISPREPBDGELEVLINEPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepbdgsectionlineplan100, AEC_AECDBDISPREPBDGSECTIONLINEPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepbdgsectionlineplan50, AEC_AECDBDISPREPBDGSECTIONLINEPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepceilinggridplan100, AEC_AECDBDISPREPCEILINGGRIDPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepceilinggridplan50, AEC_AECDBDISPREPCEILINGGRIDPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepcolumngridplan100, AEC_AECDBDISPREPCOLUMNGRIDPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepcolumngridplan50, AEC_AECDBDISPREPCOLUMNGRIDPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepcurtainwalllayoutplan100, AEC_AECDBDISPREPCURTAINWALLLAYOUTPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepcurtainwalllayoutplan50, AEC_AECDBDISPREPCURTAINWALLLAYOUTPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepcurtainwallunitplan100, AEC_AECDBDISPREPCURTAINWALLUNITPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepcurtainwallunitplan50, AEC_AECDBDISPREPCURTAINWALLUNITPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepmvblockrefplan100, AEC_AECDBDISPREPMVBLOCKREFPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepmvblockrefplan50, AEC_AECDBDISPREPMVBLOCKREFPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdispreproofplan100, AEC_AECDBDISPREPROOFPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdispreproofplan50, AEC_AECDBDISPREPROOFPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdispreproofslabplan100, AEC_AECDBDISPREPROOFSLABPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdispreproofslabplan50, AEC_AECDBDISPREPROOFSLABPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepslabplan100, AEC_AECDBDISPREPSLABPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepslabplan50, AEC_AECDBDISPREPSLABPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepspaceplan100, AEC_AECDBDISPREPSPACEPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepspaceplan50, AEC_AECDBDISPREPSPACEPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepwallplan100, AEC_AECDBDISPREPWALLPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepwallplan50, AEC_AECDBDISPREPWALLPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepwindowassemblyplan100, AEC_AECDBDISPREPWINDOWASSEMBLYPLAN100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepwindowassemblyplan50, AEC_AECDBDISPREPWINDOWASSEMBLYPLAN50)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepzone100, AEC_AECDBDISPREPZONE100)
+  //dwg_get_OBJECT (obj_aec_aecdbdisprepzone50, AEC_AECDBDISPREPZONE50)
+  //dwg_get_OBJECT (obj_aec_aecdbzonedef, AEC_AECDBZONEDEF)
+  //dwg_get_OBJECT (obj_aec_aecdbzonestyle, AEC_AECDBZONESTYLE)
+  //dwg_get_OBJECT (obj_aec_anchor_openingbase_to_wall, AEC_ANCHOR_OPENINGBASE_TO_WALL)
+  //dwg_get_OBJECT (obj_aec_classification_def, AEC_CLASSIFICATION_DEF)
+  //dwg_get_OBJECT (obj_aec_classification_system_def, AEC_CLASSIFICATION_SYSTEM_DEF)
+  //dwg_get_OBJECT (obj_aec_cleanup_group_def, AEC_CLEANUP_GROUP_DEF)
+  //dwg_get_OBJECT (obj_aec_curtain_wall_layout_style, AEC_CURTAIN_WALL_LAYOUT_STYLE)
+  //dwg_get_OBJECT (obj_aec_curtain_wall_unit_style, AEC_CURTAIN_WALL_UNIT_STYLE)
+  //dwg_get_OBJECT (obj_aec_cvsectionview, AEC_CVSECTIONVIEW)
+  //dwg_get_OBJECT (obj_aec_db_disp_rep_dim_group_plan, AEC_DB_DISP_REP_DIM_GROUP_PLAN)
+  //dwg_get_OBJECT (obj_aec_db_disp_rep_dim_group_plan100, AEC_DB_DISP_REP_DIM_GROUP_PLAN100)
+  //dwg_get_OBJECT (obj_aec_db_disp_rep_dim_group_plan50, AEC_DB_DISP_REP_DIM_GROUP_PLAN50)
+  //dwg_get_OBJECT (obj_aec_dim_style, AEC_DIM_STYLE)
+  //dwg_get_OBJECT (obj_aec_displaytheme_style, AEC_DISPLAYTHEME_STYLE)
+  //dwg_get_OBJECT (obj_aec_disprepaecdbdisprepmasselemplan100, AEC_DISPREPAECDBDISPREPMASSELEMPLAN100)
+  //dwg_get_OBJECT (obj_aec_disprepaecdbdisprepmasselemplan50, AEC_DISPREPAECDBDISPREPMASSELEMPLAN50)
+  //dwg_get_OBJECT (obj_aec_disprepaecdbdisprepmassgroupplan100, AEC_DISPREPAECDBDISPREPMASSGROUPPLAN100)
+  //dwg_get_OBJECT (obj_aec_disprepaecdbdisprepmassgroupplan50, AEC_DISPREPAECDBDISPREPMASSGROUPPLAN50)
+  //dwg_get_OBJECT (obj_aec_disprepaecdbdisprepopeningplan100, AEC_DISPREPAECDBDISPREPOPENINGPLAN100)
+  //dwg_get_OBJECT (obj_aec_disprepaecdbdisprepopeningplan50, AEC_DISPREPAECDBDISPREPOPENINGPLAN50)
+  //dwg_get_OBJECT (obj_aec_disprepaecdbdisprepopeningplanreflected, AEC_DISPREPAECDBDISPREPOPENINGPLANREFLECTED)
+  //dwg_get_OBJECT (obj_aec_disprepaecdbdisprepopeningsillplan, AEC_DISPREPAECDBDISPREPOPENINGSILLPLAN)
+  //dwg_get_OBJECT (obj_aec_dispropsmasselemplancommon, AEC_DISPROPSMASSELEMPLANCOMMON)
+  //dwg_get_OBJECT (obj_aec_dispropsmassgroupplancommon, AEC_DISPROPSMASSGROUPPLANCOMMON)
+  //dwg_get_OBJECT (obj_aec_dispropsopeningplancommon, AEC_DISPROPSOPENINGPLANCOMMON)
+  //dwg_get_OBJECT (obj_aec_dispropsopeningplancommonhatched, AEC_DISPROPSOPENINGPLANCOMMONHATCHED)
+  //dwg_get_OBJECT (obj_aec_dispropsopeningsillplan, AEC_DISPROPSOPENINGSILLPLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_2d_section, AEC_DISP_PROPS_2D_SECTION)
+  //dwg_get_OBJECT (obj_aec_disp_props_clip_volume, AEC_DISP_PROPS_CLIP_VOLUME)
+  //dwg_get_OBJECT (obj_aec_disp_props_clip_volume_result, AEC_DISP_PROPS_CLIP_VOLUME_RESULT)
+  //dwg_get_OBJECT (obj_aec_disp_props_dim, AEC_DISP_PROPS_DIM)
+  //dwg_get_OBJECT (obj_aec_disp_props_displaytheme, AEC_DISP_PROPS_DISPLAYTHEME)
+  //dwg_get_OBJECT (obj_aec_disp_props_door, AEC_DISP_PROPS_DOOR)
+  //dwg_get_OBJECT (obj_aec_disp_props_door_nominal, AEC_DISP_PROPS_DOOR_NOMINAL)
+  //dwg_get_OBJECT (obj_aec_disp_props_door_plan_100, AEC_DISP_PROPS_DOOR_PLAN_100)
+  //dwg_get_OBJECT (obj_aec_disp_props_door_plan_50, AEC_DISP_PROPS_DOOR_PLAN_50)
+  //dwg_get_OBJECT (obj_aec_disp_props_door_threshold_plan, AEC_DISP_PROPS_DOOR_THRESHOLD_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_door_threshold_symbol_plan, AEC_DISP_PROPS_DOOR_THRESHOLD_SYMBOL_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_editinplaceprofile_model, AEC_DISP_PROPS_EDITINPLACEPROFILE_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_props_ent, AEC_DISP_PROPS_ENT)
+  //dwg_get_OBJECT (obj_aec_disp_props_ent_ref, AEC_DISP_PROPS_ENT_REF)
+  //dwg_get_OBJECT (obj_aec_disp_props_grid_assembly_model, AEC_DISP_PROPS_GRID_ASSEMBLY_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_props_grid_assembly_plan, AEC_DISP_PROPS_GRID_ASSEMBLY_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_layout_curve, AEC_DISP_PROPS_LAYOUT_CURVE)
+  //dwg_get_OBJECT (obj_aec_disp_props_layout_grid2d, AEC_DISP_PROPS_LAYOUT_GRID2D)
+  //dwg_get_OBJECT (obj_aec_disp_props_layout_grid3d, AEC_DISP_PROPS_LAYOUT_GRID3D)
+  //dwg_get_OBJECT (obj_aec_disp_props_maskblock, AEC_DISP_PROPS_MASKBLOCK)
+  //dwg_get_OBJECT (obj_aec_disp_props_mass_elem_model, AEC_DISP_PROPS_MASS_ELEM_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_props_mass_group, AEC_DISP_PROPS_MASS_GROUP)
+  //dwg_get_OBJECT (obj_aec_disp_props_material, AEC_DISP_PROPS_MATERIAL)
+  //dwg_get_OBJECT (obj_aec_disp_props_opening, AEC_DISP_PROPS_OPENING)
+  //dwg_get_OBJECT (obj_aec_disp_props_polygon_model, AEC_DISP_PROPS_POLYGON_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_props_polygon_truecolour, AEC_DISP_PROPS_POLYGON_TRUECOLOUR)
+  //dwg_get_OBJECT (obj_aec_disp_props_railing_model, AEC_DISP_PROPS_RAILING_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_props_railing_plan, AEC_DISP_PROPS_RAILING_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_roof, AEC_DISP_PROPS_ROOF)
+  //dwg_get_OBJECT (obj_aec_disp_props_roofslab, AEC_DISP_PROPS_ROOFSLAB)
+  //dwg_get_OBJECT (obj_aec_disp_props_roofslab_plan, AEC_DISP_PROPS_ROOFSLAB_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_schedule_table, AEC_DISP_PROPS_SCHEDULE_TABLE)
+  //dwg_get_OBJECT (obj_aec_disp_props_slab, AEC_DISP_PROPS_SLAB)
+  //dwg_get_OBJECT (obj_aec_disp_props_slab_plan, AEC_DISP_PROPS_SLAB_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_slice, AEC_DISP_PROPS_SLICE)
+  //dwg_get_OBJECT (obj_aec_disp_props_space_decomposed, AEC_DISP_PROPS_SPACE_DECOMPOSED)
+  //dwg_get_OBJECT (obj_aec_disp_props_space_model, AEC_DISP_PROPS_SPACE_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_props_space_plan, AEC_DISP_PROPS_SPACE_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_stair_model, AEC_DISP_PROPS_STAIR_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_props_stair_plan, AEC_DISP_PROPS_STAIR_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_stair_plan_overlapping, AEC_DISP_PROPS_STAIR_PLAN_OVERLAPPING)
+  //dwg_get_OBJECT (obj_aec_disp_props_wall_graph, AEC_DISP_PROPS_WALL_GRAPH)
+  //dwg_get_OBJECT (obj_aec_disp_props_wall_model, AEC_DISP_PROPS_WALL_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_props_wall_plan, AEC_DISP_PROPS_WALL_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_wall_schem, AEC_DISP_PROPS_WALL_SCHEM)
+  //dwg_get_OBJECT (obj_aec_disp_props_window, AEC_DISP_PROPS_WINDOW)
+  //dwg_get_OBJECT (obj_aec_disp_props_window_assembly_sill_plan, AEC_DISP_PROPS_WINDOW_ASSEMBLY_SILL_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_window_nominal, AEC_DISP_PROPS_WINDOW_NOMINAL)
+  //dwg_get_OBJECT (obj_aec_disp_props_window_plan_100, AEC_DISP_PROPS_WINDOW_PLAN_100)
+  //dwg_get_OBJECT (obj_aec_disp_props_window_plan_50, AEC_DISP_PROPS_WINDOW_PLAN_50)
+  //dwg_get_OBJECT (obj_aec_disp_props_window_sill_plan, AEC_DISP_PROPS_WINDOW_SILL_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_props_zone, AEC_DISP_PROPS_ZONE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_2d_section, AEC_DISP_REP_2D_SECTION)
+  //dwg_get_OBJECT (obj_aec_disp_rep_anchor, AEC_DISP_REP_ANCHOR)
+  //dwg_get_OBJECT (obj_aec_disp_rep_anchor_bub_to_grid, AEC_DISP_REP_ANCHOR_BUB_TO_GRID)
+  //dwg_get_OBJECT (obj_aec_disp_rep_anchor_bub_to_grid_model, AEC_DISP_REP_ANCHOR_BUB_TO_GRID_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_anchor_bub_to_grid_rcp, AEC_DISP_REP_ANCHOR_BUB_TO_GRID_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_anchor_ent_to_node, AEC_DISP_REP_ANCHOR_ENT_TO_NODE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_anchor_ext_tag_to_ent, AEC_DISP_REP_ANCHOR_EXT_TAG_TO_ENT)
+  //dwg_get_OBJECT (obj_aec_disp_rep_anchor_tag_to_ent, AEC_DISP_REP_ANCHOR_TAG_TO_ENT)
+  //dwg_get_OBJECT (obj_aec_disp_rep_bdg_elevline_model, AEC_DISP_REP_BDG_ELEVLINE_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_bdg_elevline_plan, AEC_DISP_REP_BDG_ELEVLINE_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_bdg_elevline_rcp, AEC_DISP_REP_BDG_ELEVLINE_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_bdg_sectionline_model, AEC_DISP_REP_BDG_SECTIONLINE_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_bdg_sectionline_plan, AEC_DISP_REP_BDG_SECTIONLINE_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_bdg_sectionline_rcp, AEC_DISP_REP_BDG_SECTIONLINE_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_bdg_section_model, AEC_DISP_REP_BDG_SECTION_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_bdg_section_subdiv, AEC_DISP_REP_BDG_SECTION_SUBDIV)
+  //dwg_get_OBJECT (obj_aec_disp_rep_ceiling_grid, AEC_DISP_REP_CEILING_GRID)
+  //dwg_get_OBJECT (obj_aec_disp_rep_ceiling_grid_model, AEC_DISP_REP_CEILING_GRID_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_ceiling_grid_rcp, AEC_DISP_REP_CEILING_GRID_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_clip_volume_model, AEC_DISP_REP_CLIP_VOLUME_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_clip_volume_plan, AEC_DISP_REP_CLIP_VOLUME_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_clip_volume_result, AEC_DISP_REP_CLIP_VOLUME_RESULT)
+  //dwg_get_OBJECT (obj_aec_disp_rep_clip_volume_result_subdiv, AEC_DISP_REP_CLIP_VOLUME_RESULT_SUBDIV)
+  //dwg_get_OBJECT (obj_aec_disp_rep_column_grid, AEC_DISP_REP_COLUMN_GRID)
+  //dwg_get_OBJECT (obj_aec_disp_rep_column_grid_model, AEC_DISP_REP_COLUMN_GRID_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_column_grid_rcp, AEC_DISP_REP_COLUMN_GRID_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_block, AEC_DISP_REP_COL_BLOCK)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_circarc2d, AEC_DISP_REP_COL_CIRCARC2D)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_concoincident, AEC_DISP_REP_COL_CONCOINCIDENT)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_conconcentric, AEC_DISP_REP_COL_CONCONCENTRIC)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_conequaldistance, AEC_DISP_REP_COL_CONEQUALDISTANCE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_conmidpoint, AEC_DISP_REP_COL_CONMIDPOINT)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_connector, AEC_DISP_REP_COL_CONNECTOR)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_connormal, AEC_DISP_REP_COL_CONNORMAL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_conparallel, AEC_DISP_REP_COL_CONPARALLEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_conperpendicular, AEC_DISP_REP_COL_CONPERPENDICULAR)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_consymmetric, AEC_DISP_REP_COL_CONSYMMETRIC)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_contangent, AEC_DISP_REP_COL_CONTANGENT)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_dimangle, AEC_DISP_REP_COL_DIMANGLE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_dimdiameter, AEC_DISP_REP_COL_DIMDIAMETER)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_dimdistance, AEC_DISP_REP_COL_DIMDISTANCE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_dimlength, AEC_DISP_REP_COL_DIMLENGTH)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_dimmajorradius, AEC_DISP_REP_COL_DIMMAJORRADIUS)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_dimminorradius, AEC_DISP_REP_COL_DIMMINORRADIUS)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_elliparc2d, AEC_DISP_REP_COL_ELLIPARC2D)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_layoutdata, AEC_DISP_REP_COL_LAYOUTDATA)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_line2d, AEC_DISP_REP_COL_LINE2D)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_modifier_add, AEC_DISP_REP_COL_MODIFIER_ADD)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_modifier_cutplane, AEC_DISP_REP_COL_MODIFIER_CUTPLANE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_modifier_extrusion, AEC_DISP_REP_COL_MODIFIER_EXTRUSION)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_modifier_group, AEC_DISP_REP_COL_MODIFIER_GROUP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_modifier_loft, AEC_DISP_REP_COL_MODIFIER_LOFT)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_modifier_path, AEC_DISP_REP_COL_MODIFIER_PATH)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_modifier_revolve, AEC_DISP_REP_COL_MODIFIER_REVOLVE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_modifier_subtract, AEC_DISP_REP_COL_MODIFIER_SUBTRACT)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_modifier_transition, AEC_DISP_REP_COL_MODIFIER_TRANSITION)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_point2d, AEC_DISP_REP_COL_POINT2D)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_profile, AEC_DISP_REP_COL_PROFILE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_workplane, AEC_DISP_REP_COL_WORKPLANE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_col_workplane_ref, AEC_DISP_REP_COL_WORKPLANE_REF)
+  //dwg_get_OBJECT (obj_aec_disp_rep_config, AEC_DISP_REP_CONFIG)
+  //dwg_get_OBJECT (obj_aec_disp_rep_curtain_wall_layout_model, AEC_DISP_REP_CURTAIN_WALL_LAYOUT_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_curtain_wall_layout_plan, AEC_DISP_REP_CURTAIN_WALL_LAYOUT_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_curtain_wall_unit_model, AEC_DISP_REP_CURTAIN_WALL_UNIT_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_curtain_wall_unit_plan, AEC_DISP_REP_CURTAIN_WALL_UNIT_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_dcm_dimradius, AEC_DISP_REP_DCM_DIMRADIUS)
+  //dwg_get_OBJECT (obj_aec_disp_rep_displaytheme, AEC_DISP_REP_DISPLAYTHEME)
+  //dwg_get_OBJECT (obj_aec_disp_rep_door_elev, AEC_DISP_REP_DOOR_ELEV)
+  //dwg_get_OBJECT (obj_aec_disp_rep_door_model, AEC_DISP_REP_DOOR_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_door_nominal, AEC_DISP_REP_DOOR_NOMINAL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_door_plan, AEC_DISP_REP_DOOR_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_door_plan_50, AEC_DISP_REP_DOOR_PLAN_50)
+  //dwg_get_OBJECT (obj_aec_disp_rep_door_plan_hekto, AEC_DISP_REP_DOOR_PLAN_HEKTO)
+  //dwg_get_OBJECT (obj_aec_disp_rep_door_rcp, AEC_DISP_REP_DOOR_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_door_threshold_plan, AEC_DISP_REP_DOOR_THRESHOLD_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_door_threshold_symbol_plan, AEC_DISP_REP_DOOR_THRESHOLD_SYMBOL_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_editinplaceprofile, AEC_DISP_REP_EDITINPLACEPROFILE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_ent_ref, AEC_DISP_REP_ENT_REF)
+  //dwg_get_OBJECT (obj_aec_disp_rep_layout_curve, AEC_DISP_REP_LAYOUT_CURVE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_layout_grid2d, AEC_DISP_REP_LAYOUT_GRID2D)
+  //dwg_get_OBJECT (obj_aec_disp_rep_layout_grid3d, AEC_DISP_REP_LAYOUT_GRID3D)
+  //dwg_get_OBJECT (obj_aec_disp_rep_maskblock_ref, AEC_DISP_REP_MASKBLOCK_REF)
+  //dwg_get_OBJECT (obj_aec_disp_rep_maskblock_ref_rcp, AEC_DISP_REP_MASKBLOCK_REF_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_mass_elem_model, AEC_DISP_REP_MASS_ELEM_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_mass_elem_rcp, AEC_DISP_REP_MASS_ELEM_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_mass_elem_schem, AEC_DISP_REP_MASS_ELEM_SCHEM)
+  //dwg_get_OBJECT (obj_aec_disp_rep_mass_group_model, AEC_DISP_REP_MASS_GROUP_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_mass_group_plan, AEC_DISP_REP_MASS_GROUP_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_mass_group_rcp, AEC_DISP_REP_MASS_GROUP_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_material, AEC_DISP_REP_MATERIAL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_mvblock_ref, AEC_DISP_REP_MVBLOCK_REF)
+  //dwg_get_OBJECT (obj_aec_disp_rep_mvblock_ref_model, AEC_DISP_REP_MVBLOCK_REF_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_mvblock_ref_rcp, AEC_DISP_REP_MVBLOCK_REF_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_opening, AEC_DISP_REP_OPENING)
+  //dwg_get_OBJECT (obj_aec_disp_rep_opening_model, AEC_DISP_REP_OPENING_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_polygon_model, AEC_DISP_REP_POLYGON_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_polygon_truecolour, AEC_DISP_REP_POLYGON_TRUECOLOUR)
+  //dwg_get_OBJECT (obj_aec_disp_rep_railing_model, AEC_DISP_REP_RAILING_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_railing_plan, AEC_DISP_REP_RAILING_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_railing_plan_100, AEC_DISP_REP_RAILING_PLAN_100)
+  //dwg_get_OBJECT (obj_aec_disp_rep_railing_plan_50, AEC_DISP_REP_RAILING_PLAN_50)
+  //dwg_get_OBJECT (obj_aec_disp_rep_roofslab_model, AEC_DISP_REP_ROOFSLAB_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_roofslab_plan, AEC_DISP_REP_ROOFSLAB_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_roof_model, AEC_DISP_REP_ROOF_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_roof_plan, AEC_DISP_REP_ROOF_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_roof_rcp, AEC_DISP_REP_ROOF_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_schedule_table, AEC_DISP_REP_SCHEDULE_TABLE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_set, AEC_DISP_REP_SET)
+  //dwg_get_OBJECT (obj_aec_disp_rep_slab_model, AEC_DISP_REP_SLAB_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_slab_plan, AEC_DISP_REP_SLAB_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_slice, AEC_DISP_REP_SLICE)
+  //dwg_get_OBJECT (obj_aec_disp_rep_space_decomposed, AEC_DISP_REP_SPACE_DECOMPOSED)
+  //dwg_get_OBJECT (obj_aec_disp_rep_space_model, AEC_DISP_REP_SPACE_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_space_plan, AEC_DISP_REP_SPACE_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_space_rcp, AEC_DISP_REP_SPACE_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_space_volume, AEC_DISP_REP_SPACE_VOLUME)
+  //dwg_get_OBJECT (obj_aec_disp_rep_stair_model, AEC_DISP_REP_STAIR_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_stair_plan, AEC_DISP_REP_STAIR_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_stair_plan_100, AEC_DISP_REP_STAIR_PLAN_100)
+  //dwg_get_OBJECT (obj_aec_disp_rep_stair_plan_50, AEC_DISP_REP_STAIR_PLAN_50)
+  //dwg_get_OBJECT (obj_aec_disp_rep_stair_plan_overlapping, AEC_DISP_REP_STAIR_PLAN_OVERLAPPING)
+  //dwg_get_OBJECT (obj_aec_disp_rep_stair_rcp, AEC_DISP_REP_STAIR_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_wall_graph, AEC_DISP_REP_WALL_GRAPH)
+  //dwg_get_OBJECT (obj_aec_disp_rep_wall_model, AEC_DISP_REP_WALL_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_wall_plan, AEC_DISP_REP_WALL_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_wall_rcp, AEC_DISP_REP_WALL_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_wall_schem, AEC_DISP_REP_WALL_SCHEM)
+  //dwg_get_OBJECT (obj_aec_disp_rep_windowassembly_sill_plan, AEC_DISP_REP_WINDOWASSEMBLY_SILL_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_assembly_model, AEC_DISP_REP_WINDOW_ASSEMBLY_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_assembly_plan, AEC_DISP_REP_WINDOW_ASSEMBLY_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_elev, AEC_DISP_REP_WINDOW_ELEV)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_model, AEC_DISP_REP_WINDOW_MODEL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_nominal, AEC_DISP_REP_WINDOW_NOMINAL)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_plan, AEC_DISP_REP_WINDOW_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_plan_100, AEC_DISP_REP_WINDOW_PLAN_100)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_plan_50, AEC_DISP_REP_WINDOW_PLAN_50)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_rcp, AEC_DISP_REP_WINDOW_RCP)
+  //dwg_get_OBJECT (obj_aec_disp_rep_window_sill_plan, AEC_DISP_REP_WINDOW_SILL_PLAN)
+  //dwg_get_OBJECT (obj_aec_disp_rep_zone, AEC_DISP_REP_ZONE)
+  //dwg_get_OBJECT (obj_aec_disp_rops_railing_plan_100, AEC_DISP_ROPS_RAILING_PLAN_100)
+  //dwg_get_OBJECT (obj_aec_disp_rops_railing_plan_50, AEC_DISP_ROPS_RAILING_PLAN_50)
+  //dwg_get_OBJECT (obj_aec_disp_rops_stair_plan_100, AEC_DISP_ROPS_STAIR_PLAN_100)
+  //dwg_get_OBJECT (obj_aec_disp_rops_stair_plan_50, AEC_DISP_ROPS_STAIR_PLAN_50)
+  //dwg_get_OBJECT (obj_aec_door_style, AEC_DOOR_STYLE)
+  //dwg_get_OBJECT (obj_aec_endcap_style, AEC_ENDCAP_STYLE)
+  //dwg_get_OBJECT (obj_aec_frame_def, AEC_FRAME_DEF)
+  //dwg_get_OBJECT (obj_aec_layerkey_style, AEC_LAYERKEY_STYLE)
+  //dwg_get_OBJECT (obj_aec_list_def, AEC_LIST_DEF)
+  //dwg_get_OBJECT (obj_aec_maskblock_def, AEC_MASKBLOCK_DEF)
+  //dwg_get_OBJECT (obj_aec_mass_elem_style, AEC_MASS_ELEM_STYLE)
+  //dwg_get_OBJECT (obj_aec_material_def, AEC_MATERIAL_DEF)
+  //dwg_get_OBJECT (obj_aec_mvblock_def, AEC_MVBLOCK_DEF)
+  //dwg_get_OBJECT (obj_aec_mvblock_ref, AEC_MVBLOCK_REF)
+  //dwg_get_OBJECT (obj_aec_notification_tracker, AEC_NOTIFICATION_TRACKER)
+  //dwg_get_OBJECT (obj_aec_polygon, AEC_POLYGON)
+  //dwg_get_OBJECT (obj_aec_polygon_style, AEC_POLYGON_STYLE)
+  //dwg_get_OBJECT (obj_aec_property_set_def, AEC_PROPERTY_SET_DEF)
+  //dwg_get_OBJECT (obj_aec_railing_style, AEC_RAILING_STYLE)
+  //dwg_get_OBJECT (obj_aec_refedit_status_tracker, AEC_REFEDIT_STATUS_TRACKER)
+  //dwg_get_OBJECT (obj_aec_roofslabedge_style, AEC_ROOFSLABEDGE_STYLE)
+  //dwg_get_OBJECT (obj_aec_roofslab_style, AEC_ROOFSLAB_STYLE)
+  //dwg_get_OBJECT (obj_aec_schedule_data_format, AEC_SCHEDULE_DATA_FORMAT)
+  //dwg_get_OBJECT (obj_aec_slabedge_style, AEC_SLABEDGE_STYLE)
+  //dwg_get_OBJECT (obj_aec_slab_style, AEC_SLAB_STYLE)
+  //dwg_get_OBJECT (obj_aec_space_styles, AEC_SPACE_STYLES)
+  //dwg_get_OBJECT (obj_aec_stair_style, AEC_STAIR_STYLE)
+  //dwg_get_OBJECT (obj_aec_stair_winder_style, AEC_STAIR_WINDER_STYLE)
+  //dwg_get_OBJECT (obj_aec_stair_winder_type_balanced, AEC_STAIR_WINDER_TYPE_BALANCED)
+  //dwg_get_OBJECT (obj_aec_stair_winder_type_manual, AEC_STAIR_WINDER_TYPE_MANUAL)
+  //dwg_get_OBJECT (obj_aec_stair_winder_type_single_point, AEC_STAIR_WINDER_TYPE_SINGLE_POINT)
+  //dwg_get_OBJECT (obj_aec_vars_aecbbldsrv, AEC_VARS_AECBBLDSRV)
+  //dwg_get_OBJECT (obj_aec_vars_archbase, AEC_VARS_ARCHBASE)
+  //dwg_get_OBJECT (obj_aec_vars_dwg_setup, AEC_VARS_DWG_SETUP)
+  //dwg_get_OBJECT (obj_aec_vars_munich, AEC_VARS_MUNICH)
+  //dwg_get_OBJECT (obj_aec_vars_structurebase, AEC_VARS_STRUCTUREBASE)
+  //dwg_get_OBJECT (obj_aec_wallmod_style, AEC_WALLMOD_STYLE)
+  //dwg_get_OBJECT (obj_aec_wall_style, AEC_WALL_STYLE)
+  //dwg_get_OBJECT (obj_aec_window_assembly_style, AEC_WINDOW_ASSEMBLY_STYLE)
+  //dwg_get_OBJECT (obj_aec_window_style, AEC_WINDOW_STYLE)
+  //dwg_get_OBJECT (obj_alignmentgripentity, ALIGNMENTGRIPENTITY)
+  //dwg_get_OBJECT (obj_amcontextmgr, AMCONTEXTMGR)
+  //dwg_get_OBJECT (obj_amdtadmenustate, AMDTADMENUSTATE)
+  //dwg_get_OBJECT (obj_amdtammenustate, AMDTAMMENUSTATE)
+  //dwg_get_OBJECT (obj_amdtbrowserdbtab, AMDTBROWSERDBTAB)
+  //dwg_get_OBJECT (obj_amdtdmmenustate, AMDTDMMENUSTATE)
+  //dwg_get_OBJECT (obj_amdtedgestandarddin, AMDTEDGESTANDARDDIN)
+  //dwg_get_OBJECT (obj_amdtedgestandarddin13715, AMDTEDGESTANDARDDIN13715)
+  //dwg_get_OBJECT (obj_amdtedgestandardiso, AMDTEDGESTANDARDISO)
+  //dwg_get_OBJECT (obj_amdtedgestandardiso13715, AMDTEDGESTANDARDISO13715)
+  //dwg_get_OBJECT (obj_amdtformulaupdatedispatcher, AMDTFORMULAUPDATEDISPATCHER)
+  //dwg_get_OBJECT (obj_amdtinternalreactor, AMDTINTERNALREACTOR)
+  //dwg_get_OBJECT (obj_amdtmcommenustate, AMDTMCOMMENUSTATE)
+  //dwg_get_OBJECT (obj_amdtmenustatemgr, AMDTMENUSTATEMGR)
+  //dwg_get_OBJECT (obj_amdtnote, AMDTNOTE)
+  //dwg_get_OBJECT (obj_amdtnotetemplatedb, AMDTNOTETEMPLATEDB)
+  //dwg_get_OBJECT (obj_amdtsectionsym, AMDTSECTIONSYM)
+  //dwg_get_OBJECT (obj_amdtsectionsymlabel, AMDTSECTIONSYMLABEL)
+  //dwg_get_OBJECT (obj_amdtsysattr, AMDTSYSATTR)
+  //dwg_get_OBJECT (obj_amgobjpropcfg, AMGOBJPROPCFG)
+  //dwg_get_OBJECT (obj_amgsettingsobj, AMGSETTINGSOBJ)
+  //dwg_get_OBJECT (obj_amimaster, AMIMASTER)
+  //dwg_get_OBJECT (obj_am_drawing_mgr, AM_DRAWING_MGR)
+  //dwg_get_OBJECT (obj_am_dwgmgr_name, AM_DWGMGR_NAME)
+  //dwg_get_OBJECT (obj_am_dwg_document, AM_DWG_DOCUMENT)
+  //dwg_get_OBJECT (obj_am_dwg_sheet, AM_DWG_SHEET)
+  //dwg_get_OBJECT (obj_am_viewdimparmap, AM_VIEWDIMPARMAP)
+  //dwg_get_OBJECT (obj_binrecord, BINRECORD)
+  //dwg_get_OBJECT (obj_camscatalogappobject, CAMSCATALOGAPPOBJECT)
+  //dwg_get_OBJECT (obj_camsstructbtnstate, CAMSSTRUCTBTNSTATE)
+  //dwg_get_OBJECT (obj_catalogstate, CATALOGSTATE)
+  //dwg_get_OBJECT (obj_cbrowserappobject, CBROWSERAPPOBJECT)
+  //dwg_get_OBJECT (obj_depmgr, DEPMGR)
+  //dwg_get_OBJECT (obj_dmbaseelement, DMBASEELEMENT)
+  //dwg_get_OBJECT (obj_dmdefaultstyle, DMDEFAULTSTYLE)
+  //dwg_get_OBJECT (obj_dmlegend, DMLEGEND)
+  //dwg_get_OBJECT (obj_dmmap, DMMAP)
+  //dwg_get_OBJECT (obj_dmmapmanager, DMMAPMANAGER)
+  //dwg_get_OBJECT (obj_dmstylecategory, DMSTYLECATEGORY)
+  //dwg_get_OBJECT (obj_dmstylelibrary, DMSTYLELIBRARY)
+  //dwg_get_OBJECT (obj_dmstylereference, DMSTYLEREFERENCE)
+  //dwg_get_OBJECT (obj_dmstylizedentitiestable, DMSTYLIZEDENTITIESTABLE)
+  //dwg_get_OBJECT (obj_dmsurrogatestylesets, DMSURROGATESTYLESETS)
+  //dwg_get_OBJECT (obj_dm_placeholder, DM_PLACEHOLDER)
+  //dwg_get_OBJECT (obj_exactermxrefmap, EXACTERMXREFMAP)
+  //dwg_get_OBJECT (obj_exacxrefpanelobject, EXACXREFPANELOBJECT)
+  //dwg_get_OBJECT (obj_expo_notifyblock, EXPO_NOTIFYBLOCK)
+  //dwg_get_OBJECT (obj_expo_notifyhall, EXPO_NOTIFYHALL)
+  //dwg_get_OBJECT (obj_expo_notifypillar, EXPO_NOTIFYPILLAR)
+  //dwg_get_OBJECT (obj_expo_notifystand, EXPO_NOTIFYSTAND)
+  //dwg_get_OBJECT (obj_expo_notifystandnopoly, EXPO_NOTIFYSTANDNOPOLY)
+  //dwg_get_OBJECT (obj_flipactionentity, FLIPACTIONENTITY)
+  //dwg_get_OBJECT (obj_gsmanager, GSMANAGER)
+  //dwg_get_OBJECT (obj_ird_dsc_dict, IRD_DSC_DICT)
+  //dwg_get_OBJECT (obj_ird_dsc_record, IRD_DSC_RECORD)
+  //dwg_get_OBJECT (obj_ird_obj_record, IRD_OBJ_RECORD)
+  //dwg_get_OBJECT (obj_mapfsmrvobject, MAPFSMRVOBJECT)
+  //dwg_get_OBJECT (obj_mapgwsundoobject, MAPGWSUNDOOBJECT)
+  //dwg_get_OBJECT (obj_mapiammoudle, MAPIAMMOUDLE)
+  //dwg_get_OBJECT (obj_mapmetadataobject, MAPMETADATAOBJECT)
+  //dwg_get_OBJECT (obj_mapresourcemanagerobject, MAPRESOURCEMANAGEROBJECT)
+  //dwg_get_OBJECT (obj_moveactionentity, MOVEACTIONENTITY)
+  //dwg_get_OBJECT (obj_mcdbcontainer2, McDbContainer2)
+  //dwg_get_OBJECT (obj_mcdbmarker, McDbMarker)
+  //dwg_get_OBJECT (obj_namedappl, NAMEDAPPL)
+  //dwg_get_OBJECT (obj_newstdpartparlist, NEWSTDPARTPARLIST)
+  //dwg_get_OBJECT (obj_npocollection, NPOCOLLECTION)
+  //dwg_get_OBJECT (obj_objcloner, OBJCLONER)
+  //dwg_get_OBJECT (obj_parammgr, PARAMMGR)
+  //dwg_get_OBJECT (obj_paramscope, PARAMSCOPE)
+  //dwg_get_OBJECT (obj_pillar, PILLAR)
+  //dwg_get_OBJECT (obj_rapidrtrenderenvironment, RAPIDRTRENDERENVIRONMENT)
+  //dwg_get_OBJECT (obj_rotateactionentity, ROTATEACTIONENTITY)
+  //dwg_get_OBJECT (obj_scaleactionentity, SCALEACTIONENTITY)
+  //dwg_get_OBJECT (obj_stdpart2d, STDPART2D)
+  //dwg_get_OBJECT (obj_stretchactionentity, STRETCHACTIONENTITY)
+  //dwg_get_OBJECT (obj_tch_arrow, TCH_ARROW)
+  //dwg_get_OBJECT (obj_tch_axis_label, TCH_AXIS_LABEL)
+  //dwg_get_OBJECT (obj_tch_block_insert, TCH_BLOCK_INSERT)
+  //dwg_get_OBJECT (obj_tch_column, TCH_COLUMN)
+  //dwg_get_OBJECT (obj_tch_dbconfig, TCH_DBCONFIG)
+  //dwg_get_OBJECT (obj_tch_dimension2, TCH_DIMENSION2)
+  //dwg_get_OBJECT (obj_tch_drawingindex, TCH_DRAWINGINDEX)
+  //dwg_get_OBJECT (obj_tch_handrail, TCH_HANDRAIL)
+  //dwg_get_OBJECT (obj_tch_linestair, TCH_LINESTAIR)
+  //dwg_get_OBJECT (obj_tch_opening, TCH_OPENING)
+  //dwg_get_OBJECT (obj_tch_rectstair, TCH_RECTSTAIR)
+  //dwg_get_OBJECT (obj_tch_slab, TCH_SLAB)
+  //dwg_get_OBJECT (obj_tch_space, TCH_SPACE)
+  //dwg_get_OBJECT (obj_tch_text, TCH_TEXT)
+  //dwg_get_OBJECT (obj_tch_wall, TCH_WALL)
+  //dwg_get_OBJECT (obj_tgrupopuntos, TGrupoPuntos)
+  //dwg_get_OBJECT (obj_vaacimageinventory, VAACIMAGEINVENTORY)
+  //dwg_get_OBJECT (obj_vaacxrefpanelobject, VAACXREFPANELOBJECT)
+  //dwg_get_OBJECT (obj_xrefpanelobject, XREFPANELOBJECT)
 #  endif
+// clang-format: on
 
 /********************************************************************
  * Functions to return NULL-terminated array of all owned entities  *
@@ -504,6 +1355,7 @@ dwg_get_OBJECT (obj_assocarrayrectangularparameters, ASSOCARRAYRECTANGULARPARAME
  * Extracts all entities of this type from a block header (mspace or pspace),
  * and returns a malloced NULL-terminated array.
  */
+// clang-format: off
 //< \fn Dwg_Entity_TEXT* dwg_getall_TEXT (Dwg_Object_Ref *hdr)
 DWG_GETALL_ENTITY (_3DFACE)
 DWG_GETALL_ENTITY (_3DLINE)
@@ -568,6 +1420,7 @@ DWG_GETALL_ENTITY (VERTEX_MESH)
 DWG_GETALL_ENTITY (VERTEX_PFACE)
 DWG_GETALL_ENTITY (VERTEX_PFACE_FACE)
 DWG_GETALL_ENTITY (VIEWPORT)
+DWG_GETALL_ENTITY (WIPEOUT)
 DWG_GETALL_ENTITY (XLINE)
 /* unstable */
 DWG_GETALL_ENTITY (ARC_DIMENSION)
@@ -577,7 +1430,6 @@ DWG_GETALL_ENTITY (LAYOUTPRINTCONFIG)
 DWG_GETALL_ENTITY (PLANESURFACE)
 DWG_GETALL_ENTITY (POINTCLOUD)
 DWG_GETALL_ENTITY (POINTCLOUDEX)
-DWG_GETALL_ENTITY (WIPEOUT)
 /* debugging */
 DWG_GETALL_ENTITY (ALIGNMENTPARAMETERENTITY)
 DWG_GETALL_ENTITY (ARCALIGNEDTEXT)
@@ -605,6 +1457,7 @@ DWG_GETALL_ENTITY (VISIBILITYPARAMETERENTITY)
 DWG_GETALL_ENTITY (XYGRIPENTITY)
 DWG_GETALL_ENTITY (XYPARAMETERENTITY)
 
+// clang-format: on
 /********************************************************************
  *     Functions to return NULL-terminated array of all objects     *
  ********************************************************************/
@@ -615,6 +1468,7 @@ DWG_GETALL_ENTITY (XYPARAMETERENTITY)
  * NULL-terminated array.
  */
 
+// clang-format: off
 DWG_GETALL_OBJECT (ACSH_BOOLEAN_CLASS)
 DWG_GETALL_OBJECT (ACSH_BOX_CLASS)
 DWG_GETALL_OBJECT (ACSH_CONE_CLASS)
@@ -681,6 +1535,7 @@ DWG_GETALL_OBJECT (SORTENTSTABLE)
 DWG_GETALL_OBJECT (SPATIAL_FILTER)
 DWG_GETALL_OBJECT (STYLE)
 DWG_GETALL_OBJECT (STYLE_CONTROL)
+DWG_GETALL_OBJECT (SUN)
 DWG_GETALL_OBJECT (TABLEGEOMETRY)
 DWG_GETALL_OBJECT (UCS)
 DWG_GETALL_OBJECT (UCS_CONTROL)
@@ -784,14 +1639,13 @@ DWG_GETALL_OBJECT (SECTION_SETTINGS)
 DWG_GETALL_OBJECT (SKYLIGHT_BACKGROUND)
 DWG_GETALL_OBJECT (SOLID_BACKGROUND)
 DWG_GETALL_OBJECT (SPATIAL_INDEX)
-DWG_GETALL_OBJECT (SUN)
 DWG_GETALL_OBJECT (TABLESTYLE)
 DWG_GETALL_OBJECT (TEXTOBJECTCONTEXTDATA)
 DWG_GETALL_OBJECT (ASSOCARRAYMODIFYPARAMETERS)
 DWG_GETALL_OBJECT (ASSOCARRAYPATHPARAMETERS)
 DWG_GETALL_OBJECT (ASSOCARRAYPOLARPARAMETERS)
 DWG_GETALL_OBJECT (ASSOCARRAYRECTANGULARPARAMETERS)
-#  ifdef DEBUG_CLASSES
+#ifdef DEBUG_CLASSES
   DWG_GETALL_OBJECT (ACMECOMMANDHISTORY)
   DWG_GETALL_OBJECT (ACMESCOPE)
   DWG_GETALL_OBJECT (ACMESTATEMGR)
@@ -837,13 +1691,813 @@ DWG_GETALL_OBJECT (ASSOCARRAYRECTANGULARPARAMETERS)
   DWG_GETALL_OBJECT (SUNSTUDY)
   DWG_GETALL_OBJECT (TABLECONTENT)
   DWG_GETALL_OBJECT (TVDEVICEPROPERTIES)
-// DWG_GETALL_OBJECT (ACDSRECORD)
-// DWG_GETALL_OBJECT (ACDSSCHEMA)
-// DWG_GETALL_OBJECT (NPOCOLLECTION)
-// DWG_GETALL_OBJECT (RAPIDRTRENDERENVIRONMENT)
-// DWG_GETALL_OBJECT (XREFPANELOBJECT)
-#  endif
+  //DWG_GETALL_OBJECT (ABSHDRAWINGSETTINGS)
+  //DWG_GETALL_OBJECT (ACAECUSTOBJ)
+  //DWG_GETALL_OBJECT (ACAEEEMGROBJ)
+  //DWG_GETALL_OBJECT (ACAMCOMP)
+  //DWG_GETALL_OBJECT (ACAMCOMPDEF)
+  //DWG_GETALL_OBJECT (ACAMCOMPDEFMGR)
+  //DWG_GETALL_OBJECT (ACAMCONTEXTMODELER)
+  //DWG_GETALL_OBJECT (ACAMGDIMSTD)
+  //DWG_GETALL_OBJECT (ACAMGFILTERDAT)
+  //DWG_GETALL_OBJECT (ACAMGHOLECHARTSTDCSN)
+  //DWG_GETALL_OBJECT (ACAMGHOLECHARTSTDDIN)
+  //DWG_GETALL_OBJECT (ACAMGHOLECHARTSTDISO)
+  //DWG_GETALL_OBJECT (ACAMGLAYSTD)
+  //DWG_GETALL_OBJECT (ACAMGRCOMPDEF)
+  //DWG_GETALL_OBJECT (ACAMGRCOMPDEFSET)
+  //DWG_GETALL_OBJECT (ACAMGTITLESTD)
+  //DWG_GETALL_OBJECT (ACAMMVDBACKUPOBJECT)
+  //DWG_GETALL_OBJECT (ACAMPROJECT)
+  //DWG_GETALL_OBJECT (ACAMSHAFTCOMPDEF)
+  //DWG_GETALL_OBJECT (ACAMSTDPCOMPDEF)
+  //DWG_GETALL_OBJECT (ACAMWBLOCKTEMPENTS)
+  //DWG_GETALL_OBJECT (ACARRAYJIGENTITY)
+  //DWG_GETALL_OBJECT (ACCMCONTEXT)
+  //DWG_GETALL_OBJECT (ACDBCIRCARCRES)
+  //DWG_GETALL_OBJECT (ACDBDIMENSIONRES)
+  //DWG_GETALL_OBJECT (ACDBENTITYCACHE)
+  //DWG_GETALL_OBJECT (ACDBLINERES)
+  //DWG_GETALL_OBJECT (ACDBSTDPARTRES_ARC)
+  //DWG_GETALL_OBJECT (ACDBSTDPARTRES_LINE)
+  //DWG_GETALL_OBJECT (ACDB_HATCHSCALECONTEXTDATA_CLASS)
+  //DWG_GETALL_OBJECT (ACDB_HATCHVIEWCONTEXTDATA_CLASS)
+  //DWG_GETALL_OBJECT (ACDB_PROXY_ENTITY_DATA)
+  //DWG_GETALL_OBJECT (ACDSRECORD)
+  //DWG_GETALL_OBJECT (ACDSSCHEMA)
+  //DWG_GETALL_OBJECT (ACGREFACADMASTER)
+  //DWG_GETALL_OBJECT (ACGREFMASTER)
+  //DWG_GETALL_OBJECT (ACIMINTSYSVAR)
+  //DWG_GETALL_OBJECT (ACIMREALSYSVAR)
+  //DWG_GETALL_OBJECT (ACIMSTRSYSVAR)
+  //DWG_GETALL_OBJECT (ACIMSYSVARMAN)
+  //DWG_GETALL_OBJECT (ACMANOOTATIONVIEWSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMANOOTATIONVIEWSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMANOOTATIONVIEWSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMANOOTATIONVIEWSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMAPLEGENDDBOBJECT)
+  //DWG_GETALL_OBJECT (ACMAPLEGENDITEMDBOBJECT)
+  //DWG_GETALL_OBJECT (ACMAPMAPVIEWPORTDBOBJECT)
+  //DWG_GETALL_OBJECT (ACMAPPRINTLAYOUTELEMENTDBOBJECTCONTAINER)
+  //DWG_GETALL_OBJECT (ACMBALLOON)
+  //DWG_GETALL_OBJECT (ACMBOM)
+  //DWG_GETALL_OBJECT (ACMBOMROW)
+  //DWG_GETALL_OBJECT (ACMBOMROWSTRUCT)
+  //DWG_GETALL_OBJECT (ACMBOMSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMBOMSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMBOMSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMBOMSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMCENTERLINESTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMCENTERLINESTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMCENTERLINESTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMCENTERLINESTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMDATADICTIONARY)
+  //DWG_GETALL_OBJECT (ACMDATAENTRY)
+  //DWG_GETALL_OBJECT (ACMDATAENTRYBLOCK)
+  //DWG_GETALL_OBJECT (ACMDATUMID)
+  //DWG_GETALL_OBJECT (ACMDATUMSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMDATUMSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMDATUMSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMDATUMSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMDATUMSTANDARDISO2012)
+  //DWG_GETALL_OBJECT (ACMDETAILSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMDETAILSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMDETAILSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMDETAILSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMDETAILTANDARDCUSTOM)
+  //DWG_GETALL_OBJECT (ACMDIMBREAKPERSREACTOR)
+  //DWG_GETALL_OBJECT (ACMEDRAWINGMAN)
+  //DWG_GETALL_OBJECT (ACMEVIEW)
+  //DWG_GETALL_OBJECT (ACME_DATABASE)
+  //DWG_GETALL_OBJECT (ACME_DOCUMENT)
+  //DWG_GETALL_OBJECT (ACMFCFRAME)
+  //DWG_GETALL_OBJECT (ACMFCFSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMFCFSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMFCFSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMFCFSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMFCFSTANDARDISO2004)
+  //DWG_GETALL_OBJECT (ACMFCFSTANDARDISO2012)
+  //DWG_GETALL_OBJECT (ACMIDSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMIDSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMIDSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMIDSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMIDSTANDARDISO2004)
+  //DWG_GETALL_OBJECT (ACMIDSTANDARDISO2012)
+  //DWG_GETALL_OBJECT (ACMNOTESTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMNOTESTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMNOTESTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMNOTESTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMPARTLIST)
+  //DWG_GETALL_OBJECT (ACMPICKOBJ)
+  //DWG_GETALL_OBJECT (ACMSECTIONSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMSECTIONSTANDARDCSN2002)
+  //DWG_GETALL_OBJECT (ACMSECTIONSTANDARDCUSTOM)
+  //DWG_GETALL_OBJECT (ACMSECTIONSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMSECTIONSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMSECTIONSTANDARDISO2001)
+  //DWG_GETALL_OBJECT (ACMSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMSURFSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMSURFSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMSURFSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMSURFSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMSURFSTANDARDISO2002)
+  //DWG_GETALL_OBJECT (ACMSURFSYM)
+  //DWG_GETALL_OBJECT (ACMTAPERSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMTAPERSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMTAPERSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMTAPERSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMTHREADLINESTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMTHREADLINESTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMTHREADLINESTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMTHREADLINESTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMWELDSTANDARDANSI)
+  //DWG_GETALL_OBJECT (ACMWELDSTANDARDCSN)
+  //DWG_GETALL_OBJECT (ACMWELDSTANDARDDIN)
+  //DWG_GETALL_OBJECT (ACMWELDSTANDARDISO)
+  //DWG_GETALL_OBJECT (ACMWELDSYM)
+  //DWG_GETALL_OBJECT (ACRFATTGENMGR)
+  //DWG_GETALL_OBJECT (ACRFINSADJ)
+  //DWG_GETALL_OBJECT (ACRFINSADJUSTERMGR)
+  //DWG_GETALL_OBJECT (ACRFMCADAPIATTHOLDER)
+  //DWG_GETALL_OBJECT (ACRFOBJATTMGR)
+  //DWG_GETALL_OBJECT (ACSH_SUBENT_MATERIAL_CLASS)
+  //DWG_GETALL_OBJECT (AC_AM_2D_XREF_MGR)
+  //DWG_GETALL_OBJECT (AC_AM_BASIC_VIEW)
+  //DWG_GETALL_OBJECT (AC_AM_BASIC_VIEW_DEF)
+  //DWG_GETALL_OBJECT (AC_AM_COMPLEX_HIDE_SITUATION)
+  //DWG_GETALL_OBJECT (AC_AM_COMP_VIEW_DEF)
+  //DWG_GETALL_OBJECT (AC_AM_COMP_VIEW_INST)
+  //DWG_GETALL_OBJECT (AC_AM_DIRTY_NODES)
+  //DWG_GETALL_OBJECT (AC_AM_HIDE_SITUATION)
+  //DWG_GETALL_OBJECT (AC_AM_MAPPER_CACHE)
+  //DWG_GETALL_OBJECT (AC_AM_MASTER_VIEW_DEF)
+  //DWG_GETALL_OBJECT (AC_AM_MVD_DEP_MGR)
+  //DWG_GETALL_OBJECT (AC_AM_OVERRIDE_FILTER)
+  //DWG_GETALL_OBJECT (AC_AM_PROPS_OVERRIDE)
+  //DWG_GETALL_OBJECT (AC_AM_SHAFT_HIDE_SITUATION)
+  //DWG_GETALL_OBJECT (AC_AM_STDP_VIEW_DEF)
+  //DWG_GETALL_OBJECT (AC_AM_TRANSFORM_GHOST)
+  //DWG_GETALL_OBJECT (ADAPPL)
+  //DWG_GETALL_OBJECT (AECC_ALIGNMENT_DESIGN_CHECK_SET)
+  //DWG_GETALL_OBJECT (AECC_ALIGNMENT_LABEL_SET)
+  //DWG_GETALL_OBJECT (AECC_ALIGNMENT_LABEL_SET_EXT)
+  //DWG_GETALL_OBJECT (AECC_ALIGNMENT_PARCEL_NODE)
+  //DWG_GETALL_OBJECT (AECC_ALIGNMENT_STYLE)
+  //DWG_GETALL_OBJECT (AECC_APPURTENANCE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_ASSEMBLY_STYLE)
+  //DWG_GETALL_OBJECT (AECC_BUILDING_SITE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_CANT_DIAGRAM_VIEW_STYLE)
+  //DWG_GETALL_OBJECT (AECC_CATCHMENT_STYLE)
+  //DWG_GETALL_OBJECT (AECC_CLASS_NODE)
+  //DWG_GETALL_OBJECT (AECC_CONTOURVIEW)
+  //DWG_GETALL_OBJECT (AECC_CORRIDOR_STYLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_CANT_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_CURVE_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_DESIGNSPEED_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_GEOMPT_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_INDEXED_PI_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_MINOR_STATION_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_PI_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_SPIRAL_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_STAEQU_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_STATION_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_STATION_OFFSET_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_SUPERELEVATION_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_TANGENT_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ALIGNMENT_VERTICAL_GEOMPT_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_APPURTENANCE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_APPURTENANCE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_APPURTENANCE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_APPURTENANCE_PROFILE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_ASSEMBLY)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_AUTO_CORRIDOR_FEATURE_LINE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_AUTO_CORRIDOR_FEATURE_LINE_PROFILE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_AUTO_CORRIDOR_FEATURE_LINE_SECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_AUTO_FEATURE_LINE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_AUTO_FEATURE_LINE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_AUTO_FEATURE_LINE_PROFILE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_AUTO_FEATURE_LINE_SECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_BUILDINGSITE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_BUILDINGUTIL_CONNECTOR)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_CANT_DIAGRAM_VIEW)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_CATCHMENT_AREA)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_CATCHMENT_AREA_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_CORRIDOR)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_CROSSING_PIPE_PROFILE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_CROSSING_PRESSURE_PIPE_PROFILE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_CSVSTATIONSLIDER)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FACE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FEATURE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FEATURE_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FEATURE_LINE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FEATURE_LINE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FEATURE_LINE_PROFILE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FEATURE_LINE_SECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FITTING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FITTING_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FITTING_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FITTING_PROFILE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_FLOW_SEGMENT_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_GENERAL_SEGMENT_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_GRADING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_GRAPH)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_GRAPHPROFILE_NETWORKPART)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_GRAPHPROFILE_PRESSUREPART)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_GRID_SURFACE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_GRID_SURFACE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_HORGEOMETRY_BAND_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_HYDRO_REGION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_INTERFERENCE_CHECK)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_INTERFERENCE_PART)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_INTERFERENCE_PART_SECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_INTERSECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_INTERSECTION_LOCATION_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_LEGEND_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_LINE_BETWEEN_POINTS_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_LOTLINE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_MASSHAULLINE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_MASS_HAUL_VIEW)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_MATCHLINE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_MATCH_LINE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_MATERIAL_SECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_NETWORK)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_NOTE_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_OFFSET_ELEV_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PARCEL_BOUNDARY)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PARCEL_FACE_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PARCEL_SEGMENT)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PARCEL_SEGMENT_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PARCEL_SEGMENT_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PARCEL_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PIPE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PIPENETWORK_BAND_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PIPE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PIPE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PIPE_PROFILE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PIPE_SECTION_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PIPE_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_POINT_ENT)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_POINT_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_POINT_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PRESSUREPIPENETWORK)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PRESSURE_PART_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PRESSURE_PIPE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PRESSURE_PIPE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PRESSURE_PIPE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PRESSURE_PIPE_PROFILE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PRESSURE_PIPE_SECTION_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PROFILE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PROFILEDATA_BAND_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PROFILE_PROJECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PROFILE_PROJECTION_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PROFILE_VIEW)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_PROFILE_VIEW_DEPTH_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_QUANTITY_TAKEOFF_AGGREGATE_EARTHWORK_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_RIGHT_OF_WAY)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SAMPLELINE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SAMPLE_LINE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SAMPLE_LINE_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTIONALDATA_BAND_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTIONDATA_BAND_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTIONSEGMENT_BAND_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_CORRIDOR)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_CORRIDOR_POINT_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_GRADEBREAK_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_MINOR_OFFSET_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_OFFSET_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_PIPENETWORK)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_PRESSUREPIPENETWORK)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_PROJECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_PROJECTION_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_SEGMENT_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_VIEW)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_VIEW_DEPTH_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SECTION_VIEW_QUANTITY_TAKEOFF_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SHEET)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SPANNING_PIPE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SPANNING_PIPE_PROFILE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_STATION_ELEV_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_STRUCTURE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_STRUCTURE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_STRUCTURE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_STRUCTURE_PROFILE_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_STRUCTURE_SECTION_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SUBASSEMBLY)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SUPERELEVATION_BAND_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SUPERELEVATION_DIAGRAM_VIEW)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SURFACE_CONTOUR_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SURFACE_ELEVATION_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SURFACE_SLOPE_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SURVEY_FIGURE_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SVFIGURE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SVFIGURE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SVFIGURE_PROFILE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SVFIGURE_SECTION)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SVFIGURE_SEGMENT_LABEL)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_SVNETWORK)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_TANGENT_INTERSECTION_TABLE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_TIN_SURFACE)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_TIN_SURFACE_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VALIGNMENT_CRESTCURVE_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VALIGNMENT_CSV)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VALIGNMENT_HAGEOMPT_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VALIGNMENT_LINE_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VALIGNMENT_MINOR_STATION_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VALIGNMENT_PVI_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VALIGNMENT_SAGCURVE_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VALIGNMENT_STATION_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VERTICALGEOMETRY_BAND_LABEL_GROUP)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VIEWFRAME_LABELING)
+  //DWG_GETALL_OBJECT (AECC_DISP_REP_VIEW_FRAME)
+  //DWG_GETALL_OBJECT (AECC_FEATURELINE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_FEATURE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_FITTING_STYLE)
+  //DWG_GETALL_OBJECT (AECC_FORMAT_MANAGER_OBJECT)
+  //DWG_GETALL_OBJECT (AECC_GRADEVIEW)
+  //DWG_GETALL_OBJECT (AECC_GRADING_CRITERIA)
+  //DWG_GETALL_OBJECT (AECC_GRADING_CRITERIA_SET)
+  //DWG_GETALL_OBJECT (AECC_GRADING_GROUP)
+  //DWG_GETALL_OBJECT (AECC_GRADING_STYLE)
+  //DWG_GETALL_OBJECT (AECC_IMPORT_STORM_SEWER_DEFAULTS)
+  //DWG_GETALL_OBJECT (AECC_INTERFERENCE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_INTERSECTION_STYLE)
+  //DWG_GETALL_OBJECT (AECC_LABEL_COLLECTOR_STYLE)
+  //DWG_GETALL_OBJECT (AECC_LABEL_NODE)
+  //DWG_GETALL_OBJECT (AECC_LABEL_RADIAL_LINE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_LABEL_TEXT_ITERATOR_CURVE_OR_SPIRAL_STYLE)
+  //DWG_GETALL_OBJECT (AECC_LABEL_TEXT_ITERATOR_STYLE)
+  //DWG_GETALL_OBJECT (AECC_LABEL_TEXT_STYLE)
+  //DWG_GETALL_OBJECT (AECC_LABEL_VECTOR_ARROW_STYLE)
+  //DWG_GETALL_OBJECT (AECC_LEGEND_TABLE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_MASS_HAUL_LINE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_MASS_HAUL_VIEW_STYLE)
+  //DWG_GETALL_OBJECT (AECC_MATCHLINE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_MATERIAL_STYLE)
+  //DWG_GETALL_OBJECT (AECC_NETWORK_PART_CATALOG_DEF_NODE)
+  //DWG_GETALL_OBJECT (AECC_NETWORK_PART_FAMILY_ITEM)
+  //DWG_GETALL_OBJECT (AECC_NETWORK_PART_LIST)
+  //DWG_GETALL_OBJECT (AECC_NETWORK_RULE)
+  //DWG_GETALL_OBJECT (AECC_PARCEL_NODE)
+  //DWG_GETALL_OBJECT (AECC_PARCEL_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PART_SIZE_FILTER)
+  //DWG_GETALL_OBJECT (AECC_PIPE_RULES)
+  //DWG_GETALL_OBJECT (AECC_PIPE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PIPE_STYLE_EXTENSION)
+  //DWG_GETALL_OBJECT (AECC_POINTCLOUD_STYLE)
+  //DWG_GETALL_OBJECT (AECC_POINTVIEW)
+  //DWG_GETALL_OBJECT (AECC_POINT_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PRESSURE_PART_LIST)
+  //DWG_GETALL_OBJECT (AECC_PRESSURE_PIPE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PROFILESECTIONENTITY_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_DESIGN_CHECK_SET)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_LABEL_SET)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_VIEW_BAND_STYLE_SET)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_VIEW_DATA_BAND_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_VIEW_HORIZONTAL_GEOMETRY_BAND_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_VIEW_PIPE_NETWORK_BAND_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_VIEW_SECTIONAL_DATA_BAND_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_VIEW_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_VIEW_SUPERELEVATION_DIAGRAM_BAND_STYLE)
+  //DWG_GETALL_OBJECT (AECC_PROFILE_VIEW_VERTICAL_GEOMETRY_BAND_STYLE)
+  //DWG_GETALL_OBJECT (AECC_QUANTITY_TAKEOFF_CRITERIA)
+  //DWG_GETALL_OBJECT (AECC_ROADWAYLINK_STYLE)
+  //DWG_GETALL_OBJECT (AECC_ROADWAYMARKER_STYLE)
+  //DWG_GETALL_OBJECT (AECC_ROADWAYSHAPE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_ROADWAY_STYLE_SET)
+  //DWG_GETALL_OBJECT (AECC_ROOT_SETTINGS_NODE)
+  //DWG_GETALL_OBJECT (AECC_SAMPLE_LINE_GROUP_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SAMPLE_LINE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SECTION_LABEL_SET)
+  //DWG_GETALL_OBJECT (AECC_SECTION_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SECTION_VIEW_BAND_STYLE_SET)
+  //DWG_GETALL_OBJECT (AECC_SECTION_VIEW_DATA_BAND_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SECTION_VIEW_ROAD_SURFACE_BAND_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SECTION_VIEW_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SETTINGS_NODE)
+  //DWG_GETALL_OBJECT (AECC_SHEET_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SLOPE_PATTERN_STYLE)
+  //DWG_GETALL_OBJECT (AECC_STATION_FORMAT_STYLE)
+  //DWG_GETALL_OBJECT (AECC_STRUCTURE_RULES)
+  //DWG_GETALL_OBJECT (AECC_STUCTURE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SUPERELEVATION_DIAGRAM_VIEW_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SURFACE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SVFIGURE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_SVNETWORK_STYLE)
+  //DWG_GETALL_OBJECT (AECC_TABLE_STYLE)
+  //DWG_GETALL_OBJECT (AECC_TAG_MANAGER)
+  //DWG_GETALL_OBJECT (AECC_TREE_NODE)
+  //DWG_GETALL_OBJECT (AECC_USER_DEFINED_ATTRIBUTE_CLASSIFICATION)
+  //DWG_GETALL_OBJECT (AECC_VALIGNMENT_STYLE_EXTENSION)
+  //DWG_GETALL_OBJECT (AECC_VIEW_FRAME_STYLE)
+  //DWG_GETALL_OBJECT (AECS_DISP_PROPS_MEMBER)
+  //DWG_GETALL_OBJECT (AECS_DISP_PROPS_MEMBER_LOGICAL)
+  //DWG_GETALL_OBJECT (AECS_DISP_PROPS_MEMBER_PLAN)
+  //DWG_GETALL_OBJECT (AECS_DISP_PROPS_MEMBER_PLAN_SKETCH)
+  //DWG_GETALL_OBJECT (AECS_DISP_PROPS_MEMBER_PROJECTED)
+  //DWG_GETALL_OBJECT (AECS_DISP_REP_MEMBER_ELEVATION_DESIGN)
+  //DWG_GETALL_OBJECT (AECS_DISP_REP_MEMBER_ELEVATION_DETAIL)
+  //DWG_GETALL_OBJECT (AECS_DISP_REP_MEMBER_LOGICAL)
+  //DWG_GETALL_OBJECT (AECS_DISP_REP_MEMBER_MODEL_DESIGN)
+  //DWG_GETALL_OBJECT (AECS_DISP_REP_MEMBER_MODEL_DETAIL)
+  //DWG_GETALL_OBJECT (AECS_DISP_REP_MEMBER_PLAN_DESIGN)
+  //DWG_GETALL_OBJECT (AECS_DISP_REP_MEMBER_PLAN_DETAIL)
+  //DWG_GETALL_OBJECT (AECS_DISP_REP_MEMBER_PLAN_SKETCH)
+  //DWG_GETALL_OBJECT (AECS_MEMBER_NODE_SHAPE)
+  //DWG_GETALL_OBJECT (AECS_MEMBER_STYLE)
+  //DWG_GETALL_OBJECT (AEC_2DSECTION_STYLE)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPBDGELEVLINEPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPBDGELEVLINEPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPBDGSECTIONLINEPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPBDGSECTIONLINEPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPCEILINGGRIDPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPCEILINGGRIDPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPCOLUMNGRIDPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPCOLUMNGRIDPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPCURTAINWALLLAYOUTPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPCURTAINWALLLAYOUTPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPCURTAINWALLUNITPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPCURTAINWALLUNITPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPMVBLOCKREFPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPMVBLOCKREFPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPROOFPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPROOFPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPROOFSLABPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPROOFSLABPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPSLABPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPSLABPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPSPACEPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPSPACEPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPWALLPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPWALLPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPWINDOWASSEMBLYPLAN100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPWINDOWASSEMBLYPLAN50)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPZONE100)
+  //DWG_GETALL_OBJECT (AEC_AECDBDISPREPZONE50)
+  //DWG_GETALL_OBJECT (AEC_AECDBZONEDEF)
+  //DWG_GETALL_OBJECT (AEC_AECDBZONESTYLE)
+  //DWG_GETALL_OBJECT (AEC_ANCHOR_OPENINGBASE_TO_WALL)
+  //DWG_GETALL_OBJECT (AEC_CLASSIFICATION_DEF)
+  //DWG_GETALL_OBJECT (AEC_CLASSIFICATION_SYSTEM_DEF)
+  //DWG_GETALL_OBJECT (AEC_CLEANUP_GROUP_DEF)
+  //DWG_GETALL_OBJECT (AEC_CURTAIN_WALL_LAYOUT_STYLE)
+  //DWG_GETALL_OBJECT (AEC_CURTAIN_WALL_UNIT_STYLE)
+  //DWG_GETALL_OBJECT (AEC_CVSECTIONVIEW)
+  //DWG_GETALL_OBJECT (AEC_DB_DISP_REP_DIM_GROUP_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DB_DISP_REP_DIM_GROUP_PLAN100)
+  //DWG_GETALL_OBJECT (AEC_DB_DISP_REP_DIM_GROUP_PLAN50)
+  //DWG_GETALL_OBJECT (AEC_DIM_STYLE)
+  //DWG_GETALL_OBJECT (AEC_DISPLAYTHEME_STYLE)
+  //DWG_GETALL_OBJECT (AEC_DISPREPAECDBDISPREPMASSELEMPLAN100)
+  //DWG_GETALL_OBJECT (AEC_DISPREPAECDBDISPREPMASSELEMPLAN50)
+  //DWG_GETALL_OBJECT (AEC_DISPREPAECDBDISPREPMASSGROUPPLAN100)
+  //DWG_GETALL_OBJECT (AEC_DISPREPAECDBDISPREPMASSGROUPPLAN50)
+  //DWG_GETALL_OBJECT (AEC_DISPREPAECDBDISPREPOPENINGPLAN100)
+  //DWG_GETALL_OBJECT (AEC_DISPREPAECDBDISPREPOPENINGPLAN50)
+  //DWG_GETALL_OBJECT (AEC_DISPREPAECDBDISPREPOPENINGPLANREFLECTED)
+  //DWG_GETALL_OBJECT (AEC_DISPREPAECDBDISPREPOPENINGSILLPLAN)
+  //DWG_GETALL_OBJECT (AEC_DISPROPSMASSELEMPLANCOMMON)
+  //DWG_GETALL_OBJECT (AEC_DISPROPSMASSGROUPPLANCOMMON)
+  //DWG_GETALL_OBJECT (AEC_DISPROPSOPENINGPLANCOMMON)
+  //DWG_GETALL_OBJECT (AEC_DISPROPSOPENINGPLANCOMMONHATCHED)
+  //DWG_GETALL_OBJECT (AEC_DISPROPSOPENINGSILLPLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_2D_SECTION)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_CLIP_VOLUME)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_CLIP_VOLUME_RESULT)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_DIM)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_DISPLAYTHEME)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_DOOR)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_DOOR_NOMINAL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_DOOR_PLAN_100)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_DOOR_PLAN_50)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_DOOR_THRESHOLD_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_DOOR_THRESHOLD_SYMBOL_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_EDITINPLACEPROFILE_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_ENT)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_ENT_REF)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_GRID_ASSEMBLY_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_GRID_ASSEMBLY_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_LAYOUT_CURVE)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_LAYOUT_GRID2D)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_LAYOUT_GRID3D)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_MASKBLOCK)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_MASS_ELEM_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_MASS_GROUP)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_MATERIAL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_OPENING)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_POLYGON_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_POLYGON_TRUECOLOUR)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_RAILING_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_RAILING_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_ROOF)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_ROOFSLAB)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_ROOFSLAB_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_SCHEDULE_TABLE)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_SLAB)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_SLAB_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_SLICE)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_SPACE_DECOMPOSED)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_SPACE_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_SPACE_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_STAIR_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_STAIR_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_STAIR_PLAN_OVERLAPPING)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WALL_GRAPH)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WALL_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WALL_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WALL_SCHEM)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WINDOW)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WINDOW_ASSEMBLY_SILL_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WINDOW_NOMINAL)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WINDOW_PLAN_100)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WINDOW_PLAN_50)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_WINDOW_SILL_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_PROPS_ZONE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_2D_SECTION)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ANCHOR)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ANCHOR_BUB_TO_GRID)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ANCHOR_BUB_TO_GRID_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ANCHOR_BUB_TO_GRID_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ANCHOR_ENT_TO_NODE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ANCHOR_EXT_TAG_TO_ENT)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ANCHOR_TAG_TO_ENT)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_BDG_ELEVLINE_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_BDG_ELEVLINE_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_BDG_ELEVLINE_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_BDG_SECTIONLINE_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_BDG_SECTIONLINE_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_BDG_SECTIONLINE_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_BDG_SECTION_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_BDG_SECTION_SUBDIV)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CEILING_GRID)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CEILING_GRID_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CEILING_GRID_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CLIP_VOLUME_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CLIP_VOLUME_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CLIP_VOLUME_RESULT)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CLIP_VOLUME_RESULT_SUBDIV)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COLUMN_GRID)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COLUMN_GRID_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COLUMN_GRID_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_BLOCK)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CIRCARC2D)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONCOINCIDENT)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONCONCENTRIC)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONEQUALDISTANCE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONMIDPOINT)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONNECTOR)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONNORMAL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONPARALLEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONPERPENDICULAR)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONSYMMETRIC)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_CONTANGENT)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_DIMANGLE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_DIMDIAMETER)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_DIMDISTANCE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_DIMLENGTH)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_DIMMAJORRADIUS)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_DIMMINORRADIUS)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_ELLIPARC2D)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_LAYOUTDATA)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_LINE2D)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_MODIFIER_ADD)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_MODIFIER_CUTPLANE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_MODIFIER_EXTRUSION)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_MODIFIER_GROUP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_MODIFIER_LOFT)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_MODIFIER_PATH)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_MODIFIER_REVOLVE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_MODIFIER_SUBTRACT)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_MODIFIER_TRANSITION)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_POINT2D)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_PROFILE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_WORKPLANE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_COL_WORKPLANE_REF)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CONFIG)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CURTAIN_WALL_LAYOUT_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CURTAIN_WALL_LAYOUT_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CURTAIN_WALL_UNIT_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_CURTAIN_WALL_UNIT_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DCM_DIMRADIUS)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DISPLAYTHEME)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DOOR_ELEV)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DOOR_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DOOR_NOMINAL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DOOR_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DOOR_PLAN_50)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DOOR_PLAN_HEKTO)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DOOR_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DOOR_THRESHOLD_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_DOOR_THRESHOLD_SYMBOL_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_EDITINPLACEPROFILE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ENT_REF)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_LAYOUT_CURVE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_LAYOUT_GRID2D)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_LAYOUT_GRID3D)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MASKBLOCK_REF)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MASKBLOCK_REF_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MASS_ELEM_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MASS_ELEM_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MASS_ELEM_SCHEM)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MASS_GROUP_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MASS_GROUP_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MASS_GROUP_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MATERIAL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MVBLOCK_REF)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MVBLOCK_REF_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_MVBLOCK_REF_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_OPENING)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_OPENING_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_POLYGON_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_POLYGON_TRUECOLOUR)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_RAILING_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_RAILING_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_RAILING_PLAN_100)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_RAILING_PLAN_50)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ROOFSLAB_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ROOFSLAB_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ROOF_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ROOF_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ROOF_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SCHEDULE_TABLE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SET)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SLAB_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SLAB_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SLICE)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SPACE_DECOMPOSED)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SPACE_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SPACE_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SPACE_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_SPACE_VOLUME)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_STAIR_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_STAIR_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_STAIR_PLAN_100)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_STAIR_PLAN_50)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_STAIR_PLAN_OVERLAPPING)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_STAIR_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WALL_GRAPH)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WALL_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WALL_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WALL_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WALL_SCHEM)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOWASSEMBLY_SILL_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_ASSEMBLY_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_ASSEMBLY_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_ELEV)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_MODEL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_NOMINAL)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_PLAN_100)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_PLAN_50)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_RCP)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_WINDOW_SILL_PLAN)
+  //DWG_GETALL_OBJECT (AEC_DISP_REP_ZONE)
+  //DWG_GETALL_OBJECT (AEC_DISP_ROPS_RAILING_PLAN_100)
+  //DWG_GETALL_OBJECT (AEC_DISP_ROPS_RAILING_PLAN_50)
+  //DWG_GETALL_OBJECT (AEC_DISP_ROPS_STAIR_PLAN_100)
+  //DWG_GETALL_OBJECT (AEC_DISP_ROPS_STAIR_PLAN_50)
+  //DWG_GETALL_OBJECT (AEC_DOOR_STYLE)
+  //DWG_GETALL_OBJECT (AEC_ENDCAP_STYLE)
+  //DWG_GETALL_OBJECT (AEC_FRAME_DEF)
+  //DWG_GETALL_OBJECT (AEC_LAYERKEY_STYLE)
+  //DWG_GETALL_OBJECT (AEC_LIST_DEF)
+  //DWG_GETALL_OBJECT (AEC_MASKBLOCK_DEF)
+  //DWG_GETALL_OBJECT (AEC_MASS_ELEM_STYLE)
+  //DWG_GETALL_OBJECT (AEC_MATERIAL_DEF)
+  //DWG_GETALL_OBJECT (AEC_MVBLOCK_DEF)
+  //DWG_GETALL_OBJECT (AEC_MVBLOCK_REF)
+  //DWG_GETALL_OBJECT (AEC_NOTIFICATION_TRACKER)
+  //DWG_GETALL_OBJECT (AEC_POLYGON)
+  //DWG_GETALL_OBJECT (AEC_POLYGON_STYLE)
+  //DWG_GETALL_OBJECT (AEC_PROPERTY_SET_DEF)
+  //DWG_GETALL_OBJECT (AEC_RAILING_STYLE)
+  //DWG_GETALL_OBJECT (AEC_REFEDIT_STATUS_TRACKER)
+  //DWG_GETALL_OBJECT (AEC_ROOFSLABEDGE_STYLE)
+  //DWG_GETALL_OBJECT (AEC_ROOFSLAB_STYLE)
+  //DWG_GETALL_OBJECT (AEC_SCHEDULE_DATA_FORMAT)
+  //DWG_GETALL_OBJECT (AEC_SLABEDGE_STYLE)
+  //DWG_GETALL_OBJECT (AEC_SLAB_STYLE)
+  //DWG_GETALL_OBJECT (AEC_SPACE_STYLES)
+  //DWG_GETALL_OBJECT (AEC_STAIR_STYLE)
+  //DWG_GETALL_OBJECT (AEC_STAIR_WINDER_STYLE)
+  //DWG_GETALL_OBJECT (AEC_STAIR_WINDER_TYPE_BALANCED)
+  //DWG_GETALL_OBJECT (AEC_STAIR_WINDER_TYPE_MANUAL)
+  //DWG_GETALL_OBJECT (AEC_STAIR_WINDER_TYPE_SINGLE_POINT)
+  //DWG_GETALL_OBJECT (AEC_VARS_AECBBLDSRV)
+  //DWG_GETALL_OBJECT (AEC_VARS_ARCHBASE)
+  //DWG_GETALL_OBJECT (AEC_VARS_DWG_SETUP)
+  //DWG_GETALL_OBJECT (AEC_VARS_MUNICH)
+  //DWG_GETALL_OBJECT (AEC_VARS_STRUCTUREBASE)
+  //DWG_GETALL_OBJECT (AEC_WALLMOD_STYLE)
+  //DWG_GETALL_OBJECT (AEC_WALL_STYLE)
+  //DWG_GETALL_OBJECT (AEC_WINDOW_ASSEMBLY_STYLE)
+  //DWG_GETALL_OBJECT (AEC_WINDOW_STYLE)
+  //DWG_GETALL_OBJECT (ALIGNMENTGRIPENTITY)
+  //DWG_GETALL_OBJECT (AMCONTEXTMGR)
+  //DWG_GETALL_OBJECT (AMDTADMENUSTATE)
+  //DWG_GETALL_OBJECT (AMDTAMMENUSTATE)
+  //DWG_GETALL_OBJECT (AMDTBROWSERDBTAB)
+  //DWG_GETALL_OBJECT (AMDTDMMENUSTATE)
+  //DWG_GETALL_OBJECT (AMDTEDGESTANDARDDIN)
+  //DWG_GETALL_OBJECT (AMDTEDGESTANDARDDIN13715)
+  //DWG_GETALL_OBJECT (AMDTEDGESTANDARDISO)
+  //DWG_GETALL_OBJECT (AMDTEDGESTANDARDISO13715)
+  //DWG_GETALL_OBJECT (AMDTFORMULAUPDATEDISPATCHER)
+  //DWG_GETALL_OBJECT (AMDTINTERNALREACTOR)
+  //DWG_GETALL_OBJECT (AMDTMCOMMENUSTATE)
+  //DWG_GETALL_OBJECT (AMDTMENUSTATEMGR)
+  //DWG_GETALL_OBJECT (AMDTNOTE)
+  //DWG_GETALL_OBJECT (AMDTNOTETEMPLATEDB)
+  //DWG_GETALL_OBJECT (AMDTSECTIONSYM)
+  //DWG_GETALL_OBJECT (AMDTSECTIONSYMLABEL)
+  //DWG_GETALL_OBJECT (AMDTSYSATTR)
+  //DWG_GETALL_OBJECT (AMGOBJPROPCFG)
+  //DWG_GETALL_OBJECT (AMGSETTINGSOBJ)
+  //DWG_GETALL_OBJECT (AMIMASTER)
+  //DWG_GETALL_OBJECT (AM_DRAWING_MGR)
+  //DWG_GETALL_OBJECT (AM_DWGMGR_NAME)
+  //DWG_GETALL_OBJECT (AM_DWG_DOCUMENT)
+  //DWG_GETALL_OBJECT (AM_DWG_SHEET)
+  //DWG_GETALL_OBJECT (AM_VIEWDIMPARMAP)
+  //DWG_GETALL_OBJECT (BINRECORD)
+  //DWG_GETALL_OBJECT (CAMSCATALOGAPPOBJECT)
+  //DWG_GETALL_OBJECT (CAMSSTRUCTBTNSTATE)
+  //DWG_GETALL_OBJECT (CATALOGSTATE)
+  //DWG_GETALL_OBJECT (CBROWSERAPPOBJECT)
+  //DWG_GETALL_OBJECT (DEPMGR)
+  //DWG_GETALL_OBJECT (DMBASEELEMENT)
+  //DWG_GETALL_OBJECT (DMDEFAULTSTYLE)
+  //DWG_GETALL_OBJECT (DMLEGEND)
+  //DWG_GETALL_OBJECT (DMMAP)
+  //DWG_GETALL_OBJECT (DMMAPMANAGER)
+  //DWG_GETALL_OBJECT (DMSTYLECATEGORY)
+  //DWG_GETALL_OBJECT (DMSTYLELIBRARY)
+  //DWG_GETALL_OBJECT (DMSTYLEREFERENCE)
+  //DWG_GETALL_OBJECT (DMSTYLIZEDENTITIESTABLE)
+  //DWG_GETALL_OBJECT (DMSURROGATESTYLESETS)
+  //DWG_GETALL_OBJECT (DM_PLACEHOLDER)
+  //DWG_GETALL_OBJECT (EXACTERMXREFMAP)
+  //DWG_GETALL_OBJECT (EXACXREFPANELOBJECT)
+  //DWG_GETALL_OBJECT (EXPO_NOTIFYBLOCK)
+  //DWG_GETALL_OBJECT (EXPO_NOTIFYHALL)
+  //DWG_GETALL_OBJECT (EXPO_NOTIFYPILLAR)
+  //DWG_GETALL_OBJECT (EXPO_NOTIFYSTAND)
+  //DWG_GETALL_OBJECT (EXPO_NOTIFYSTANDNOPOLY)
+  //DWG_GETALL_OBJECT (FLIPACTIONENTITY)
+  //DWG_GETALL_OBJECT (GSMANAGER)
+  //DWG_GETALL_OBJECT (IRD_DSC_DICT)
+  //DWG_GETALL_OBJECT (IRD_DSC_RECORD)
+  //DWG_GETALL_OBJECT (IRD_OBJ_RECORD)
+  //DWG_GETALL_OBJECT (MAPFSMRVOBJECT)
+  //DWG_GETALL_OBJECT (MAPGWSUNDOOBJECT)
+  //DWG_GETALL_OBJECT (MAPIAMMOUDLE)
+  //DWG_GETALL_OBJECT (MAPMETADATAOBJECT)
+  //DWG_GETALL_OBJECT (MAPRESOURCEMANAGEROBJECT)
+  //DWG_GETALL_OBJECT (MOVEACTIONENTITY)
+  //DWG_GETALL_OBJECT (McDbContainer2)
+  //DWG_GETALL_OBJECT (McDbMarker)
+  //DWG_GETALL_OBJECT (NAMEDAPPL)
+  //DWG_GETALL_OBJECT (NEWSTDPARTPARLIST)
+  //DWG_GETALL_OBJECT (NPOCOLLECTION)
+  //DWG_GETALL_OBJECT (OBJCLONER)
+  //DWG_GETALL_OBJECT (PARAMMGR)
+  //DWG_GETALL_OBJECT (PARAMSCOPE)
+  //DWG_GETALL_OBJECT (PILLAR)
+  //DWG_GETALL_OBJECT (RAPIDRTRENDERENVIRONMENT)
+  //DWG_GETALL_OBJECT (ROTATEACTIONENTITY)
+  //DWG_GETALL_OBJECT (SCALEACTIONENTITY)
+  //DWG_GETALL_OBJECT (STDPART2D)
+  //DWG_GETALL_OBJECT (STRETCHACTIONENTITY)
+  //DWG_GETALL_OBJECT (TCH_ARROW)
+  //DWG_GETALL_OBJECT (TCH_AXIS_LABEL)
+  //DWG_GETALL_OBJECT (TCH_BLOCK_INSERT)
+  //DWG_GETALL_OBJECT (TCH_COLUMN)
+  //DWG_GETALL_OBJECT (TCH_DBCONFIG)
+  //DWG_GETALL_OBJECT (TCH_DIMENSION2)
+  //DWG_GETALL_OBJECT (TCH_DRAWINGINDEX)
+  //DWG_GETALL_OBJECT (TCH_HANDRAIL)
+  //DWG_GETALL_OBJECT (TCH_LINESTAIR)
+  //DWG_GETALL_OBJECT (TCH_OPENING)
+  //DWG_GETALL_OBJECT (TCH_RECTSTAIR)
+  //DWG_GETALL_OBJECT (TCH_SLAB)
+  //DWG_GETALL_OBJECT (TCH_SPACE)
+  //DWG_GETALL_OBJECT (TCH_TEXT)
+  //DWG_GETALL_OBJECT (TCH_WALL)
+  //DWG_GETALL_OBJECT (TGrupoPuntos)
+  //DWG_GETALL_OBJECT (VAACIMAGEINVENTORY)
+  //DWG_GETALL_OBJECT (VAACXREFPANELOBJECT)
+  //DWG_GETALL_OBJECT (XREFPANELOBJECT)
+#endif
 
+// clang-format: on
 /*******************************************************************
  *     Functions created from macro to cast dwg_object to entity     *
  *                 Usage :- dwg_object_to_ENTITY(),                  *
@@ -854,6 +2508,7 @@ DWG_GETALL_OBJECT (ASSOCARRAYRECTANGULARPARAMETERS)
  * \fn Dwg_Entity_ENTITY *dwg_object_to_ENTITY(Dwg_Object *obj)
  * cast a Dwg_Object to Entity
  */
+// clang-format: off
 /* fixed <500 */
 CAST_DWG_OBJECT_TO_ENTITY (_3DFACE)
 CAST_DWG_OBJECT_TO_ENTITY (_3DSOLID)
@@ -920,6 +2575,7 @@ CAST_DWG_OBJECT_TO_ENTITY_BYNAME (OLE2FRAME)
 CAST_DWG_OBJECT_TO_ENTITY_BYNAME (PDFUNDERLAY)
 CAST_DWG_OBJECT_TO_ENTITY_BYNAME (REPEAT)
 CAST_DWG_OBJECT_TO_ENTITY_BYNAME (SECTIONOBJECT)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (WIPEOUT)
 /* unstable */
 CAST_DWG_OBJECT_TO_ENTITY_BYNAME (ARC_DIMENSION)
 CAST_DWG_OBJECT_TO_ENTITY_BYNAME (HELIX)
@@ -928,35 +2584,35 @@ CAST_DWG_OBJECT_TO_ENTITY_BYNAME (LAYOUTPRINTCONFIG)
 CAST_DWG_OBJECT_TO_ENTITY_BYNAME (PLANESURFACE)
 CAST_DWG_OBJECT_TO_ENTITY_BYNAME (POINTCLOUD)
 CAST_DWG_OBJECT_TO_ENTITY_BYNAME (POINTCLOUDEX)
-CAST_DWG_OBJECT_TO_ENTITY_BYNAME (WIPEOUT)
 #  ifdef DEBUG_CLASSES
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (ALIGNMENTPARAMETERENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (ARCALIGNEDTEXT)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (BASEPOINTPARAMETERENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (EXTRUDEDSURFACE)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (FLIPGRIPENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (FLIPPARAMETERENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (GEOPOSITIONMARKER)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (LINEARGRIPENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (LINEARPARAMETERENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (LOFTEDSURFACE)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (MPOLYGON)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (NAVISWORKSMODEL)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (NURBSURFACE)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (POINTPARAMETERENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (POLARGRIPENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (REVOLVEDSURFACE)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (ROTATIONGRIPENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (ROTATIONPARAMETERENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (RTEXT)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (SWEPTSURFACE)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (TABLE)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (VISIBILITYGRIPENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (VISIBILITYPARAMETERENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (XYGRIPENTITY)
-  CAST_DWG_OBJECT_TO_ENTITY_BYNAME (XYPARAMETERENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (ALIGNMENTPARAMETERENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (ARCALIGNEDTEXT)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (BASEPOINTPARAMETERENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (EXTRUDEDSURFACE)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (FLIPGRIPENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (FLIPPARAMETERENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (GEOPOSITIONMARKER)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (LINEARGRIPENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (LINEARPARAMETERENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (LOFTEDSURFACE)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (MPOLYGON)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (NAVISWORKSMODEL)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (NURBSURFACE)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (POINTPARAMETERENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (POLARGRIPENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (REVOLVEDSURFACE)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (ROTATIONGRIPENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (ROTATIONPARAMETERENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (RTEXT)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (SWEPTSURFACE)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (TABLE)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (VISIBILITYGRIPENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (VISIBILITYPARAMETERENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (XYGRIPENTITY)
+CAST_DWG_OBJECT_TO_ENTITY_BYNAME (XYPARAMETERENTITY)
 #  endif
 
+// clang-format: on
 /*******************************************************************
  *     Functions created from macro to cast dwg object to object     *
  *                 Usage :- dwg_object_to_OBJECT(),                  *
@@ -966,6 +2622,7 @@ CAST_DWG_OBJECT_TO_ENTITY_BYNAME (WIPEOUT)
  * \fn Dwg_Object_OBJECT *dwg_object_to_OBJECT(Dwg_Object *obj)
  * cast a Dwg_Object to Object
  */
+// clang-format: off
 CAST_DWG_OBJECT_TO_OBJECT (ACSH_BOOLEAN_CLASS)
 CAST_DWG_OBJECT_TO_OBJECT (ACSH_BOX_CLASS)
 CAST_DWG_OBJECT_TO_OBJECT (ACSH_CONE_CLASS)
@@ -1032,6 +2689,7 @@ CAST_DWG_OBJECT_TO_OBJECT (SORTENTSTABLE)
 CAST_DWG_OBJECT_TO_OBJECT (SPATIAL_FILTER)
 CAST_DWG_OBJECT_TO_OBJECT (STYLE)
 CAST_DWG_OBJECT_TO_OBJECT (STYLE_CONTROL)
+CAST_DWG_OBJECT_TO_OBJECT (SUN)
 CAST_DWG_OBJECT_TO_OBJECT (TABLEGEOMETRY)
 CAST_DWG_OBJECT_TO_OBJECT (UCS)
 CAST_DWG_OBJECT_TO_OBJECT (UCS_CONTROL)
@@ -1135,7 +2793,6 @@ CAST_DWG_OBJECT_TO_OBJECT (SECTION_SETTINGS)
 CAST_DWG_OBJECT_TO_OBJECT (SKYLIGHT_BACKGROUND)
 CAST_DWG_OBJECT_TO_OBJECT (SOLID_BACKGROUND)
 CAST_DWG_OBJECT_TO_OBJECT (SPATIAL_INDEX)
-CAST_DWG_OBJECT_TO_OBJECT (SUN)
 CAST_DWG_OBJECT_TO_OBJECT (TABLESTYLE)
 CAST_DWG_OBJECT_TO_OBJECT (TEXTOBJECTCONTEXTDATA)
 CAST_DWG_OBJECT_TO_OBJECT (ASSOCARRAYMODIFYPARAMETERS)
@@ -1143,56 +2800,855 @@ CAST_DWG_OBJECT_TO_OBJECT (ASSOCARRAYPATHPARAMETERS)
 CAST_DWG_OBJECT_TO_OBJECT (ASSOCARRAYPOLARPARAMETERS)
 CAST_DWG_OBJECT_TO_OBJECT (ASSOCARRAYRECTANGULARPARAMETERS)
 #  ifdef DEBUG_CLASSES
-  CAST_DWG_OBJECT_TO_OBJECT (ACMECOMMANDHISTORY)
-  CAST_DWG_OBJECT_TO_OBJECT (ACMESCOPE)
-  CAST_DWG_OBJECT_TO_OBJECT (ACMESTATEMGR)
-  CAST_DWG_OBJECT_TO_OBJECT (ACSH_EXTRUSION_CLASS)
-  CAST_DWG_OBJECT_TO_OBJECT (ACSH_LOFT_CLASS)
-  CAST_DWG_OBJECT_TO_OBJECT (ACSH_REVOLVE_CLASS)
-  CAST_DWG_OBJECT_TO_OBJECT (ACSH_SWEEP_CLASS)
-  CAST_DWG_OBJECT_TO_OBJECT (ANGDIMOBJECTCONTEXTDATA)
-  CAST_DWG_OBJECT_TO_OBJECT (ANNOTSCALEOBJECTCONTEXTDATA)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOC3POINTANGULARDIMACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCALIGNEDDIMACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCARRAYMODIFYACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCEDGEACTIONPARAM)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCEDGECHAMFERACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCEDGEFILLETACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCMLEADERACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCORDINATEDIMACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCPERSSUBENTMANAGER)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCRESTOREENTITYSTATEACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCROTATEDDIMACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (ASSOCSWEPTSURFACEACTIONBODY)
-  CAST_DWG_OBJECT_TO_OBJECT (BLOCKPROPERTIESTABLE)
-  CAST_DWG_OBJECT_TO_OBJECT (BLOCKPROPERTIESTABLEGRIP)
-  CAST_DWG_OBJECT_TO_OBJECT (BREAKDATA)
-  CAST_DWG_OBJECT_TO_OBJECT (BREAKPOINTREF)
-  CAST_DWG_OBJECT_TO_OBJECT (CONTEXTDATAMANAGER)
-  CAST_DWG_OBJECT_TO_OBJECT (CSACDOCUMENTOPTIONS)
-  CAST_DWG_OBJECT_TO_OBJECT (CURVEPATH)
-  CAST_DWG_OBJECT_TO_OBJECT (DATATABLE)
-  CAST_DWG_OBJECT_TO_OBJECT (DIMASSOC)
-  CAST_DWG_OBJECT_TO_OBJECT (DMDIMOBJECTCONTEXTDATA)
-  CAST_DWG_OBJECT_TO_OBJECT (DYNAMICBLOCKPROXYNODE)
-  CAST_DWG_OBJECT_TO_OBJECT (GEOMAPIMAGE)
-  CAST_DWG_OBJECT_TO_OBJECT (MLEADEROBJECTCONTEXTDATA)
-  CAST_DWG_OBJECT_TO_OBJECT (MOTIONPATH)
-  CAST_DWG_OBJECT_TO_OBJECT (MTEXTATTRIBUTEOBJECTCONTEXTDATA)
-  CAST_DWG_OBJECT_TO_OBJECT (NAVISWORKSMODELDEF)
-  CAST_DWG_OBJECT_TO_OBJECT (ORDDIMOBJECTCONTEXTDATA)
-  CAST_DWG_OBJECT_TO_OBJECT (PERSUBENTMGR)
-  CAST_DWG_OBJECT_TO_OBJECT (POINTPATH)
-  CAST_DWG_OBJECT_TO_OBJECT (RADIMLGOBJECTCONTEXTDATA)
-  CAST_DWG_OBJECT_TO_OBJECT (RADIMOBJECTCONTEXTDATA)
-  CAST_DWG_OBJECT_TO_OBJECT (SUNSTUDY)
-  CAST_DWG_OBJECT_TO_OBJECT (TABLECONTENT)
-  CAST_DWG_OBJECT_TO_OBJECT (TVDEVICEPROPERTIES)
-  // CAST_DWG_OBJECT_TO_OBJECT (ACDSRECORD)
-  // CAST_DWG_OBJECT_TO_OBJECT (ACDSSCHEMA)
-  // CAST_DWG_OBJECT_TO_OBJECT (NPOCOLLECTION)
-  // CAST_DWG_OBJECT_TO_OBJECT (RAPIDRTRENDERENVIRONMENT)
-  // CAST_DWG_OBJECT_TO_OBJECT (XREFPANELOBJECT)
+CAST_DWG_OBJECT_TO_OBJECT (ACMECOMMANDHISTORY)
+CAST_DWG_OBJECT_TO_OBJECT (ACMESCOPE)
+CAST_DWG_OBJECT_TO_OBJECT (ACMESTATEMGR)
+CAST_DWG_OBJECT_TO_OBJECT (ACSH_EXTRUSION_CLASS)
+CAST_DWG_OBJECT_TO_OBJECT (ACSH_LOFT_CLASS)
+CAST_DWG_OBJECT_TO_OBJECT (ACSH_REVOLVE_CLASS)
+CAST_DWG_OBJECT_TO_OBJECT (ACSH_SWEEP_CLASS)
+CAST_DWG_OBJECT_TO_OBJECT (ANGDIMOBJECTCONTEXTDATA)
+CAST_DWG_OBJECT_TO_OBJECT (ANNOTSCALEOBJECTCONTEXTDATA)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOC3POINTANGULARDIMACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCALIGNEDDIMACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCARRAYMODIFYACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCEDGEACTIONPARAM)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCEDGECHAMFERACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCEDGEFILLETACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCMLEADERACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCORDINATEDIMACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCPERSSUBENTMANAGER)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCRESTOREENTITYSTATEACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCROTATEDDIMACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (ASSOCSWEPTSURFACEACTIONBODY)
+CAST_DWG_OBJECT_TO_OBJECT (BLOCKPROPERTIESTABLE)
+CAST_DWG_OBJECT_TO_OBJECT (BLOCKPROPERTIESTABLEGRIP)
+CAST_DWG_OBJECT_TO_OBJECT (BREAKDATA)
+CAST_DWG_OBJECT_TO_OBJECT (BREAKPOINTREF)
+CAST_DWG_OBJECT_TO_OBJECT (CONTEXTDATAMANAGER)
+CAST_DWG_OBJECT_TO_OBJECT (CSACDOCUMENTOPTIONS)
+CAST_DWG_OBJECT_TO_OBJECT (CURVEPATH)
+CAST_DWG_OBJECT_TO_OBJECT (DATATABLE)
+CAST_DWG_OBJECT_TO_OBJECT (DIMASSOC)
+CAST_DWG_OBJECT_TO_OBJECT (DMDIMOBJECTCONTEXTDATA)
+CAST_DWG_OBJECT_TO_OBJECT (DYNAMICBLOCKPROXYNODE)
+CAST_DWG_OBJECT_TO_OBJECT (GEOMAPIMAGE)
+CAST_DWG_OBJECT_TO_OBJECT (MLEADEROBJECTCONTEXTDATA)
+CAST_DWG_OBJECT_TO_OBJECT (MOTIONPATH)
+CAST_DWG_OBJECT_TO_OBJECT (MTEXTATTRIBUTEOBJECTCONTEXTDATA)
+CAST_DWG_OBJECT_TO_OBJECT (NAVISWORKSMODELDEF)
+CAST_DWG_OBJECT_TO_OBJECT (ORDDIMOBJECTCONTEXTDATA)
+CAST_DWG_OBJECT_TO_OBJECT (PERSUBENTMGR)
+CAST_DWG_OBJECT_TO_OBJECT (POINTPATH)
+CAST_DWG_OBJECT_TO_OBJECT (RADIMLGOBJECTCONTEXTDATA)
+CAST_DWG_OBJECT_TO_OBJECT (RADIMOBJECTCONTEXTDATA)
+CAST_DWG_OBJECT_TO_OBJECT (SUNSTUDY)
+CAST_DWG_OBJECT_TO_OBJECT (TABLECONTENT)
+CAST_DWG_OBJECT_TO_OBJECT (TVDEVICEPROPERTIES)
+// CAST_DWG_OBJECT_TO_OBJECT (ABSHDRAWINGSETTINGS)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAECUSTOBJ)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAEEEMGROBJ)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMCOMP)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMCOMPDEF)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMCOMPDEFMGR)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMCONTEXTMODELER)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMGDIMSTD)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMGFILTERDAT)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMGHOLECHARTSTDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMGHOLECHARTSTDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMGHOLECHARTSTDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMGLAYSTD)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMGRCOMPDEF)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMGRCOMPDEFSET)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMGTITLESTD)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMMVDBACKUPOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMPROJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMSHAFTCOMPDEF)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMSTDPCOMPDEF)
+// CAST_DWG_OBJECT_TO_OBJECT (ACAMWBLOCKTEMPENTS)
+// CAST_DWG_OBJECT_TO_OBJECT (ACARRAYJIGENTITY)
+// CAST_DWG_OBJECT_TO_OBJECT (ACCMCONTEXT)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDBCIRCARCRES)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDBDIMENSIONRES)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDBENTITYCACHE)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDBLINERES)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDBSTDPARTRES_ARC)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDBSTDPARTRES_LINE)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDB_HATCHSCALECONTEXTDATA_CLASS)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDB_HATCHVIEWCONTEXTDATA_CLASS)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDB_PROXY_ENTITY_DATA)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDSRECORD)
+// CAST_DWG_OBJECT_TO_OBJECT (ACDSSCHEMA)
+// CAST_DWG_OBJECT_TO_OBJECT (ACGREFACADMASTER)
+// CAST_DWG_OBJECT_TO_OBJECT (ACGREFMASTER)
+// CAST_DWG_OBJECT_TO_OBJECT (ACIMINTSYSVAR)
+// CAST_DWG_OBJECT_TO_OBJECT (ACIMREALSYSVAR)
+// CAST_DWG_OBJECT_TO_OBJECT (ACIMSTRSYSVAR)
+// CAST_DWG_OBJECT_TO_OBJECT (ACIMSYSVARMAN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMANOOTATIONVIEWSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMANOOTATIONVIEWSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMANOOTATIONVIEWSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMANOOTATIONVIEWSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMAPLEGENDDBOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMAPLEGENDITEMDBOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMAPMAPVIEWPORTDBOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMAPPRINTLAYOUTELEMENTDBOBJECTCONTAINER)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMBALLOON)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMBOM)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMBOMROW)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMBOMROWSTRUCT)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMBOMSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMBOMSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMBOMSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMBOMSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMCENTERLINESTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMCENTERLINESTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMCENTERLINESTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMCENTERLINESTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDATADICTIONARY)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDATAENTRY)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDATAENTRYBLOCK)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDATUMID)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDATUMSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDATUMSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDATUMSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDATUMSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDATUMSTANDARDISO2012)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDETAILSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDETAILSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDETAILSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDETAILSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDETAILTANDARDCUSTOM)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMDIMBREAKPERSREACTOR)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMEDRAWINGMAN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMEVIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (ACME_DATABASE)
+// CAST_DWG_OBJECT_TO_OBJECT (ACME_DOCUMENT)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMFCFRAME)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMFCFSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMFCFSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMFCFSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMFCFSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMFCFSTANDARDISO2004)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMFCFSTANDARDISO2012)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMIDSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMIDSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMIDSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMIDSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMIDSTANDARDISO2004)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMIDSTANDARDISO2012)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMNOTESTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMNOTESTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMNOTESTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMNOTESTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMPARTLIST)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMPICKOBJ)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSECTIONSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSECTIONSTANDARDCSN2002)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSECTIONSTANDARDCUSTOM)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSECTIONSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSECTIONSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSECTIONSTANDARDISO2001)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSURFSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSURFSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSURFSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSURFSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSURFSTANDARDISO2002)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMSURFSYM)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMTAPERSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMTAPERSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMTAPERSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMTAPERSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMTHREADLINESTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMTHREADLINESTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMTHREADLINESTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMTHREADLINESTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMWELDSTANDARDANSI)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMWELDSTANDARDCSN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMWELDSTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMWELDSTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (ACMWELDSYM)
+// CAST_DWG_OBJECT_TO_OBJECT (ACRFATTGENMGR)
+// CAST_DWG_OBJECT_TO_OBJECT (ACRFINSADJ)
+// CAST_DWG_OBJECT_TO_OBJECT (ACRFINSADJUSTERMGR)
+// CAST_DWG_OBJECT_TO_OBJECT (ACRFMCADAPIATTHOLDER)
+// CAST_DWG_OBJECT_TO_OBJECT (ACRFOBJATTMGR)
+// CAST_DWG_OBJECT_TO_OBJECT (ACSH_SUBENT_MATERIAL_CLASS)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_2D_XREF_MGR)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_BASIC_VIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_BASIC_VIEW_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_COMPLEX_HIDE_SITUATION)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_COMP_VIEW_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_COMP_VIEW_INST)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_DIRTY_NODES)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_HIDE_SITUATION)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_MAPPER_CACHE)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_MASTER_VIEW_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_MVD_DEP_MGR)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_OVERRIDE_FILTER)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_PROPS_OVERRIDE)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_SHAFT_HIDE_SITUATION)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_STDP_VIEW_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AC_AM_TRANSFORM_GHOST)
+// CAST_DWG_OBJECT_TO_OBJECT (ADAPPL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ALIGNMENT_DESIGN_CHECK_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ALIGNMENT_LABEL_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ALIGNMENT_LABEL_SET_EXT)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ALIGNMENT_PARCEL_NODE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ALIGNMENT_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_APPURTENANCE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ASSEMBLY_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_BUILDING_SITE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_CANT_DIAGRAM_VIEW_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_CATCHMENT_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_CLASS_NODE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_CONTOURVIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_CORRIDOR_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_CANT_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_CURVE_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_DESIGNSPEED_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_GEOMPT_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_INDEXED_PI_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_MINOR_STATION_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_PI_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_SPIRAL_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_STAEQU_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_STATION_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_STATION_OFFSET_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_SUPERELEVATION_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_TANGENT_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ALIGNMENT_VERTICAL_GEOMPT_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_APPURTENANCE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_APPURTENANCE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_APPURTENANCE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_APPURTENANCE_PROFILE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_ASSEMBLY)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_AUTO_CORRIDOR_FEATURE_LINE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_AUTO_CORRIDOR_FEATURE_LINE_PROFILE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_AUTO_CORRIDOR_FEATURE_LINE_SECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_AUTO_FEATURE_LINE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_AUTO_FEATURE_LINE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_AUTO_FEATURE_LINE_PROFILE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_AUTO_FEATURE_LINE_SECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_BUILDINGSITE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_BUILDINGUTIL_CONNECTOR)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_CANT_DIAGRAM_VIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_CATCHMENT_AREA)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_CATCHMENT_AREA_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_CORRIDOR)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_CROSSING_PIPE_PROFILE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_CROSSING_PRESSURE_PIPE_PROFILE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_CSVSTATIONSLIDER)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FACE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FEATURE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FEATURE_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FEATURE_LINE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FEATURE_LINE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FEATURE_LINE_PROFILE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FEATURE_LINE_SECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FITTING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FITTING_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FITTING_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FITTING_PROFILE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_FLOW_SEGMENT_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_GENERAL_SEGMENT_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_GRADING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_GRAPH)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_GRAPHPROFILE_NETWORKPART)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_GRAPHPROFILE_PRESSUREPART)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_GRID_SURFACE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_GRID_SURFACE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_HORGEOMETRY_BAND_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_HYDRO_REGION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_INTERFERENCE_CHECK)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_INTERFERENCE_PART)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_INTERFERENCE_PART_SECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_INTERSECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_INTERSECTION_LOCATION_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_LEGEND_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_LINE_BETWEEN_POINTS_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_LOTLINE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_MASSHAULLINE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_MASS_HAUL_VIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_MATCHLINE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_MATCH_LINE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_MATERIAL_SECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_NETWORK)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_NOTE_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_OFFSET_ELEV_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PARCEL_BOUNDARY)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PARCEL_FACE_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PARCEL_SEGMENT)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PARCEL_SEGMENT_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PARCEL_SEGMENT_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PARCEL_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PIPE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PIPENETWORK_BAND_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PIPE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PIPE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PIPE_PROFILE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PIPE_SECTION_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PIPE_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_POINT_ENT)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_POINT_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_POINT_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PRESSUREPIPENETWORK)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PRESSURE_PART_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PRESSURE_PIPE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PRESSURE_PIPE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PRESSURE_PIPE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PRESSURE_PIPE_PROFILE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PRESSURE_PIPE_SECTION_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PROFILE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PROFILEDATA_BAND_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PROFILE_PROJECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PROFILE_PROJECTION_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PROFILE_VIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_PROFILE_VIEW_DEPTH_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_QUANTITY_TAKEOFF_AGGREGATE_EARTHWORK_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_RIGHT_OF_WAY)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SAMPLELINE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SAMPLE_LINE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SAMPLE_LINE_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTIONALDATA_BAND_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTIONDATA_BAND_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTIONSEGMENT_BAND_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_CORRIDOR)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_CORRIDOR_POINT_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_GRADEBREAK_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_MINOR_OFFSET_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_OFFSET_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_PIPENETWORK)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_PRESSUREPIPENETWORK)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_PROJECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_PROJECTION_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_SEGMENT_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_VIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_VIEW_DEPTH_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SECTION_VIEW_QUANTITY_TAKEOFF_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SHEET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SPANNING_PIPE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SPANNING_PIPE_PROFILE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_STATION_ELEV_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_STRUCTURE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_STRUCTURE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_STRUCTURE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_STRUCTURE_PROFILE_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_STRUCTURE_SECTION_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SUBASSEMBLY)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SUPERELEVATION_BAND_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SUPERELEVATION_DIAGRAM_VIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SURFACE_CONTOUR_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SURFACE_ELEVATION_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SURFACE_SLOPE_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SURVEY_FIGURE_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SVFIGURE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SVFIGURE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SVFIGURE_PROFILE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SVFIGURE_SECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SVFIGURE_SEGMENT_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_SVNETWORK)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_TANGENT_INTERSECTION_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_TIN_SURFACE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_TIN_SURFACE_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VALIGNMENT_CRESTCURVE_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VALIGNMENT_CSV)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VALIGNMENT_HAGEOMPT_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VALIGNMENT_LINE_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VALIGNMENT_MINOR_STATION_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VALIGNMENT_PVI_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VALIGNMENT_SAGCURVE_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VALIGNMENT_STATION_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VERTICALGEOMETRY_BAND_LABEL_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VIEWFRAME_LABELING)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_DISP_REP_VIEW_FRAME)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_FEATURELINE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_FEATURE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_FITTING_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_FORMAT_MANAGER_OBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_GRADEVIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_GRADING_CRITERIA)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_GRADING_CRITERIA_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_GRADING_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_GRADING_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_IMPORT_STORM_SEWER_DEFAULTS)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_INTERFERENCE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_INTERSECTION_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_LABEL_COLLECTOR_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_LABEL_NODE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_LABEL_RADIAL_LINE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_LABEL_TEXT_ITERATOR_CURVE_OR_SPIRAL_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_LABEL_TEXT_ITERATOR_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_LABEL_TEXT_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_LABEL_VECTOR_ARROW_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_LEGEND_TABLE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_MASS_HAUL_LINE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_MASS_HAUL_VIEW_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_MATCHLINE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_MATERIAL_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_NETWORK_PART_CATALOG_DEF_NODE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_NETWORK_PART_FAMILY_ITEM)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_NETWORK_PART_LIST)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_NETWORK_RULE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PARCEL_NODE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PARCEL_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PART_SIZE_FILTER)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PIPE_RULES)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PIPE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PIPE_STYLE_EXTENSION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_POINTCLOUD_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_POINTVIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_POINT_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PRESSURE_PART_LIST)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PRESSURE_PIPE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILESECTIONENTITY_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_DESIGN_CHECK_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_LABEL_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_VIEW_BAND_STYLE_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_VIEW_DATA_BAND_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_VIEW_HORIZONTAL_GEOMETRY_BAND_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_VIEW_PIPE_NETWORK_BAND_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_VIEW_SECTIONAL_DATA_BAND_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_VIEW_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_VIEW_SUPERELEVATION_DIAGRAM_BAND_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_PROFILE_VIEW_VERTICAL_GEOMETRY_BAND_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_QUANTITY_TAKEOFF_CRITERIA)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ROADWAYLINK_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ROADWAYMARKER_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ROADWAYSHAPE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ROADWAY_STYLE_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_ROOT_SETTINGS_NODE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SAMPLE_LINE_GROUP_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SAMPLE_LINE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SECTION_LABEL_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SECTION_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SECTION_VIEW_BAND_STYLE_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SECTION_VIEW_DATA_BAND_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SECTION_VIEW_ROAD_SURFACE_BAND_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SECTION_VIEW_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SETTINGS_NODE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SHEET_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SLOPE_PATTERN_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_STATION_FORMAT_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_STRUCTURE_RULES)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_STUCTURE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SUPERELEVATION_DIAGRAM_VIEW_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SURFACE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SVFIGURE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_SVNETWORK_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_TABLE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_TAG_MANAGER)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_TREE_NODE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_USER_DEFINED_ATTRIBUTE_CLASSIFICATION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_VALIGNMENT_STYLE_EXTENSION)
+// CAST_DWG_OBJECT_TO_OBJECT (AECC_VIEW_FRAME_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_PROPS_MEMBER)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_PROPS_MEMBER_LOGICAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_PROPS_MEMBER_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_PROPS_MEMBER_PLAN_SKETCH)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_PROPS_MEMBER_PROJECTED)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_REP_MEMBER_ELEVATION_DESIGN)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_REP_MEMBER_ELEVATION_DETAIL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_REP_MEMBER_LOGICAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_REP_MEMBER_MODEL_DESIGN)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_REP_MEMBER_MODEL_DETAIL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_REP_MEMBER_PLAN_DESIGN)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_REP_MEMBER_PLAN_DETAIL)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_DISP_REP_MEMBER_PLAN_SKETCH)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_MEMBER_NODE_SHAPE)
+// CAST_DWG_OBJECT_TO_OBJECT (AECS_MEMBER_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_2DSECTION_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPBDGELEVLINEPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPBDGELEVLINEPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPBDGSECTIONLINEPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPBDGSECTIONLINEPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPCEILINGGRIDPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPCEILINGGRIDPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPCOLUMNGRIDPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPCOLUMNGRIDPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPCURTAINWALLLAYOUTPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPCURTAINWALLLAYOUTPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPCURTAINWALLUNITPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPCURTAINWALLUNITPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPMVBLOCKREFPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPMVBLOCKREFPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPROOFPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPROOFPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPROOFSLABPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPROOFSLABPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPSLABPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPSLABPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPSPACEPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPSPACEPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPWALLPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPWALLPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPWINDOWASSEMBLYPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPWINDOWASSEMBLYPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPZONE100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBDISPREPZONE50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBZONEDEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_AECDBZONESTYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_ANCHOR_OPENINGBASE_TO_WALL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_CLASSIFICATION_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_CLASSIFICATION_SYSTEM_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_CLEANUP_GROUP_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_CURTAIN_WALL_LAYOUT_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_CURTAIN_WALL_UNIT_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_CVSECTIONVIEW)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DB_DISP_REP_DIM_GROUP_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DB_DISP_REP_DIM_GROUP_PLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DB_DISP_REP_DIM_GROUP_PLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DIM_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPLAYTHEME_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPREPAECDBDISPREPMASSELEMPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPREPAECDBDISPREPMASSELEMPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPREPAECDBDISPREPMASSGROUPPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPREPAECDBDISPREPMASSGROUPPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPREPAECDBDISPREPOPENINGPLAN100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPREPAECDBDISPREPOPENINGPLAN50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPREPAECDBDISPREPOPENINGPLANREFLECTED)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPREPAECDBDISPREPOPENINGSILLPLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPROPSMASSELEMPLANCOMMON)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPROPSMASSGROUPPLANCOMMON)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPROPSOPENINGPLANCOMMON)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPROPSOPENINGPLANCOMMONHATCHED)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISPROPSOPENINGSILLPLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_2D_SECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_CLIP_VOLUME)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_CLIP_VOLUME_RESULT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_DIM)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_DISPLAYTHEME)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_DOOR)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_DOOR_NOMINAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_DOOR_PLAN_100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_DOOR_PLAN_50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_DOOR_THRESHOLD_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_DOOR_THRESHOLD_SYMBOL_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_EDITINPLACEPROFILE_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_ENT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_ENT_REF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_GRID_ASSEMBLY_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_GRID_ASSEMBLY_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_LAYOUT_CURVE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_LAYOUT_GRID2D)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_LAYOUT_GRID3D)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_MASKBLOCK)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_MASS_ELEM_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_MASS_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_MATERIAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_OPENING)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_POLYGON_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_POLYGON_TRUECOLOUR)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_RAILING_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_RAILING_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_ROOF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_ROOFSLAB)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_ROOFSLAB_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_SCHEDULE_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_SLAB)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_SLAB_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_SLICE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_SPACE_DECOMPOSED)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_SPACE_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_SPACE_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_STAIR_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_STAIR_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_STAIR_PLAN_OVERLAPPING)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WALL_GRAPH)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WALL_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WALL_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WALL_SCHEM)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WINDOW)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WINDOW_ASSEMBLY_SILL_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WINDOW_NOMINAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WINDOW_PLAN_100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WINDOW_PLAN_50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_WINDOW_SILL_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_PROPS_ZONE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_2D_SECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ANCHOR)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ANCHOR_BUB_TO_GRID)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ANCHOR_BUB_TO_GRID_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ANCHOR_BUB_TO_GRID_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ANCHOR_ENT_TO_NODE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ANCHOR_EXT_TAG_TO_ENT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ANCHOR_TAG_TO_ENT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_BDG_ELEVLINE_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_BDG_ELEVLINE_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_BDG_ELEVLINE_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_BDG_SECTIONLINE_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_BDG_SECTIONLINE_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_BDG_SECTIONLINE_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_BDG_SECTION_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_BDG_SECTION_SUBDIV)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CEILING_GRID)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CEILING_GRID_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CEILING_GRID_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CLIP_VOLUME_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CLIP_VOLUME_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CLIP_VOLUME_RESULT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CLIP_VOLUME_RESULT_SUBDIV)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COLUMN_GRID)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COLUMN_GRID_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COLUMN_GRID_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_BLOCK)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CIRCARC2D)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONCOINCIDENT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONCONCENTRIC)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONEQUALDISTANCE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONMIDPOINT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONNECTOR)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONNORMAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONPARALLEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONPERPENDICULAR)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONSYMMETRIC)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_CONTANGENT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_DIMANGLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_DIMDIAMETER)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_DIMDISTANCE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_DIMLENGTH)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_DIMMAJORRADIUS)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_DIMMINORRADIUS)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_ELLIPARC2D)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_LAYOUTDATA)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_LINE2D)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_MODIFIER_ADD)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_MODIFIER_CUTPLANE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_MODIFIER_EXTRUSION)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_MODIFIER_GROUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_MODIFIER_LOFT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_MODIFIER_PATH)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_MODIFIER_REVOLVE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_MODIFIER_SUBTRACT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_MODIFIER_TRANSITION)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_POINT2D)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_PROFILE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_WORKPLANE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_COL_WORKPLANE_REF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CONFIG)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CURTAIN_WALL_LAYOUT_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CURTAIN_WALL_LAYOUT_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CURTAIN_WALL_UNIT_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_CURTAIN_WALL_UNIT_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DCM_DIMRADIUS)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DISPLAYTHEME)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DOOR_ELEV)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DOOR_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DOOR_NOMINAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DOOR_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DOOR_PLAN_50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DOOR_PLAN_HEKTO)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DOOR_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DOOR_THRESHOLD_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_DOOR_THRESHOLD_SYMBOL_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_EDITINPLACEPROFILE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ENT_REF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_LAYOUT_CURVE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_LAYOUT_GRID2D)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_LAYOUT_GRID3D)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MASKBLOCK_REF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MASKBLOCK_REF_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MASS_ELEM_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MASS_ELEM_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MASS_ELEM_SCHEM)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MASS_GROUP_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MASS_GROUP_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MASS_GROUP_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MATERIAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MVBLOCK_REF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MVBLOCK_REF_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_MVBLOCK_REF_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_OPENING)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_OPENING_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_POLYGON_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_POLYGON_TRUECOLOUR)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_RAILING_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_RAILING_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_RAILING_PLAN_100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_RAILING_PLAN_50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ROOFSLAB_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ROOFSLAB_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ROOF_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ROOF_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ROOF_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SCHEDULE_TABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SET)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SLAB_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SLAB_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SLICE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SPACE_DECOMPOSED)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SPACE_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SPACE_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SPACE_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_SPACE_VOLUME)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_STAIR_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_STAIR_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_STAIR_PLAN_100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_STAIR_PLAN_50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_STAIR_PLAN_OVERLAPPING)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_STAIR_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WALL_GRAPH)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WALL_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WALL_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WALL_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WALL_SCHEM)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOWASSEMBLY_SILL_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_ASSEMBLY_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_ASSEMBLY_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_ELEV)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_MODEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_NOMINAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_PLAN_100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_PLAN_50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_RCP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_WINDOW_SILL_PLAN)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_REP_ZONE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_ROPS_RAILING_PLAN_100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_ROPS_RAILING_PLAN_50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_ROPS_STAIR_PLAN_100)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DISP_ROPS_STAIR_PLAN_50)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_DOOR_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_ENDCAP_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_FRAME_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_LAYERKEY_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_LIST_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_MASKBLOCK_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_MASS_ELEM_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_MATERIAL_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_MVBLOCK_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_MVBLOCK_REF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_NOTIFICATION_TRACKER)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_POLYGON)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_POLYGON_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_PROPERTY_SET_DEF)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_RAILING_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_REFEDIT_STATUS_TRACKER)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_ROOFSLABEDGE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_ROOFSLAB_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_SCHEDULE_DATA_FORMAT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_SLABEDGE_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_SLAB_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_SPACE_STYLES)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_STAIR_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_STAIR_WINDER_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_STAIR_WINDER_TYPE_BALANCED)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_STAIR_WINDER_TYPE_MANUAL)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_STAIR_WINDER_TYPE_SINGLE_POINT)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_VARS_AECBBLDSRV)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_VARS_ARCHBASE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_VARS_DWG_SETUP)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_VARS_MUNICH)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_VARS_STRUCTUREBASE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_WALLMOD_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_WALL_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_WINDOW_ASSEMBLY_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (AEC_WINDOW_STYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (ALIGNMENTGRIPENTITY)
+// CAST_DWG_OBJECT_TO_OBJECT (AMCONTEXTMGR)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTADMENUSTATE)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTAMMENUSTATE)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTBROWSERDBTAB)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTDMMENUSTATE)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTEDGESTANDARDDIN)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTEDGESTANDARDDIN13715)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTEDGESTANDARDISO)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTEDGESTANDARDISO13715)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTFORMULAUPDATEDISPATCHER)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTINTERNALREACTOR)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTMCOMMENUSTATE)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTMENUSTATEMGR)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTNOTE)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTNOTETEMPLATEDB)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTSECTIONSYM)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTSECTIONSYMLABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (AMDTSYSATTR)
+// CAST_DWG_OBJECT_TO_OBJECT (AMGOBJPROPCFG)
+// CAST_DWG_OBJECT_TO_OBJECT (AMGSETTINGSOBJ)
+// CAST_DWG_OBJECT_TO_OBJECT (AMIMASTER)
+// CAST_DWG_OBJECT_TO_OBJECT (AM_DRAWING_MGR)
+// CAST_DWG_OBJECT_TO_OBJECT (AM_DWGMGR_NAME)
+// CAST_DWG_OBJECT_TO_OBJECT (AM_DWG_DOCUMENT)
+// CAST_DWG_OBJECT_TO_OBJECT (AM_DWG_SHEET)
+// CAST_DWG_OBJECT_TO_OBJECT (AM_VIEWDIMPARMAP)
+// CAST_DWG_OBJECT_TO_OBJECT (BINRECORD)
+// CAST_DWG_OBJECT_TO_OBJECT (CAMSCATALOGAPPOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (CAMSSTRUCTBTNSTATE)
+// CAST_DWG_OBJECT_TO_OBJECT (CATALOGSTATE)
+// CAST_DWG_OBJECT_TO_OBJECT (CBROWSERAPPOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (DEPMGR)
+// CAST_DWG_OBJECT_TO_OBJECT (DMBASEELEMENT)
+// CAST_DWG_OBJECT_TO_OBJECT (DMDEFAULTSTYLE)
+// CAST_DWG_OBJECT_TO_OBJECT (DMLEGEND)
+// CAST_DWG_OBJECT_TO_OBJECT (DMMAP)
+// CAST_DWG_OBJECT_TO_OBJECT (DMMAPMANAGER)
+// CAST_DWG_OBJECT_TO_OBJECT (DMSTYLECATEGORY)
+// CAST_DWG_OBJECT_TO_OBJECT (DMSTYLELIBRARY)
+// CAST_DWG_OBJECT_TO_OBJECT (DMSTYLEREFERENCE)
+// CAST_DWG_OBJECT_TO_OBJECT (DMSTYLIZEDENTITIESTABLE)
+// CAST_DWG_OBJECT_TO_OBJECT (DMSURROGATESTYLESETS)
+// CAST_DWG_OBJECT_TO_OBJECT (DM_PLACEHOLDER)
+// CAST_DWG_OBJECT_TO_OBJECT (EXACTERMXREFMAP)
+// CAST_DWG_OBJECT_TO_OBJECT (EXACXREFPANELOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (EXPO_NOTIFYBLOCK)
+// CAST_DWG_OBJECT_TO_OBJECT (EXPO_NOTIFYHALL)
+// CAST_DWG_OBJECT_TO_OBJECT (EXPO_NOTIFYPILLAR)
+// CAST_DWG_OBJECT_TO_OBJECT (EXPO_NOTIFYSTAND)
+// CAST_DWG_OBJECT_TO_OBJECT (EXPO_NOTIFYSTANDNOPOLY)
+// CAST_DWG_OBJECT_TO_OBJECT (FLIPACTIONENTITY)
+// CAST_DWG_OBJECT_TO_OBJECT (GSMANAGER)
+// CAST_DWG_OBJECT_TO_OBJECT (IRD_DSC_DICT)
+// CAST_DWG_OBJECT_TO_OBJECT (IRD_DSC_RECORD)
+// CAST_DWG_OBJECT_TO_OBJECT (IRD_OBJ_RECORD)
+// CAST_DWG_OBJECT_TO_OBJECT (MAPFSMRVOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (MAPGWSUNDOOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (MAPIAMMOUDLE)
+// CAST_DWG_OBJECT_TO_OBJECT (MAPMETADATAOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (MAPRESOURCEMANAGEROBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (MOVEACTIONENTITY)
+// CAST_DWG_OBJECT_TO_OBJECT (McDbContainer2)
+// CAST_DWG_OBJECT_TO_OBJECT (McDbMarker)
+// CAST_DWG_OBJECT_TO_OBJECT (NAMEDAPPL)
+// CAST_DWG_OBJECT_TO_OBJECT (NEWSTDPARTPARLIST)
+// CAST_DWG_OBJECT_TO_OBJECT (NPOCOLLECTION)
+// CAST_DWG_OBJECT_TO_OBJECT (OBJCLONER)
+// CAST_DWG_OBJECT_TO_OBJECT (PARAMMGR)
+// CAST_DWG_OBJECT_TO_OBJECT (PARAMSCOPE)
+// CAST_DWG_OBJECT_TO_OBJECT (PILLAR)
+// CAST_DWG_OBJECT_TO_OBJECT (RAPIDRTRENDERENVIRONMENT)
+// CAST_DWG_OBJECT_TO_OBJECT (ROTATEACTIONENTITY)
+// CAST_DWG_OBJECT_TO_OBJECT (SCALEACTIONENTITY)
+// CAST_DWG_OBJECT_TO_OBJECT (STDPART2D)
+// CAST_DWG_OBJECT_TO_OBJECT (STRETCHACTIONENTITY)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_ARROW)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_AXIS_LABEL)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_BLOCK_INSERT)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_COLUMN)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_DBCONFIG)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_DIMENSION2)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_DRAWINGINDEX)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_HANDRAIL)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_LINESTAIR)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_OPENING)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_RECTSTAIR)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_SLAB)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_SPACE)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_TEXT)
+// CAST_DWG_OBJECT_TO_OBJECT (TCH_WALL)
+// CAST_DWG_OBJECT_TO_OBJECT (TGrupoPuntos)
+// CAST_DWG_OBJECT_TO_OBJECT (VAACIMAGEINVENTORY)
+// CAST_DWG_OBJECT_TO_OBJECT (VAACXREFPANELOBJECT)
+// CAST_DWG_OBJECT_TO_OBJECT (XREFPANELOBJECT)
 #  endif
 // clang-format: on
 /* End auto-generated content */
@@ -12718,7 +15174,7 @@ dwg_ent_spline_get_fit_pts (const dwg_ent_spline *restrict spline,
   else
     {
       *error = 1;
-      LOG_ERROR ("%s: Out of memory", __FUNCTION__)
+      LOG_ERROR ("%s: Out of memory", __FUNCTION__);
       return NULL;
     }
 }
@@ -16015,7 +18471,7 @@ dwg_ent_mline_get_verts (const dwg_ent_mline *restrict mline,
 
 /** Returns vertex_pface vertind
  */
-EXPORT BITCODE_BS
+EXPORT BITCODE_BSd
 dwg_ent_vertex_pface_face_get_vertind (const dwg_ent_vert_pface_face *face)
 {
   if (face)
@@ -16033,7 +18489,7 @@ dwg_ent_vertex_pface_face_get_vertind (const dwg_ent_vert_pface_face *face)
  */
 EXPORT void
 dwg_ent_vertex_pface_face_set_vertind (dwg_ent_vert_pface_face *restrict face,
-                                       const BITCODE_BS vertind[4])
+                                       const BITCODE_BSd vertind[4])
 {
   if (face
 #    ifndef HAVE_NONNULL
@@ -20500,7 +22956,7 @@ dwg_obj_block_control *
 dwg_block_header_get_block_control (const dwg_obj_block_header *block_header,
                                     int *restrict error)
 {
-  if (block_header && block_header->parent && block_header->parent->ownerhandle
+  if (block_header->parent && block_header->parent->ownerhandle
       && block_header->parent->ownerhandle->obj
       && block_header->parent->ownerhandle->obj->fixedtype
              == DWG_TYPE_BLOCK_CONTROL
@@ -20528,7 +22984,7 @@ dwg_obj_block_control_get_block_headers (
 {
   dwg_object_ref **ptx;
 
-  if (!ctrl || (ctrl->num_entries && !ctrl->entries))
+  if (ctrl->num_entries && !ctrl->entries)
     {
       *error = 1;
       LOG_ERROR ("%s: null block_headers", __FUNCTION__);
@@ -20632,20 +23088,11 @@ char *
 dwg_obj_block_header_get_name (const dwg_obj_block_header *restrict hdr,
                                int *restrict error)
 {
-  if (hdr)
-    {
-      *error = 0;
-      if (dwg_version >= R_2007)
-        return bit_convert_TU ((BITCODE_TU)hdr->name);
-      else
-        return hdr->name;
-    }
+  *error = 0;
+  if (dwg_version >= R_2007)
+    return bit_convert_TU ((BITCODE_TU)hdr->name);
   else
-    {
-      *error = 1;
-      LOG_ERROR ("%s: empty arg", __FUNCTION__)
-      return NULL;
-    }
+    return hdr->name;
 }
 
 /** Returns 1st block header present in the dwg file.
@@ -20662,7 +23109,7 @@ dwg_get_block_header (dwg_data *restrict dwg, int *restrict error)
   Dwg_Object_BLOCK_HEADER *blk;
 
   *error = 0;
-  if (!dwg || dwg->num_classes > 1000 || dwg->num_objects > 0xfffffff)
+  if (dwg->num_classes > 1000 || dwg->num_objects > 0xfffffff)
     {
       *error = 1;
       return NULL;
@@ -20716,27 +23163,18 @@ char *
 dwg_obj_layer_get_name (const dwg_obj_layer *restrict layer,
                         int *restrict error)
 {
-  if (layer)
-    {
-      const Dwg_Object *obj = dwg_obj_generic_to_object (layer, error);
-      if (*error || obj->fixedtype != DWG_TYPE_LAYER)
-        {
-          *error = 1;
-          LOG_ERROR ("%s: arg not a LAYER", __FUNCTION__)
-          return NULL;
-        }
-      *error = 0;
-      if (dwg_version >= R_2007)
-        return bit_convert_TU ((BITCODE_TU)layer->name);
-      else
-        return layer->name;
-    }
-  else
+  const Dwg_Object *obj = dwg_obj_generic_to_object (layer, error);
+  if (*error || obj->fixedtype != DWG_TYPE_LAYER)
     {
       *error = 1;
-      LOG_ERROR ("%s: empty arg", __FUNCTION__)
+      LOG_ERROR ("%s: arg not a LAYER", __FUNCTION__)
       return NULL;
     }
+  *error = 0;
+  if (dwg_version >= R_2007)
+    return bit_convert_TU ((BITCODE_TU)layer->name);
+  else
+    return layer->name;
 }
 
 /** Change name of the layer (utf-8 encoded).
@@ -20752,28 +23190,19 @@ EXPORT void
 dwg_obj_layer_set_name (dwg_obj_layer *restrict layer,
                         const char *restrict name, int *restrict error)
 {
-  if (layer)
+  const Dwg_Object *obj = dwg_obj_generic_to_object (layer, error);
+  if (*error || obj->fixedtype != DWG_TYPE_LAYER)
     {
-      const Dwg_Object *obj = dwg_obj_generic_to_object (layer, error);
-      if (*error || obj->fixedtype != DWG_TYPE_LAYER)
-        {
-          LOG_ERROR ("%s: arg not a LAYER", __FUNCTION__)
-          *error = 1;
-          return;
-        }
-      *error = 0;
-      if (dwg_version >= R_2007)
-        layer->name = bit_convert_TU ((BITCODE_TU)layer->name);
-      else
-        layer->name = strdup (name);
-      return;
-    }
-  else
-    {
-      LOG_ERROR ("%s: empty arg", __FUNCTION__)
+      LOG_ERROR ("%s: arg not a LAYER", __FUNCTION__)
       *error = 1;
       return;
     }
+  *error = 0;
+  if (dwg_version >= R_2007)
+    layer->name = bit_convert_TU ((BITCODE_TU)layer->name);
+  else
+    layer->name = strdup (name);
+  return;
 }
 
 /*******************************************************************
@@ -20790,8 +23219,7 @@ EXPORT BITCODE_BL
 dwg_object_tablectrl_get_num_entries (const dwg_object *restrict obj,
                                       int *restrict error)
 {
-  if (obj && obj->supertype == DWG_SUPERTYPE_OBJECT
-      && dwg_obj_is_control (obj))
+  if (obj->supertype == DWG_SUPERTYPE_OBJECT && dwg_obj_is_control (obj))
     {
       // HACK: we can guarantee that num_entries is always the first field.
       Dwg_Object_STYLE_CONTROL *ctrl = obj->tio.object->tio.STYLE_CONTROL;
@@ -20802,7 +23230,7 @@ dwg_object_tablectrl_get_num_entries (const dwg_object *restrict obj,
     {
       *error = 1;
       LOG_ERROR ("%s: empty or invalid table control arg %p, type: 0x%x",
-                 __FUNCTION__, obj, obj ? obj->type : 0)
+                 __FUNCTION__, obj, obj->type)
       return 0;
     }
 }
@@ -20816,8 +23244,7 @@ EXPORT dwg_object_ref **
 dwg_object_tablectrl_get_entries (const dwg_object *restrict obj,
                                   int *restrict error)
 {
-  if (obj && obj->supertype == DWG_SUPERTYPE_OBJECT
-      && dwg_obj_is_control (obj))
+  if (obj->supertype == DWG_SUPERTYPE_OBJECT && dwg_obj_is_control (obj))
     {
       // HACK: we can guarantee a common layout of the common fields
       Dwg_Object_STYLE_CONTROL *ctrl = obj->tio.object->tio.STYLE_CONTROL;
@@ -20827,7 +23254,7 @@ dwg_object_tablectrl_get_entries (const dwg_object *restrict obj,
     {
       *error = 1;
       LOG_ERROR ("%s: empty or invalid table control arg %p, type: 0x%x",
-                 __FUNCTION__, obj, obj ? obj->type : 0)
+                 __FUNCTION__, obj, obj->type)
       return NULL;
     }
 }
@@ -20841,8 +23268,7 @@ EXPORT dwg_object_ref *
 dwg_object_tablectrl_get_entry (const dwg_object *restrict obj,
                                 const BITCODE_BS idx, int *restrict error)
 {
-  if (obj && obj->supertype == DWG_SUPERTYPE_OBJECT
-      && dwg_obj_is_control (obj))
+  if (obj->supertype == DWG_SUPERTYPE_OBJECT && dwg_obj_is_control (obj))
     {
       // HACK: we can guarantee a common layout of the common fields
       Dwg_Object_STYLE_CONTROL *ctrl = obj->tio.object->tio.STYLE_CONTROL;
@@ -20863,7 +23289,7 @@ dwg_object_tablectrl_get_entry (const dwg_object *restrict obj,
     {
       *error = 1;
       LOG_ERROR ("%s: empty or invalid table control arg %p, type: 0x%x",
-                 __FUNCTION__, obj, obj ? obj->type : 0)
+                 __FUNCTION__, obj, obj->type)
       return NULL;
     }
 }
@@ -20877,8 +23303,7 @@ EXPORT dwg_object_ref *
 dwg_object_tablectrl_get_ownerhandle (const dwg_object *restrict obj,
                                       int *restrict error)
 {
-  if (obj && obj->supertype == DWG_SUPERTYPE_OBJECT
-      && dwg_obj_is_control (obj))
+  if (obj->supertype == DWG_SUPERTYPE_OBJECT && dwg_obj_is_control (obj))
     {
       return obj->tio.object->ownerhandle;
     }
@@ -20886,7 +23311,7 @@ dwg_object_tablectrl_get_ownerhandle (const dwg_object *restrict obj,
     {
       *error = 1;
       LOG_ERROR ("%s: empty or invalid table control arg %p, type: 0x%x",
-                 __FUNCTION__, obj, obj ? obj->type : 0)
+                 __FUNCTION__, obj, obj->type)
       return NULL;
     }
 }
@@ -20901,8 +23326,7 @@ EXPORT dwg_object_ref *
 dwg_object_tablectrl_get_xdicobjhandle (const dwg_object *restrict obj,
                                         int *restrict error)
 {
-  if (obj && obj->supertype == DWG_SUPERTYPE_OBJECT
-      && dwg_obj_is_control (obj))
+  if (obj->supertype == DWG_SUPERTYPE_OBJECT && dwg_obj_is_control (obj))
     {
       return obj->tio.object->xdicobjhandle;
     }
@@ -20910,7 +23334,7 @@ dwg_object_tablectrl_get_xdicobjhandle (const dwg_object *restrict obj,
     {
       *error = 1;
       LOG_ERROR ("%s: empty or invalid table control arg %p, type: 0x%x",
-                 __FUNCTION__, obj, obj ? obj->type : 0)
+                 __FUNCTION__, obj, obj->type)
       return NULL;
     }
 }
@@ -20925,8 +23349,7 @@ EXPORT BITCODE_BL
 dwg_object_tablectrl_get_objid (const dwg_object *restrict obj,
                                 int *restrict error)
 {
-  if (obj && obj->supertype == DWG_SUPERTYPE_OBJECT
-      && dwg_obj_is_control (obj))
+  if (obj->supertype == DWG_SUPERTYPE_OBJECT && dwg_obj_is_control (obj))
     {
       return obj->tio.object->objid;
     }
@@ -20934,7 +23357,7 @@ dwg_object_tablectrl_get_objid (const dwg_object *restrict obj,
     {
       *error = 1;
       LOG_ERROR ("%s: empty or invalid table control arg %p, type: 0x%x",
-                 __FUNCTION__, obj, obj ? obj->type : 0)
+                 __FUNCTION__, obj, obj->type)
       return 0;
     }
 }
@@ -20952,7 +23375,7 @@ dwg_ref_get_table_name (const dwg_object_ref *restrict ref,
                         int *restrict error)
 {
   char *name = NULL;
-  if (ref && ref->obj)
+  if (ref->obj)
     name = dwg_obj_table_get_name (ref->obj, error);
   if (!name)
     name = (char *)"ByLayer";
@@ -20973,7 +23396,7 @@ dwg_ref_get_table_name (const dwg_object_ref *restrict ref,
 EXPORT char *
 dwg_obj_table_get_name (const dwg_object *restrict obj, int *restrict error)
 {
-  if (obj && obj->supertype == DWG_SUPERTYPE_OBJECT
+  if (obj->supertype == DWG_SUPERTYPE_OBJECT
       && (dwg_obj_is_table (
           obj) /* || obj->fixedtype == DWG_TYPE_DICTIONARY */))
     {
@@ -20993,7 +23416,7 @@ dwg_obj_table_get_name (const dwg_object *restrict obj, int *restrict error)
     {
       *error = 1;
       LOG_ERROR ("%s: empty or invalid table arg %p, type: 0x%x", __FUNCTION__,
-                 obj, obj ? obj->type : 0)
+                 obj, obj->type)
       return NULL;
     }
 }
@@ -21056,7 +23479,7 @@ EXPORT BITCODE_RL
 dwg_ent_get_bitsize (const dwg_obj_ent *restrict ent, int *restrict error)
 {
   Dwg_Object *obj = dwg_ent_to_object (ent, error);
-  if (obj && !*error)
+  if (!*error)
     {
       return obj->bitsize;
     }
@@ -21147,11 +23570,6 @@ dwg_ent_get_eed_data (const dwg_obj_ent *restrict ent, const BITCODE_BL idx,
 #endif /* __AFL_COMPILER */
 
 #define _BODY_FIELD(ent, field)                                               \
-  if (!ent)                                                                   \
-    {                                                                         \
-      *error = 1;                                                             \
-      return 0;                                                               \
-    }                                                                         \
   *error = 0;                                                                 \
   return ent->field
 
@@ -21371,6 +23789,52 @@ dwg_ent_get_edge_visualstyle (const dwg_obj_ent *restrict ent,
   _BODY_FIELD (ent, edge_visualstyle);
 }
 
+// accepts utf-8 string
+EXPORT int
+dwg_ent_set_ltype (dwg_obj_ent *restrict ent, const char *restrict name)
+{
+  int error = 0;
+  // check given handle (to the ltype tablerecord)
+  Dwg_Data *dwg = ent->dwg;
+  BITCODE_H lt_ref = dwg_find_tablehandle (dwg, name, "LTYPE");
+  if (!lt_ref)
+    {
+      if (!dwg_is_valid_name_u8 (dwg, name))
+        {
+          LOG_WARN ("Invalid symbol table record name \"%s\"\n", name);
+          return 2; // invalid name
+        }
+      return 1; // not found
+    }
+  if (!ent->ltype || lt_ref->absolute_ref != ent->ltype->absolute_ref)
+    {
+      // TODO preR13
+      if (!strcasecmp (name, "BYLAYER"))
+        {
+          ent->isbylayerlt = 1;
+          ent->ltype_flags = 0;
+        }
+      else if (!strcasecmp (name, "BYBLOCK"))
+        {
+          ent->isbylayerlt = 0;
+          ent->ltype_flags = 1;
+        }
+      else if (!strcasecmp (name, "CONTINUOUS"))
+        {
+          ent->isbylayerlt = 0;
+          ent->ltype_flags = 2;
+        }
+      else
+        {
+          ent->isbylayerlt = 0;
+          ent->ltype_flags = 3;
+          // set ltype tablerecord if not one the 3 builtins
+          ent->ltype = dwg_add_handleref (dwg, 5, lt_ref->absolute_ref, NULL);
+        }
+    }
+  return error;
+}
+
 #endif /* __AFL_COMPILER */
 
 /** Returns dwg_object* from dwg_obj_ent*
@@ -21384,12 +23848,6 @@ dwg_ent_to_object (const dwg_obj_ent *restrict obj, int *restrict error)
 {
   dwg_data *dwg;
   dwg_object *retval;
-  if (!obj)
-    {
-      *error = 1;
-      LOG_ERROR ("%s: Empty or invalid obj", __FUNCTION__);
-      return NULL;
-    }
   dwg = obj->dwg;
   if (dwg_version == R_INVALID)
     dwg_version = (Dwg_Version_Type)dwg->header.version;
@@ -21463,7 +23921,7 @@ dwg_ent_generic_parent (const void *restrict ent, int *restrict error)
 dwg_obj_ent *
 dwg_object_to_entity (dwg_object *restrict obj, int *restrict error)
 {
-  if (obj && obj->supertype == DWG_SUPERTYPE_ENTITY)
+  if (obj->supertype == DWG_SUPERTYPE_ENTITY)
     {
       *error = 0;
       if (dwg_version == R_INVALID)
@@ -21571,19 +24029,10 @@ dwg_object_get_bitsize (const dwg_object *obj)
 EXPORT BITCODE_BL
 dwg_object_get_index (const dwg_object *restrict obj, int *restrict error)
 {
-  if (obj)
-    {
-      *error = 0;
-      if (dwg_version == R_INVALID)
-        dwg_version = (Dwg_Version_Type)obj->parent->header.version;
-      return obj->index;
-    }
-  else
-    {
-      *error = 1;
-      LOG_ERROR ("%s: empty obj", __FUNCTION__)
-      return 0;
-    }
+  *error = 0;
+  if (dwg_version == R_INVALID)
+    dwg_version = (Dwg_Version_Type)obj->parent->header.version;
+  return obj->index;
 }
 
 /** Returns dwg_handle* from dwg_object*
@@ -21595,19 +24044,8 @@ dwg_object_get_index (const dwg_object *restrict obj, int *restrict error)
 dwg_handle *
 dwg_object_get_handle (dwg_object *restrict obj, int *restrict error)
 {
-  if (obj)
-    {
-      *error = 0;
-      if (dwg_version == R_INVALID)
-        dwg_version = (Dwg_Version_Type)obj->parent->header.version;
-      return &(obj->handle);
-    }
-  else
-    {
-      *error = 1;
-      LOG_ERROR ("%s: empty obj", __FUNCTION__)
-      return NULL;
-    }
+  *error = 0;
+  return &(obj->handle);
 }
 
 /** Returns the dwg object type, see \ref DWG_OBJECT_TYPE "enum
@@ -21693,12 +24131,6 @@ dwg_obj_get_objid (const dwg_obj_obj *restrict obj, int *restrict error)
 EXPORT BITCODE_BL
 dwg_obj_get_num_eed (const dwg_obj_obj *restrict obj, int *restrict error)
 {
-  if (!obj)
-    {
-      *error = 1;
-      return 0;
-    }
-  *error = 0;
   return obj->num_eed;
 }
 /** Returns the nth EED structure.
@@ -21713,13 +24145,7 @@ dwg_entity_eed *
 dwg_obj_get_eed (const dwg_obj_obj *restrict obj, const BITCODE_BL idx,
                  int *restrict error)
 {
-  if (!obj)
-    {
-      *error = 1;
-      LOG_ERROR ("%s: empty or invalid obj", __FUNCTION__)
-      return NULL;
-    }
-  else if (idx >= obj->num_eed)
+  if (idx >= obj->num_eed)
     {
       *error = 2;
       return NULL;
@@ -21811,7 +24237,7 @@ dwg_obj_get_handleref (const dwg_obj_obj *restrict obj, int *restrict error)
 EXPORT dwg_obj_obj *
 dwg_object_to_object (dwg_object *restrict obj, int *restrict error)
 {
-  if (obj && obj->supertype == DWG_SUPERTYPE_OBJECT)
+  if (obj->supertype == DWG_SUPERTYPE_OBJECT)
     {
       *error = 0;
       if ((dwg_version == R_INVALID) && (obj->parent != NULL))
@@ -21838,12 +24264,6 @@ dwg_obj_obj_to_object (const dwg_obj_obj *restrict obj, int *restrict error)
   dwg_data *dwg;
   dwg_object *retval;
 
-  if (!obj)
-    {
-      *error = 1;
-      // LOG_ERROR("%s: Empty or invalid obj", __FUNCTION__)
-      return NULL;
-    }
   dwg = obj->dwg;
   if (!dwg)
     {
@@ -21918,7 +24338,7 @@ dwg_obj_generic_handlevalue (void *_obj)
 {
   int error;
   Dwg_Object *obj = dwg_obj_generic_to_object (_obj, &error);
-  if (obj && !error)
+  if (!error)
     return obj->handle.value;
   else
     return 0UL;
@@ -21996,17 +24416,7 @@ dwg_ref_get_object (const dwg_object_ref *restrict ref, int *restrict error)
 EXPORT BITCODE_BL
 dwg_ref_get_absref (const dwg_object_ref *restrict ref, int *restrict error)
 {
-  if (ref)
-    {
-      *error = 0;
-      return ref->absolute_ref;
-    }
-  else
-    {
-      LOG_ERROR ("%s: empty ref", __FUNCTION__)
-      *error = 1;
-      return (BITCODE_BL)-1;
-    }
+  return ref->absolute_ref;
 }
 
 /* This was previously in encode and out_dxf, but since out_dxf needs it for
@@ -22032,7 +24442,142 @@ dwg_encrypt_SAT1 (BITCODE_BL blocksize, BITCODE_RC *restrict acis_data,
   return (char *)encr_sat_data;
 }
 
-/* utf-8 string without lowercase letters, space or ! */
+/* check for valid symbol table record name.
+   names can be up to 255 characters long and can contain letters,
+   digits, and the following special characters:
+   dollar sign ($), hyphen (-), and underscore (_).
+   utf-8 string.
+   check if in codepage
+*/
+EXPORT bool
+dwg_is_valid_name_u8 (Dwg_Data *restrict dwg, const char *restrict name)
+{
+  Dwg_Version_Type version = dwg->header.version;
+  const Dwg_Codepage cp = (const Dwg_Codepage)dwg->header.codepage;
+  BITCODE_TU wstr;
+  size_t wlen;
+#ifndef HAVE_NONNULL
+  if (!name)
+    return false;
+#endif
+  if (!*name || strlen (name) > 255)
+    return false;
+  // decode utf-8, check wide-chars
+  wstr = bit_utf8_to_TU ((char *)name, 0);
+  wlen = bit_wcs2nlen (wstr, 255);
+  if (wlen > 255 || !wlen)
+    goto fail;
+  for (size_t i = 0; i < wlen; i++)
+    {
+      uint16_t c = wstr[i];
+      if (i == 0 && c == '*')
+        continue;
+      if (version < R_13 &&
+#ifdef HAVE_WCTYPE_H
+          iswlower (c)
+#else
+          c < 128 && islower (c)
+#endif
+      )
+        goto fail;
+      if (c < 128)
+        {
+          if (!(c == '$' || c == '_' || c == '-' || isalnum (c)))
+            goto fail;
+          else
+            continue;
+        }
+      else if (dwg_codepage_isasian (cp))
+        {
+          // reverse lookup in the cp for the cp index, and then check this
+          // for alnum
+          uint16_t idx = dwg_codepage_wc (cp, c);
+          if (!dwg_codepage_isalnum (cp, idx))
+            goto fail;
+        }
+      else
+        {
+          uint8_t idx = dwg_codepage_c (cp, c);
+          if (!dwg_codepage_isalnum (cp, idx))
+            goto fail;
+        }
+    }
+  free (wstr);
+  return true;
+fail:
+  free (wstr);
+  return false;
+}
+
+/* check for valid symbol table record name.
+   names can be up to 255 characters long and can contain letters,
+   digits, and the following special characters:
+   dollar sign ($), hyphen (-), and underscore (_).
+   native TV or TU string.
+   check if each char in codepage.
+*/
+EXPORT bool
+dwg_is_valid_name (Dwg_Data *restrict dwg, const char *restrict name)
+{
+  Dwg_Version_Type version = dwg->header.version;
+  const Dwg_Codepage cp = (const Dwg_Codepage)dwg->header.codepage;
+#ifndef HAVE_NONNULL
+  if (!name)
+    return false;
+#endif
+  if (dwg->header.from_version < R_2007)
+    {
+      bool isasian = dwg_codepage_isasian (cp);
+      if (!*name || strlen (name) > 255)
+        return false;
+      if (*name == '*') // valid at the beginning
+        name++;
+
+      while (*name)
+        {
+          uint16_t c = (unsigned char)*name;
+          name++;
+          if (version < R_13 && c < 128 && islower (c))
+            return false;
+          if (c > 127 && isasian)
+            {
+              c = (c << 8) + (unsigned char)*name++;
+            }
+          if (!(c == '$' || c == '_' || c == '-'
+                || dwg_codepage_isalnum (cp, c)))
+            return false;
+        }
+      return true;
+    }
+  else // TU string
+    {
+      BITCODE_TU wstr = (BITCODE_TU)name;
+      size_t wlen = bit_wcs2nlen (wstr, 255);
+      if (wlen > 255 || !wlen)
+        return false;
+      for (size_t i = 0; i < wlen; i++)
+        {
+          uint16_t c = wstr[i];
+          if (i == 0 && c == '*')
+            continue;
+          if (version < R_13 &&
+#ifdef HAVE_WCTYPE_H
+              iswlower (c)
+#else
+              c < 128 && islower (c)
+#endif
+          )
+            return false;
+          // check if char in target codepage
+          if (!(c == '$' || c == '_' || c == '-'
+                || dwg_codepage_isalnum (cp, c)))
+            return false;
+        }
+    }
+  return true;
+}
+
+/* utf-8? string without lowercase letters, space or ! */
 EXPORT bool
 dwg_is_valid_tag (const char *tag)
 {
@@ -22044,34 +24589,36 @@ dwg_is_valid_tag (const char *tag)
     return false;
 #ifdef HAVE_WCTYPE_H
   {
-    // decode utf-8, check wide-chars
+    // decode utf-8, check wide-chars (but only in current locale!)
     BITCODE_TU wstr = bit_utf8_to_TU ((char *)tag, 0);
     size_t len = bit_wcs2nlen (wstr, 256);
     if (len > 256 || !len)
-      {
-        free (wstr);
-        return false;
-      }
+      goto fail1;
     for (size_t i = 0; i < len; i++)
       {
-        if (iswlower (wstr[i]))
-          {
-            free (wstr);
-            return false;
-          }
+        uint16_t c = wstr[i];
+        if (iswlower (c)
+            || !(c == '$' || c == '_' || c == '-' || iswalnum (c)))
+          goto fail1;
       }
     free (wstr);
+    return true;
+  fail1:
+    free (wstr);
+    return false;
   }
 #else
   // only ascii support, no wctype nor maxlen checks
-  while (*tag)
-    {
-      if (islower (*tag))
-        return false;
-      tag++;
-    }
-#endif
+  {
+    uint8_t c;
+    while (c = *tag++)
+      {
+        if (islower (c) || !(c == '$' || c == '_' || c == '-' || isalnum (c)))
+          return false;
+      }
+  }
   return true;
+#endif
 }
 
 /********************************************************************
@@ -22215,7 +24762,7 @@ add_obj_reactor (Dwg_Object_Object *obj, BITCODE_RLL absolute_ref)
     }
 
 /* Convert UTF-8 strings to BITCODE_T fields */
-EXPORT BITCODE_T
+EXPORT __nonnull_all BITCODE_T
 dwg_add_u8_input (Dwg_Data *restrict dwg, const char *restrict u8str)
 {
   if (IS_FROM_TU_DWG (dwg))
@@ -22232,7 +24779,7 @@ dwg_add_u8_input (Dwg_Data *restrict dwg, const char *restrict u8str)
                                   dwg->header.codepage);
       if (!dest)
         {
-          LOG_ERROR ("Out of memory");
+          LOG_ERROR ("%s: Out of memory", __FUNCTION__);
           return NULL;
         }
       while (!tgt)
@@ -22240,7 +24787,7 @@ dwg_add_u8_input (Dwg_Data *restrict dwg, const char *restrict u8str)
           size *= 2;
           if (size >= 1>>32)
             {
-              LOG_ERROR ("Out of memory");
+              LOG_ERROR ("%s: Out of memory", __FUNCTION__);
               return NULL;
             }
           dest = (char*)realloc (dest, size);
@@ -22355,11 +24902,11 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
   if (version)
     dwg->header.from_version = version;
   else
-    {
-      version = dwg->header.version = dwg->header.from_version;
-    }
+    version = dwg->header.version = dwg->header.from_version;
+
   // dwg->header.is_maint = 0xf;
-  // dwg->header.zero_one_or_three = 1;
+  if (version > R_2_5)
+    dwg->header.zero_one_or_three = 1;
   // dwg->header.dwg_version = 0x17; // prefer encode if dwg_version is 0
   dwg_ver_struct = (struct dwg_versions *)dwg_version_struct (version);
   if (!dwg->header.codepage)
@@ -22378,17 +24925,33 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
     return error;
 
   dwg->header_vars.unit1_ratio = 412148564080.0; // m to ??
-  dwg->header_vars.unit2_ratio = 1.0;
-  dwg->header_vars.unit3_ratio = 1.0;
-  dwg->header_vars.unit4_ratio = 1.0;
-  if (version > R_11) // also meter sometimes. unit1_text
+  if (version >= R_13 && version < R_2000)
     {
+      dwg->header_vars.unit2_ratio = 6.162483e-14;
+      dwg->header_vars.unit3_ratio = 1.62263e+13;
+      dwg->header_vars.unit4_ratio = 2.63294e+26;
       if (dwg->header_vars.unit1_name)
         free (dwg->header_vars.unit1_name);
-      dwg->header_vars.unit1_name = dwg_add_u8_input (dwg, "m");
+      dwg->header_vars.unit1_name = dwg_add_u8_input (dwg, "meter");
+      dwg->header_vars.unit2_name = dwg_add_u8_input (dwg, "inch");
+      dwg->header_vars.unit3_name = dwg_add_u8_input (dwg, "inch");
+      dwg->header_vars.unit4_name = dwg_add_u8_input (dwg, "sq inch");
     }
+  else
+    {
+      dwg->header_vars.unit2_ratio = 1.0;
+      dwg->header_vars.unit3_ratio = 1.0;
+      dwg->header_vars.unit4_ratio = 1.0;
+      if (version >= R_10) // also meter sometimes. unit1_text
+        {
+          if (dwg->header_vars.unit1_name)
+            free (dwg->header_vars.unit1_name);
+          dwg->header_vars.unit1_name = dwg_add_u8_input (dwg, "m");
+        }
+    }
+  dwg->header_vars.SNAPUNIT = (BITCODE_2RD){ 1.0, 1.0 };
   dwg->header_vars.DIMASO = 1;
-  dwg->header_vars.DIMSHO = 1; // Obsolete
+  dwg->header_vars.DIMSHO = 0; // Obsolete
   dwg->header_vars.REGENMODE = 1;
   dwg->header_vars.FILLMODE = 1;
   dwg->header_vars.PSLTSCALE = 1;
@@ -22399,7 +24962,7 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
   dwg->header_vars.VISRETAIN = 1;
   dwg->header_vars.ATTREQ = 1;
   dwg->header_vars.MIRRTEXT = 1;
-  dwg->header_vars.WORLDVIEW = 1;
+  dwg->header_vars.WORLDVIEW = 1; // since r11
   dwg->header_vars.TILEMODE = 1;
   dwg->header_vars.DELOBJ = 1;
   dwg->header_vars.PROXYGRAPHICS = 1;
@@ -22408,7 +24971,8 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
   dwg->header_vars.LUNITS = 2;
   dwg->header_vars.LUPREC = 4;
   dwg->header_vars.ATTMODE = 1;
-  dwg->header_vars.COORDS = 1;
+  dwg->header_vars.COORDS = version >= R_14 ? 1 : 0;
+  dwg->header_vars.HANDLING = version > R_10 ? 1 : 0;
   dwg->header_vars.PICKSTYLE = 1;
   dwg->header_vars.SPLINESEGS = 8;
   dwg->header_vars.SURFU = 6;
@@ -22419,7 +24983,10 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
   dwg->header_vars.SPLINETYPE = 6;
   dwg->header_vars.SHADEDGE = 3;
   dwg->header_vars.SHADEDIF = 70;
-  dwg->header_vars.MAXACTVP = 48;
+  if (version <= R_11)
+    dwg->header_vars.MAXACTVP = 16;
+  else
+    dwg->header_vars.MAXACTVP = 48;
   dwg->header_vars.ISOLINES = 4;
   dwg->header_vars.TEXTQLTY = 50;
   dwg->header_vars.LTSCALE = 1.0;
@@ -22451,11 +25018,14 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
   dwg->header_vars.TDUUPDATE = dwg->header_vars.TDUCREATE;
   // CECOLOR.index: 256 [CMC.BS 62]
   dwg->header_vars.CECOLOR = (BITCODE_CMC){ 256, CMC_DEFAULTS }; // ByLayer
-  if (version > R_11)
+  if (version > R_9)
     {
       // HANDSEED: 0.1.49 [H 0] // FIXME needs to be updated on encode
       dwg->header_vars.HANDSEED
-          = dwg_add_handleref (dwg, 0, UINT64_C (0x25), NULL);
+          = dwg_add_handleref (dwg, 0, UINT64_C (0x2c), NULL);
+    }
+  if (version > R_10)
+    {
       dwg->header_vars.PEXTMIN
           = (BITCODE_3BD){ 100000000000000000000.0, 100000000000000000000.0,
                            100000000000000000000.0 };
@@ -22467,9 +25037,11 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
       dwg->header_vars.PUCSYDIR = (BITCODE_3BD){ 0.0, 1.0, 0.0 };
       // PUCSNAME: (5.0.0) abs:0 [H 2]
     }
-  else
+  if (version > R_1_4 && version < R_13b1)
+    dwg->header_vars.oldCECOLOR_lo = 15;
+  if (version < R_10)
     {
-      dwg->header_vars.oldCECOLOR_lo = 15;
+      dwg->header_vars.FASTZOOM = 1;
       dwg->header_vars.VPOINTX = (BITCODE_3RD){ 1.0, 0.0, 0.0 };
       dwg->header_vars.VPOINTY = (BITCODE_3RD){ 0.0, 1.0, 0.0 };
       dwg->header_vars.VPOINTZ = (BITCODE_3RD){ 0.0, 0.0, 1.0 };
@@ -22488,11 +25060,15 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
     {
       dwg->header_vars.PLIMMAX = (BITCODE_2DPOINT){ 12.0, 9.0 };
       dwg->header_vars.LIMMAX = (BITCODE_2DPOINT){ 12.0, 9.0 };
+      dwg->header_vars.VIEWCTR = (BITCODE_3RD){ 7.21903, 5.22844, 0 };
+      dwg->header_vars.VIEWSIZE = 10.4569;
     }
   else
     {
       dwg->header_vars.PLIMMAX = (BITCODE_2DPOINT){ 420.0, 297.0 };
       dwg->header_vars.LIMMAX = (BITCODE_2DPOINT){ 420.0, 297.0 };
+      dwg->header_vars.VIEWCTR = (BITCODE_3RD){ 210.0, 148.5, 0 };
+      dwg->header_vars.VIEWSIZE = 228.422194;
     }
   // UCSORG: (0.0, 0.0, 0.0) [3BD 10]
   dwg->header_vars.UCSXDIR = (BITCODE_3BD){ 1.0, 0.0, 0.0 };
@@ -22536,49 +25112,62 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
                                   : "ISO_A1_(841.00_x_594.00_MM)";
 
   // BLOCK_CONTROL_OBJECT: (3.1.1) abs:1 [H 0]
+  dwg_set_next_hdl (dwg, UINT64_C (0x1));
   block_control
       = dwg_add_BLOCK_CONTROL (dwg,
                                0x1F,                          // model space
                                version >= R_13b1 ? 0x20 : 0); // paper space
   // LAYER_CONTROL_OBJECT: (3.1.2) abs:2 [H 0]
+  dwg_set_next_hdl (dwg, UINT64_C (0x2));
   dwg_add_LAYER (dwg, NULL);
   // STYLE_CONTROL_OBJECT: (3.1.3) abs:3 [H 0]
+  dwg_set_next_hdl (dwg, UINT64_C (0x3));
   dwg_add_STYLE (dwg, NULL);
   // hole at 4
   dwg_set_next_hdl (dwg, UINT64_C (0x5));
   // LTYPE_CONTROL_OBJECT: (3.1.5) abs:5 [H 0]
   dwg_add_LTYPE (dwg, NULL);
   // VIEW_CONTROL_OBJECT: (3.1.6) abs:6 [H 0]
+  dwg_set_next_hdl (dwg, UINT64_C (0x6));
   dwg_add_VIEW (dwg, NULL);
   // dwg->view_control = *dwg->object[4].tio.object->tio.VIEW_CONTROL;
   if (version >= R_10)
     {
       // UCS_CONTROL_OBJECT: (3.1.7) abs:7 [H 0]
+      dwg_set_next_hdl (dwg, UINT64_C (0x7));
       dwg_add_UCS (dwg, &pt0, NULL, NULL, NULL);
       // dwg->ucs_control = *dwg->object[5].tio.object->tio.UCS_CONTROL;
-      //  VPORT_CONTROL_OBJECT: (3.1.8) abs:8 [H 0]
+      // VPORT_CONTROL_OBJECT: (3.1.8) abs:8 [H 0]
+      dwg_set_next_hdl (dwg, UINT64_C (0x8));
       dwg_add_VPORT (dwg, NULL);
       // dwg->vport_control = *dwg->object[6].tio.object->tio.VPORT_CONTROL;
-      //  APPID_CONTROL_OBJECT: (3.1.9) abs:9 [H 0]
+      // APPID_CONTROL_OBJECT: (3.1.9) abs:9 [H 0]
+      dwg_set_next_hdl (dwg, UINT64_C (0x9));
       dwg_add_APPID (dwg, NULL);
     }
   if (version >= R_11)
     {
       // DIMSTYLE_CONTROL_OBJECT: (3.1.A) abs:A [H 0]
-      // We don't create DIMSTYLE Standard upfront, only on demand.
+      // We don't create the DIMSTYLE Standard 3.1.1D upfront, only on demand.
+      dwg_set_next_hdl (dwg, UINT64_C (0xA));
       dwg_add_DIMSTYLE (dwg, NULL);
+    }
+  if (version >= R_11 && version <= R_2000)
+    {
       // VX_CONTROL_OBJECT: (3.1.B) abs:B [H 0]
-      if (version <= R_2000)
-        dwg_add_VX (dwg, NULL);
+      dwg_set_next_hdl (dwg, UINT64_C (0xB));
+      dwg_add_VX (dwg, NULL);
     }
   if (version > R_11)
     {
       // DICTIONARY_NAMED_OBJECT: (3.1.C) abs:C [H 0]
+      dwg_set_next_hdl (dwg, UINT64_C (0xC));
       nod = dwg_add_DICTIONARY (dwg, NULL, (const BITCODE_T) "NAMED_OBJECT",
                                 0UL);
       dwg->header_vars.DICTIONARY_NAMED_OBJECT
           = dwg_add_handleref (dwg, 3, UINT64_C (0xC), NULL);
       // DICTIONARY_ACAD_GROUP: (5.1.D) abs:D [H 0]
+      dwg_set_next_hdl (dwg, UINT64_C (0xD));
       dwg_add_DICTIONARY (dwg, (const BITCODE_T) "ACAD_GROUP", NULL,
                           UINT64_C (0));
       dwg->header_vars.DICTIONARY_ACAD_GROUP
@@ -22590,39 +25179,52 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
     {
       Dwg_Object_PLACEHOLDER *plh;
       // DICTIONARY (5.1.E) //FIXME
+      dwg_set_next_hdl (dwg, UINT64_C (0xE));
       dwg_add_DICTIONARYWDFLT (dwg, (const BITCODE_T) "ACAD_PLOTSTYLENAME",
                                (const BITCODE_T) "Normal", UINT64_C (0xF));
       dwg->header_vars.DICTIONARY_PLOTSTYLENAME
           = dwg_add_handleref (dwg, 5, UINT64_C (0xE), NULL);
       // PLOTSTYLE (2.1.F)
+      dwg_set_next_hdl (dwg, UINT64_C (0xF));
       plh = dwg_add_PLACEHOLDER (dwg); // PLOTSTYLE
       obj = dwg_obj_generic_to_object (plh, &error);
       obj->tio.object->ownerhandle
           = dwg_add_handleref (dwg, 4, UINT64_C (0xE), obj);
       add_obj_reactor (obj->tio.object, UINT64_C (0xE));
     }
-  else
+  //else
+  //  {
+  //    dwg_set_next_hdl (dwg, UINT64_C (0x10));
+  //  }
+  if (version >= R_9)
     {
-      dwg_set_next_hdl (dwg, UINT64_C (0x10));
-    }
-  if (version > R_11)
-    {
+      const char *standard
+          = dwg->header.version < R_13 ? "STANDARD" : "Standard";
       // LAYER: (0.1.10)
+      dwg_set_next_hdl (dwg, UINT64_C (0x10));
       layer = dwg_add_LAYER (dwg, (const BITCODE_T) "0");
-      layer->color = (BITCODE_CMC){ 7, CMC_DEFAULTS };
-      layer->ltype
-          = dwg_add_handleref (dwg, 5, UINT64_C (0x16), NULL); // Continuous
-      layer->plotstyle = dwg_add_handleref (dwg, 5, UINT64_C (0xF), NULL);
-      // CLAYER: (5.1.F) abs:F [H 8]
-      dwg->header_vars.CLAYER
-          = dwg_add_handleref (dwg, 5, UINT64_C (0x10), NULL);
+      if (layer)
+        {
+          layer->color = (BITCODE_CMC){ 7, CMC_DEFAULTS };
+          layer->ltype = dwg_add_handleref (dwg, 5, UINT64_C (0x16),
+                                            NULL); // Continuous
+          layer->plotstyle = dwg_add_handleref (dwg, 5, UINT64_C (0xF), NULL);
+          // CLAYER: (5.1.F) abs:F [H 8]
+          dwg->header_vars.CLAYER
+              = dwg_add_handleref (dwg, 5, UINT64_C (0x10), NULL);
+        }
       // ctrl = dwg_get_first_object (dwg, DWG_TYPE_LAYER_CONTROL);
       // if (ctrl)
       //   dwg->layer_control = ctrl->tio.object->tio.LAYER_CONTROL;
-      //   STYLE: (0.1.11)
-      style = dwg_add_STYLE (dwg, "Standard");
-      style->font_file = dwg_add_u8_input (dwg, "txt");
-      style->last_height = 0.2;
+      // STYLE: (0.1.11)
+      dwg_set_next_hdl (dwg, UINT64_C (0x11));
+      style = dwg_add_STYLE (dwg, standard);
+      if (style)
+        {
+          style->font_file = dwg_add_u8_input (dwg, "txt");
+          style->last_height = 0.2;
+          style->width_factor = 1.0;
+        }
       // TEXTSTYLE: (5.1.11) [H 7]
       dwg->header_vars.TEXTSTYLE
           = dwg_add_handleref (dwg, 5, UINT64_C (0x11), NULL);
@@ -22631,20 +25233,26 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
       // ctrl = dwg_get_first_object (dwg, DWG_TYPE_STYLE_CONTROL);
       // if (ctrl)
       //   dwg->style_control = ctrl->tio.object->tio.STYLE_CONTROL;
-      //   APPID "ACAD": (0.1.12)
+      // APPID "ACAD": (0.1.12)
+      dwg_set_next_hdl (dwg, UINT64_C (0x12));
       dwg_add_APPID (dwg, "ACAD");
-      //  hole at 13. already in r13
+      // hole at 13. already in r13
       dwg_set_next_hdl (dwg, UINT64_C (0x14));
       ctrl = dwg_get_first_object (dwg, DWG_TYPE_LTYPE_CONTROL);
       ltype_ctrl = ctrl->tio.object->tio.LTYPE_CONTROL;
       // LTYPE->byblock: (3.1.14)
       ltype = dwg_add_LTYPE (dwg, "BYBLOCK");
+      if (ltype)
+        ltype->flag &= ~64; // not loaded
       ltype_ctrl->num_entries--;
       ltype_ctrl->byblock = dwg_add_handleref (dwg, 3, UINT64_C (0x14), NULL);
       dwg->header_vars.LTYPE_BYBLOCK
           = dwg_add_handleref (dwg, 5, UINT64_C (0x14), NULL);
       // LTYPE->bylayer: (3.1.15)
-      dwg_add_LTYPE (dwg, "BYLAYER");
+      dwg_set_next_hdl (dwg, UINT64_C (0x15));
+      ltype = dwg_add_LTYPE (dwg, "BYLAYER");
+      if (ltype)
+        ltype->flag &= ~64; // not loaded
       ltype_ctrl->num_entries--;
       ltype_ctrl->bylayer = dwg_add_handleref (dwg, 3, UINT64_C (0x15), NULL);
       dwg->header_vars.LTYPE_BYLAYER
@@ -22653,8 +25261,10 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
       dwg->header_vars.CELTYPE
           = dwg_add_handleref (dwg, 5, UINT64_C (0x15), NULL);
       // LTYPE_CONTINUOUS: (5.1.16)
+      dwg_set_next_hdl (dwg, UINT64_C (0x16));
       ltype = dwg_add_LTYPE (dwg, "CONTINUOUS");
-      ltype->description = dwg_add_u8_input (dwg, "Solid line");
+      if (ltype)
+        ltype->description = dwg_add_u8_input (dwg, "Solid line");
       dwg->header_vars.LTYPE_CONTINUOUS
           = dwg_add_handleref (dwg, 5, UINT64_C (0x16), NULL);
     }
@@ -22662,17 +25272,23 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
   if (version >= R_13b1)
     {
       // DICTIONARY ACAD_MLINESTYLE: (5.1.17) abs:E [H 0]
+      dwg_set_next_hdl (dwg, UINT64_C (0x17));
       dwg_add_DICTIONARY (dwg, "ACAD_MLINESTYLE", "Standard", UINT64_C (0x18));
       dwg->header_vars.DICTIONARY_ACAD_MLINESTYLE
           = dwg_add_handleref (dwg, 5, UINT64_C (0x17), NULL);
       // MLINESTYLE: (0.1.18)
+      dwg_set_next_hdl (dwg, UINT64_C (0x18));
       mlstyle = dwg_add_MLINESTYLE (dwg, "Standard");
-      obj = dwg_obj_generic_to_object (mlstyle, &error);
-      if (!error)
-        dwg->header_vars.CMLSTYLE
-            = dwg_add_handleref (dwg, 5, obj->handle.value, NULL);
+      if (mlstyle)
+        {
+          obj = dwg_obj_generic_to_object (mlstyle, &error);
+          if (!error)
+            dwg->header_vars.CMLSTYLE
+                = dwg_add_handleref (dwg, 5, obj->handle.value, NULL);
+        }
 
       // DICTIONARY ACAD_PLOTSETTINGS: (5.1.19)
+      dwg_set_next_hdl (dwg, UINT64_C (0x19));
       dwg_add_DICTIONARY (dwg, "ACAD_PLOTSETTINGS", NULL, 0);
       dwg->header_vars.DICTIONARY_PLOTSETTINGS
           = dwg_add_handleref (dwg, 5, UINT64_C (0x19), NULL);
@@ -22680,18 +25296,24 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
   if (version >= R_2000)
     {
       // DICTIONARY_LAYOUT: (5.1.1A)
+      dwg_set_next_hdl (dwg, UINT64_C (0x1A));
       layoutdict = dwg_add_DICTIONARY (dwg, "ACAD_LAYOUT", NULL, 0);
-      obj = dwg_obj_generic_to_object (layoutdict, &error);
-      dwg->header_vars.DICTIONARY_LAYOUT
-          = dwg_add_handleref (dwg, 5, obj->handle.value, NULL);
+      if (layoutdict)
+        {
+          obj = dwg_obj_generic_to_object (layoutdict, &error);
+          dwg->header_vars.DICTIONARY_LAYOUT
+              = dwg_add_handleref (dwg, 5, obj->handle.value, NULL);
+        }
     }
-  // DIMSTYLE: (5.1.1D) abs:1D [H 2]
+  // DIMSTYLE: STANDARD (5.1.1D) abs:1D [H 2] (only if used)
 
   // hole until 1F
-  dwg_set_next_hdl (dwg, UINT64_C (0x1F));
   // BLOCK_RECORD_MSPACE: (5.1.1F)
+  dwg_set_next_hdl (dwg, UINT64_C (0x1F));
   mspace = dwg_add_BLOCK_HEADER (dwg, "*MODEL_SPACE");
   mspaceobj = dwg_obj_generic_to_object (mspace, &error);
+  if (!mspaceobj)
+    return 1;
   block_control->num_entries--;
   dwg->header_vars.BLOCK_RECORD_MSPACE
       = dwg_add_handleref (dwg, 5, mspaceobj->handle.value, NULL);
@@ -22701,6 +25323,7 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
   if (version >= R_13b1)
     {
       // BLOCK_RECORD_PSPACE: (5.1.20)
+      dwg_set_next_hdl (dwg, UINT64_C (0x20));
       pspace = dwg_add_BLOCK_HEADER (dwg, "*PAPER_SPACE");
       obj = dwg_obj_generic_to_object (pspace, &error);
       block_control->num_entries--;
@@ -22716,14 +25339,18 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
           = dwg_add_handleref (dwg, 3, obj->handle.value, NULL);
       dwg->block_control = *block_control;
       // BLOCK: (5.1.21)
+      dwg_set_next_hdl (dwg, UINT64_C (0x21));
       dwg_add_BLOCK (pspace, "*PAPER_SPACE");
       // ENDBLK: (5.1.22)
+      dwg_set_next_hdl (dwg, UINT64_C (0x22));
       dwg_add_ENDBLK (pspace);
     }
   // LAYOUT (0.1.23)
+  // dwg_set_next_hdl (dwg, UINT64_C (0x23));
   // layout = dwg_add_LAYOUT (layoutdict);
   // pspace->layout = dwg_add_handleref (dwg, 5, UINT64_C (0x23), NULL);
 
+  dwg_set_next_hdl (dwg, UINT64_C (0x24));
   {
     // BLOCK: (5.1.24)
     Dwg_Entity_BLOCK *block = dwg_add_BLOCK (mspace, "*MODEL_SPACE");
@@ -22733,6 +25360,7 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
         obj->type = DWG_TYPE_UNUSED_r11; // don't encode it
       }
   }
+  dwg_set_next_hdl (dwg, UINT64_C (0x25));
   {
     // ENDBLK: (5.1.25)
     Dwg_Entity_ENDBLK *endblk = dwg_add_ENDBLK (mspace);
@@ -22742,11 +25370,17 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
         obj->type = DWG_TYPE_UNUSED_r11; // don't encode it
       }
   }
+  if (dwg->header.version >= R_10)
+    {
+      // VPORT (0.1.26)
+      dwg_set_next_hdl (dwg, UINT64_C (0x26));
+      vport_active = dwg_add_VPORT (
+          dwg, dwg->header.version >= R_13b1 ? "*Active" : "*ACTIVE");
+    }
   if (dwg->header.version >= R_2000)
     {
+      dwg_set_next_hdl (dwg, UINT64_C (0x27));
 #ifdef NEED_VPORT_FOR_MODEL_LAYOUT
-      // VPORT (0.1.26)
-      vport_active = dwg_add_VPORT (dwg, "*Active");
       // LAYOUT (0.1.27)
       obj = dwg_obj_generic_to_object (vport_active, &error);
       layout = dwg_add_LAYOUT (obj, "Model", canonical_media_name);
@@ -22758,12 +25392,14 @@ dwg_add_Document (Dwg_Data *restrict dwg, const int imperial)
 
 #ifdef NEED_VPORT_FOR_MODEL_LAYOUT
       // VIEWPORT (0.1.28)
+      dwg_set_next_hdl (dwg, UINT64_C (0x28));
       pviewport = dwg_add_VIEWPORT (pspace, "");
-      // LAYOUT (0.1.29)
       obj = dwg_obj_generic_to_object (pviewport, &error);
 #else
       obj = dwg_obj_generic_to_object (pspace, &error);
 #endif
+      // LAYOUT (0.1.29)
+      dwg_set_next_hdl (dwg, UINT64_C (0x29));
       layout = dwg_add_LAYOUT (obj, "Layout1", canonical_media_name);
       obj = dwg_obj_generic_to_object (layout, &error);
       pspace->layout = dwg_add_handleref (dwg, 5, obj->handle.value, NULL);
@@ -22790,7 +25426,7 @@ dwg_new_Document (const Dwg_Version_Type version, const int imperial,
   dwg->header.version = version;
   dwg->opts = log_level;
 
-  (void)dwg_add_Document (dwg, imperial);
+  (void)dwg_add_Document (dwg, imperial); // ignores errors
   return dwg;
 }
 
@@ -22812,7 +25448,7 @@ dwg_add_class (Dwg_Data *restrict dwg, const char *const restrict dxfname,
         = (Dwg_Class *)realloc (dwg->dwg_class, (i + 1) * sizeof (Dwg_Class));
   if (!dwg->dwg_class)
     {
-      LOG_ERROR ("Out of memory");
+      LOG_ERROR ("%s: Out of memory", __FUNCTION__);
       return -1;
     }
   klass = &dwg->dwg_class[i];
@@ -22890,6 +25526,34 @@ dwg_add_class (Dwg_Data *restrict dwg, const char *const restrict dxfname,
                  blkobj ? dwg_type_name (blkobj->fixedtype) : "NULL");        \
       return NULL;                                                            \
     }                                                                         \
+  NEW_ENTITY (dwg, obj);                                                      \
+  ADD_ENTITY (token);                                                         \
+  obj->tio.entity->ownerhandle                                                \
+      = dwg_add_handleref (dwg, 5, blkobj->handle.value, obj);                \
+  dwg_set_next_objhandle (obj);                                               \
+  LOG_TRACE ("  handle " FORMAT_H "\n", ARGS_H (obj->handle));                \
+  IN_POSTPROCESS_HANDLES (obj);                                               \
+  if (dwg->header.version < R_10)                                             \
+    dwg->header_vars.numentities++;                                           \
+  dwg_insert_entity ((Dwg_Object_BLOCK_HEADER *)blkhdr, obj)
+
+/* split into 2 to add controls before */
+#define API_ADD_PREP(token)                                                   \
+  int error;                                                                  \
+  Dwg_Object *obj;                                                            \
+  Dwg_Entity_##token *_obj;                                                   \
+  Dwg_Object *blkobj = dwg_obj_generic_to_object (blkhdr, &error);            \
+  Dwg_Data *dwg = blkobj && !error ? blkobj->parent : NULL;                   \
+  if (!dwg || !blkobj                                                         \
+      || !(blkobj->fixedtype == DWG_TYPE_BLOCK_HEADER                         \
+           || dwg_obj_has_subentity (blkobj)))                                \
+    {                                                                         \
+      LOG_ERROR ("Entity %s can not be added to %s", #token,                  \
+                 blkobj ? dwg_type_name (blkobj->fixedtype) : "NULL");        \
+      return NULL;                                                            \
+    }
+
+#define API_ADD_ENTITY2(token)                                                \
   NEW_ENTITY (dwg, obj);                                                      \
   ADD_ENTITY (token);                                                         \
   obj->tio.entity->ownerhandle                                                \
@@ -23196,6 +25860,13 @@ dwg_add_Attribute (Dwg_Entity_INSERT *restrict insert, const double height,
   Dwg_Entity_ATTRIB *attrib;
   int err;
 
+#ifndef HAVE_NONNULL
+  if (!insert)
+    {
+      LOG_ERROR ("add_Attribute: Missing insert");
+      return NULL;
+    }
+#endif
   if (!dwg_is_valid_tag (tag))
     {
       LOG_ERROR ("add_Attribute: Invalid tag %s", tag);
@@ -23379,6 +26050,12 @@ dwg_add_INSERT (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
   // TODO scale_flag
   _obj->rotation = rotation;
   ADD_CHECK_ANGLE (_obj->rotation);
+  if (!dwg_is_valid_name_u8 (dwg, name))
+    {
+      LOG_WARN ("Invalid blockname %s", name);
+      // API_UNADD_ENTITY;
+      // return NULL;
+    }
   hdrref = dwg_find_tablehandle (dwg, name, "BLOCK");
   if (hdrref)
     {
@@ -23397,6 +26074,12 @@ dwg_add_INSERT (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
             blkhdr->inserts, blkhdr->num_inserts * sizeof (BITCODE_H));
       blkhdr->inserts[blkhdr->num_inserts - 1]
           = dwg_add_handleref (dwg, 4, obj->handle.value, NULL);
+    }
+  else
+    {
+      API_UNADD_ENTITY;
+      LOG_ERROR ("block %s not found", name);
+      return NULL;
     }
   if (dwg->header.version < R_2_0b)
     _obj->block_name = strdup (name);
@@ -23521,7 +26204,7 @@ EXPORT Dwg_Entity_POLYLINE_2D *
 dwg_add_POLYLINE_2D (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                      const int num_pts, const dwg_point_2d *restrict pts)
 {
-  Dwg_Object *pl, *vtx = NULL;
+  Dwg_Object *pl, *seq, *vtx = NULL;
   Dwg_Entity_POLYLINE_2D *_pl;
   Dwg_Entity_VERTEX_2D *_vtx;
   Dwg_Entity_SEQEND *_seq;
@@ -23547,8 +26230,9 @@ dwg_add_POLYLINE_2D (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
           return NULL;
         }
       vtx = dwg_obj_generic_to_object (_vtx, &error);
-      if (!vtx)
+      if (!vtx || !vtx->tio.entity || vtx->supertype != DWG_SUPERTYPE_ENTITY)
         goto vtx_2d_err;
+      vtx->tio.entity->next_entity = NULL;
       _pl->vertex[i] = dwg_add_handleref (dwg, 3, vtx->handle.value, pl);
       if (i == 0)
         _pl->first_vertex
@@ -23573,6 +26257,7 @@ dwg_add_POLYLINE_2D (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
       LOG_ERROR ("No SEQEND added");
       return NULL;
     }
+  seq = dwg_obj_generic_to_object (_seq, &error);
   _pl->seqend
       = dwg_add_handleref (dwg, 3, dwg_obj_generic_handlevalue (_seq), pl);
   pl->tio.entity->next_entity = NULL;
@@ -23580,7 +26265,7 @@ dwg_add_POLYLINE_2D (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
     obj->type = DWG_TYPE_POLYLINE_r11;
 
   _pl->num_owned = num_pts;
-  IN_POSTPROCESS_SEQEND (obj, _pl->num_owned, _pl->vertex);
+  IN_POSTPROCESS_SEQEND (seq, _pl->num_owned, _pl->vertex);
   return _pl;
 }
 
@@ -23588,7 +26273,7 @@ EXPORT Dwg_Entity_POLYLINE_3D *
 dwg_add_POLYLINE_3D (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                      const int num_pts, const dwg_point_3d *restrict pts)
 {
-  Dwg_Object *pl, *vtx = NULL;
+  Dwg_Object *pl, *seq, *vtx = NULL;
   Dwg_Entity_POLYLINE_3D *_pl;
   Dwg_Entity_VERTEX_3D *_vtx;
   Dwg_Entity_SEQEND *_seq;
@@ -23598,7 +26283,10 @@ dwg_add_POLYLINE_3D (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
   _pl = _obj;
   _pl->vertex = (BITCODE_H *)malloc (num_pts * sizeof (BITCODE_H));
   if (!_pl->vertex)
-    return NULL;
+    {
+      LOG_ERROR ("%s: Out of memory", __FUNCTION__)
+      return NULL;
+    }
   obj->tio.entity->opts_r11 = OPTS_R11_POLYLINE_HAS_FLAG;
   _obj->flag = FLAG_POLYLINE_3D;
   if (num_pts)
@@ -23616,8 +26304,9 @@ dwg_add_POLYLINE_3D (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
           return NULL;
         }
       vtx = dwg_obj_generic_to_object (_vtx, &error);
-      if (!vtx)
+      if (!vtx || !vtx->tio.entity || vtx->supertype != DWG_SUPERTYPE_ENTITY)
         goto vtx_3d_err;
+      vtx->tio.entity->next_entity = NULL;
       _pl->vertex[i] = dwg_add_handleref (dwg, 3, vtx->handle.value, pl);
       if (i == 0)
         _pl->first_vertex
@@ -23640,6 +26329,7 @@ dwg_add_POLYLINE_3D (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
       LOG_ERROR ("No SEQEND added");
       return NULL;
     }
+  seq = dwg_obj_generic_to_object (_seq, &error);
   _pl->seqend
       = dwg_add_handleref (dwg, 3, dwg_obj_generic_handlevalue (_seq), pl);
   pl->tio.entity->next_entity = NULL;
@@ -23647,7 +26337,7 @@ dwg_add_POLYLINE_3D (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
     obj->type = DWG_TYPE_POLYLINE_r11;
 
   _pl->num_owned = num_pts;
-  IN_POSTPROCESS_SEQEND (obj, _pl->num_owned, _pl->vertex);
+  IN_POSTPROCESS_SEQEND (seq, _pl->num_owned, _pl->vertex);
   return _pl;
 }
 
@@ -23715,7 +26405,7 @@ dwg_add_POLYLINE_PFACE (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                         const dwg_point_3d *restrict verts,
                         const dwg_face *restrict faces)
 {
-  Dwg_Object *pl, *vtx;
+  Dwg_Object *pl, *seq, *vtx;
   Dwg_Entity_POLYLINE_PFACE *_pl;
   Dwg_Entity_VERTEX_PFACE *_vtx;
   Dwg_Entity_VERTEX_PFACE_FACE *_vtxf;
@@ -23727,7 +26417,10 @@ dwg_add_POLYLINE_PFACE (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
   _pl->vertex = (BITCODE_H *)malloc (((unsigned long)numverts + numfaces)
                                      * sizeof (BITCODE_H));
   if (!_pl->vertex)
-    return NULL;
+    {
+      LOG_ERROR ("%s: Out of memory", __FUNCTION__)
+      return NULL;
+    }
   _pl->has_vertex = 1;
   obj->tio.entity->opts_r11 = OPTS_R11_POLYLINE_HAS_FLAG
                               | OPTS_R11_POLYLINE_HAS_M_VERTS
@@ -23747,7 +26440,7 @@ dwg_add_POLYLINE_PFACE (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
           return NULL;
         }
       vtx = dwg_obj_generic_to_object (_vtx, &error);
-      if (!vtx)
+      if (!vtx || !vtx->tio.entity || vtx->supertype != DWG_SUPERTYPE_ENTITY)
         goto vtx_pface_err;
       _pl->vertex[i] = dwg_add_handleref (dwg, 3, vtx->handle.value, pl);
       if (i == 0)
@@ -23764,8 +26457,9 @@ dwg_add_POLYLINE_PFACE (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
           return NULL;
         }
       vtx = dwg_obj_generic_to_object (_vtxf, &error);
-      if (!vtx)
+      if (!vtx || !vtx->tio.entity || vtx->supertype != DWG_SUPERTYPE_ENTITY)
         goto vtx_pface_face_err;
+      vtx->tio.entity->next_entity = NULL;
       _pl->vertex[numverts + j]
           = dwg_add_handleref (dwg, 3, vtx->handle.value, pl);
       if (j == numfaces - 1)
@@ -23783,9 +26477,10 @@ dwg_add_POLYLINE_PFACE (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
       LOG_ERROR ("No SEQEND added");
       return NULL;
     }
+  seq = dwg_obj_generic_to_object (_seq, &error);
   _pl->seqend
       = dwg_add_handleref (dwg, 3, dwg_obj_generic_handlevalue (_seq), pl);
-  IN_POSTPROCESS_SEQEND (obj, _pl->num_owned, _pl->vertex);
+  IN_POSTPROCESS_SEQEND (seq, _pl->num_owned, _pl->vertex);
   pl->tio.entity->next_entity = NULL; // fixup
   if (dwg->header.version <= R_12)
     obj->type = DWG_TYPE_POLYLINE_r11;
@@ -23825,7 +26520,7 @@ dwg_add_POLYLINE_MESH (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                        const unsigned num_m_verts, const unsigned num_n_verts,
                        const dwg_point_3d *restrict verts)
 {
-  Dwg_Object *pl, *vtx;
+  Dwg_Object *pl, *seq, *vtx;
   Dwg_Entity_POLYLINE_MESH *_pl;
   Dwg_Entity_VERTEX_MESH *_vtx;
   Dwg_Entity_SEQEND *_seq;
@@ -23836,7 +26531,10 @@ dwg_add_POLYLINE_MESH (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
   _pl->vertex = (BITCODE_H *)malloc ((unsigned long)num_m_verts * num_n_verts
                                      * sizeof (BITCODE_H));
   if (!_pl->vertex)
-    return NULL;
+    {
+      LOG_ERROR ("%s: Out of memory", __FUNCTION__)
+      return NULL;
+    }
   _pl->flag = FLAG_POLYLINE_MESH;
   _pl->num_m_verts = num_m_verts;
   _pl->num_n_verts = num_n_verts;
@@ -23853,8 +26551,9 @@ dwg_add_POLYLINE_MESH (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
           return NULL;
         }
       vtx = dwg_obj_generic_to_object (_vtx, &error);
-      if (!vtx)
+      if (!vtx || !vtx->tio.entity || vtx->supertype != DWG_SUPERTYPE_ENTITY)
         goto vtx_mesh_err;
+      vtx->tio.entity->next_entity = NULL;
       _pl->vertex[i] = dwg_add_handleref (dwg, 3, vtx->handle.value, pl);
       if (i == 0)
         _pl->first_vertex
@@ -23873,6 +26572,7 @@ dwg_add_POLYLINE_MESH (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
       LOG_ERROR ("No SEQEND added");
       return NULL;
     }
+  seq = dwg_obj_generic_to_object (_seq, &error);
   _pl->seqend
       = dwg_add_handleref (dwg, 3, dwg_obj_generic_handlevalue (_seq), pl);
   pl->tio.entity->next_entity = NULL;
@@ -23887,7 +26587,7 @@ dwg_add_POLYLINE_MESH (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
       if (num_n_verts)
         obj->tio.entity->opts_r11 |= OPTS_R11_POLYLINE_HAS_N_VERTS;
     }
-  IN_POSTPROCESS_SEQEND (obj, _pl->num_owned, _pl->vertex);
+  IN_POSTPROCESS_SEQEND (seq, _pl->num_owned, _pl->vertex);
   return _pl;
 }
 
@@ -23981,9 +26681,10 @@ dwg_add_LINE (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
 static void
 dwg_require_DIMSTYLE_Standard (Dwg_Data *restrict dwg)
 {
-  if (!(dwg_find_tablehandle_silent (dwg, "Standard", "DIMSTYLE")))
+  const char *standard = dwg->header.version < R_13 ? "STANDARD" : "Standard";
+  if (!(dwg_find_tablehandle_silent (dwg, standard, "DIMSTYLE")))
     {
-      Dwg_Object_DIMSTYLE *std = dwg_add_DIMSTYLE (dwg, "Standard");
+      Dwg_Object_DIMSTYLE *std = dwg_add_DIMSTYLE (dwg, standard);
       if (std)
         dwg->header_vars.DIMSTYLE = dwg_add_handleref (
             dwg, 5, dwg_obj_generic_handlevalue (std), NULL);
@@ -23992,7 +26693,6 @@ dwg_require_DIMSTYLE_Standard (Dwg_Data *restrict dwg)
 
 #define DIMENSION_DEFAULTS                                                    \
   _obj->extrusion.z = 1.0;                                                    \
-  dwg_require_DIMSTYLE_Standard (dwg);                                        \
   if (dwg->header_vars.DIMSTYLE)                                              \
   _obj->dimstyle = dwg_add_handleref (                                        \
       dwg, 5, dwg->header_vars.DIMSTYLE->absolute_ref, NULL)
@@ -24003,13 +26703,14 @@ dwg_add_DIMENSION_ALIGNED (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                            const dwg_point_3d *restrict xline2_pt,
                            const dwg_point_3d *restrict text_midpt)
 {
-  API_ADD_ENTITY (DIMENSION_ALIGNED);
+  API_ADD_PREP (DIMENSION_ALIGNED);
   if (dwg->header.version <= R_2_22)
     {
       LOG_ERROR ("Invalid entity %s <r2.22", "DIMENSION_ALIGNED")
-      API_UNADD_ENTITY;
       return NULL;
     }
+  dwg_require_DIMSTYLE_Standard (dwg);
+  API_ADD_ENTITY2 (DIMENSION_ALIGNED);
   DIMENSION_DEFAULTS;
   ADD_CHECK_3DPOINT (xline1_pt);
   ADD_CHECK_3DPOINT (xline2_pt);
@@ -24039,13 +26740,14 @@ dwg_add_DIMENSION_ANG2LN (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                           const dwg_point_3d *restrict xline2end_pt,
                           const dwg_point_3d *restrict text_midpt)
 {
-  API_ADD_ENTITY (DIMENSION_ANG2LN);
+  API_ADD_PREP (DIMENSION_ANG2LN);
   if (dwg->header.version <= R_2_22)
     {
       LOG_ERROR ("Invalid entity %s <r2.22", "DIMENSION_ANG2LN")
-      API_UNADD_ENTITY;
       return NULL;
     }
+  dwg_require_DIMSTYLE_Standard (dwg);
+  API_ADD_ENTITY2 (DIMENSION_ANG2LN);
   DIMENSION_DEFAULTS;
   ADD_CHECK_3DPOINT (center_pt);
   ADD_CHECK_3DPOINT (xline1end_pt);
@@ -24079,13 +26781,14 @@ dwg_add_DIMENSION_ANG3PT (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                           const dwg_point_3d *restrict xline2_pt,
                           const dwg_point_3d *restrict text_midpt)
 {
-  API_ADD_ENTITY (DIMENSION_ANG3PT);
+  API_ADD_PREP (DIMENSION_ANG3PT);
   if (dwg->header.version <= R_2_22)
     {
       LOG_ERROR ("Invalid entity %s <r2.22", "DIMENSION_ANG3PT")
-      API_UNADD_ENTITY;
       return NULL;
     }
+  dwg_require_DIMSTYLE_Standard (dwg);
+  API_ADD_ENTITY2 (DIMENSION_ANG3PT);
   DIMENSION_DEFAULTS;
   ADD_CHECK_3DPOINT (center_pt);
   ADD_CHECK_3DPOINT (xline1_pt);
@@ -24117,13 +26820,14 @@ dwg_add_DIMENSION_DIAMETER (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                             const dwg_point_3d *restrict far_chord_pt,
                             const double leader_len)
 {
-  API_ADD_ENTITY (DIMENSION_DIAMETER);
+  API_ADD_PREP (DIMENSION_DIAMETER);
   if (dwg->header.version <= R_2_22)
     {
       LOG_ERROR ("Invalid entity %s <r2.22", "DIMENSION_DIAMETER")
-      API_UNADD_ENTITY;
       return NULL;
     }
+  dwg_require_DIMSTYLE_Standard (dwg);
+  API_ADD_ENTITY2 (DIMENSION_DIAMETER);
   DIMENSION_DEFAULTS;
   ADD_CHECK_3DPOINT (chord_pt);
   ADD_CHECK_3DPOINT (far_chord_pt);
@@ -24149,13 +26853,14 @@ dwg_add_DIMENSION_ORDINATE (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                             const dwg_point_3d *restrict leader_endpt,
                             const bool use_x_axis)
 {
-  API_ADD_ENTITY (DIMENSION_ORDINATE);
+  API_ADD_PREP (DIMENSION_ORDINATE);
   if (dwg->header.version <= R_2_22)
     {
       LOG_ERROR ("Invalid entity %s <r2.22", "DIMENSION_ORDINATE")
-      API_UNADD_ENTITY;
       return NULL;
     }
+  dwg_require_DIMSTYLE_Standard (dwg);
+  API_ADD_ENTITY2 (DIMENSION_ORDINATE);
   DIMENSION_DEFAULTS;
   ADD_CHECK_3DPOINT (feature_location_pt);
   ADD_CHECK_3DPOINT (leader_endpt);
@@ -24180,13 +26885,14 @@ dwg_add_DIMENSION_RADIUS (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                           const dwg_point_3d *restrict chord_pt,
                           const double leader_len)
 {
-  API_ADD_ENTITY (DIMENSION_RADIUS);
+  API_ADD_PREP (DIMENSION_RADIUS);
   if (dwg->header.version <= R_2_22)
     {
       LOG_ERROR ("Invalid entity %s <r2.22", "DIMENSION_RADIUS")
-      API_UNADD_ENTITY;
       return NULL;
     }
+  dwg_require_DIMSTYLE_Standard (dwg);
+  API_ADD_ENTITY2 (DIMENSION_RADIUS);
   DIMENSION_DEFAULTS;
   ADD_CHECK_3DPOINT (center_pt);
   ADD_CHECK_3DPOINT (chord_pt);
@@ -24213,13 +26919,14 @@ dwg_add_DIMENSION_LINEAR (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                           const dwg_point_3d *restrict def_pt,
                           const double rotation_angle)
 {
-  API_ADD_ENTITY (DIMENSION_LINEAR);
+  API_ADD_PREP (DIMENSION_LINEAR);
   if (dwg->header.version <= R_2_22)
     {
       LOG_ERROR ("Invalid entity %s <r2.22", "DIMENSION_LINEAR")
-      API_UNADD_ENTITY;
       return NULL;
     }
+  dwg_require_DIMSTYLE_Standard (dwg);
+  API_ADD_ENTITY2 (DIMENSION_LINEAR);
   DIMENSION_DEFAULTS;
   ADD_CHECK_3DPOINT (xline1_pt);
   ADD_CHECK_3DPOINT (xline2_pt);
@@ -24420,12 +27127,25 @@ EXPORT Dwg_Entity_VIEWPORT *
 dwg_add_VIEWPORT (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                   const char *restrict name)
 {
-  API_ADD_ENTITY (VIEWPORT);
+  Dwg_Object_VX_TABLE_RECORD *vx = NULL;
+  API_ADD_PREP (VIEWPORT);
   if (dwg->header.version < R_11)
     {
       LOG_ERROR ("Invalid entity %s <r11", "VIEWPORT")
-      API_UNADD_ENTITY;
       return NULL;
+    }
+  if (dwg->header.version < R_2004)
+    {
+      vx = dwg_add_VX (dwg, name);
+    }
+  API_ADD_ENTITY2 (VIEWPORT);
+  if (dwg->header.version < R_2004 && vx)
+    {
+      Dwg_Object *vxobj = dwg_obj_generic_to_object (vx, &error);
+      vx->is_on = 1;
+      // FIXME vxobj->tio.object->ownerhandle
+      vx->viewport = dwg_add_handleref (dwg, 4, obj->handle.value, NULL);
+      _obj->vport_entity_header = dwg_add_handleref (dwg, 5, vxobj ? vxobj->handle.value : 0, NULL);
     }
   // TODO get defaults from name
   _obj->lens_length = 50.0;
@@ -24509,7 +27229,14 @@ dwg_add_SPLINE (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
   _obj->num_fit_pts = (BITCODE_BL)num_fit_pts;
   assert (sizeof (BITCODE_3BD) == sizeof (dwg_point_3d));
   _obj->fit_pts = (BITCODE_3BD *)malloc (num_fit_pts * sizeof (BITCODE_3BD));
-  memcpy (_obj->fit_pts, fit_pts, num_fit_pts * sizeof (BITCODE_3BD));
+  if (!_obj->fit_pts)
+    {
+      LOG_ERROR ("%s: Out of memory", __FUNCTION__)
+    }
+  else
+    {
+      memcpy (_obj->fit_pts, fit_pts, num_fit_pts * sizeof (BITCODE_3BD));
+    }
   return _obj;
 }
 
@@ -24694,6 +27421,7 @@ dwg_add_DICTIONARY (Dwg_Data *restrict dwg,
               = dwg_add_handleref (dwg, 4, nod->handle.value, obj);
           if (!obj->tio.object->num_reactors)
             add_obj_reactor (obj->tio.object, nod->handle.value);
+          _obj->cloning = 1;
         }
     }
   else /* not a direct NOD item */
@@ -24880,19 +27608,38 @@ dwg_add_LEADER (
     const Dwg_Entity_MTEXT *restrict associated_annotation, /* maybe NULL */
     const unsigned type)
 {
-  API_ADD_ENTITY (LEADER);
+  BITCODE_H annotative = NULL;
+  Dwg_Object_DIMSTYLE *annot_style = NULL;
+  Dwg_Object *annot_o = NULL;
+  API_ADD_PREP (LEADER);
   if (!num_points)
     {
       LOG_ERROR ("no num_points")
-      API_UNADD_ENTITY;
       return NULL;
     }
   if (dwg->header.version <= R_12)
     {
       LOG_ERROR ("Invalid entity %s <r13", "LEADER")
-      API_UNADD_ENTITY;
       return NULL;
     }
+  // dimstyles need to be created before the entity
+  if (associated_annotation)
+    {
+      annot_o = dwg_obj_generic_to_object (associated_annotation, &error);
+      if (error || !annot_o || annot_o->fixedtype != DWG_TYPE_MTEXT)
+        {
+          LOG_ERROR ("Invalid associated_annotation object");
+          return NULL;
+        }
+      // use DIMSTYLE "Annotative"
+      annotative = dwg_find_tablehandle (dwg, "Annotative", "DIMSTYLE");
+      if (!annotative)
+        { // create it
+          annot_style = dwg_add_DIMSTYLE (dwg, (const BITCODE_T) "Annotative");
+        }
+    }
+
+  API_ADD_ENTITY2 (LEADER);
   _obj->points = (BITCODE_3BD *)calloc (num_points, sizeof (BITCODE_3BD));
   _obj->num_points = num_points;
   for (unsigned i = 0; i < num_points; i++)
@@ -24909,35 +27656,6 @@ dwg_add_LEADER (
   _obj->origin.z = points[0].z;
   // TODO type => path_type + annot_type + arrowhead_on
   // TODO check more valid types
-  if (associated_annotation)
-    {
-      BITCODE_H annotative;
-      Dwg_Object *o
-          = dwg_obj_generic_to_object (associated_annotation, &error);
-      if (error || !o || o->fixedtype != DWG_TYPE_MTEXT)
-        {
-          LOG_ERROR ("Invalid associated_annotation object");
-          return NULL;
-        }
-      _obj->annot_type = 1;
-      _obj->associated_annotation = dwg_add_handleref (
-          dwg, 5, dwg_obj_generic_handlevalue ((void *)associated_annotation),
-          obj);
-      add_obj_reactor (o->tio.object, obj->handle.value);
-      // use DIMSTYLE "Annotative"
-      annotative = dwg_find_tablehandle (dwg, "Annotative", "DIMSTYLE");
-      if (annotative)
-        _obj->dimstyle
-            = dwg_add_handleref (dwg, 5, annotative->absolute_ref, NULL);
-      else
-        { // create it
-          Dwg_Object_DIMSTYLE *annot
-              = dwg_add_DIMSTYLE (dwg, (const BITCODE_T) "Annotative");
-          if (annot)
-            _obj->dimstyle = dwg_add_handleref (
-                dwg, 5, dwg_obj_generic_handlevalue (annot), NULL);
-        }
-    }
   // defaults:
   _obj->x_direction.x = 1.0;
   if (!_obj->dimstyle && dwg->header_vars.DIMSTYLE)
@@ -24949,6 +27667,21 @@ dwg_add_LEADER (
   // TODO more calcs ...
   _obj->box_width = 0.82;
   _obj->arrowhead_type = 8;
+  if (associated_annotation)
+    {
+      _obj->annot_type = 1;
+      _obj->associated_annotation = dwg_add_handleref (
+          dwg, 5, dwg_obj_generic_handlevalue ((void *)associated_annotation),
+          obj);
+      add_obj_reactor (annot_o->tio.object, obj->handle.value);
+      // use DIMSTYLE "Annotative"
+      if (annotative)
+        _obj->dimstyle
+            = dwg_add_handleref (dwg, 5, annotative->absolute_ref, NULL);
+      else if (annot_style) // created above
+        _obj->dimstyle = dwg_add_handleref (
+            dwg, 5, dwg_obj_generic_handlevalue (annot_style), NULL);
+    }
   return _obj;
 }
 
@@ -25137,6 +27870,11 @@ dwg_add_BLOCK_CONTROL (Dwg_Data *restrict dwg, const unsigned ms,
   Dwg_Object *ctrl = dwg_get_first_object (dwg, DWG_TYPE_##control);          \
   Dwg_Object_##control *_ctrl;                                                \
   BITCODE_RLL ctrlhdl, ctrlidx;                                               \
+  if (name && !dwg_is_valid_name_u8 (dwg, name))                              \
+    {                                                                         \
+      LOG_WARN ("Invalid symbol table record name \"%s\"\n", name);           \
+      /*return NULL;*/                                                        \
+    }                                                                         \
   if (!ctrl || !ctrl->tio.object || !ctrl->tio.object->tio.control)           \
     {                                                                         \
       API_ADD_OBJECT (control);                                               \
@@ -25154,7 +27892,7 @@ dwg_add_BLOCK_CONTROL (Dwg_Data *restrict dwg, const unsigned ms,
     }                                                                         \
   ctrlhdl = ctrl->handle.value;                                               \
   ctrlidx = ctrl->index;                                                      \
-  if (name || strEQc (#record, "BLOCK_HEADER"))                               \
+  if (name)                                                                   \
     {                                                                         \
       API_ADD_OBJECT (record);                                                \
       _record = _obj;                                                         \
@@ -25179,6 +27917,8 @@ dwg_add_BLOCK_CONTROL (Dwg_Data *restrict dwg, const unsigned ms,
       _ctrl->num_entries++;                                                   \
       obj->tio.object->ownerhandle                                            \
           = dwg_add_handleref (dwg, 4, ctrlhdl, obj);                         \
+      LOG_TRACE (#record ".ownerhandle = " FORMAT_REF "\n",                  \
+                 ARGS_REF (obj->tio.object->ownerhandle));                    \
       _obj->is_xref_ref = 1;                                                  \
       return _obj;                                                            \
     }                                                                         \
@@ -25201,6 +27941,8 @@ dwg_add_LAYER (Dwg_Data *restrict dwg, const char *restrict name)
       // PLOTSTYLE placeholder
       API_ADD_TABLE (LAYER, LAYER_CONTROL, {
         _obj->plotstyle = dwg_add_handleref (dwg, 5, UINT64_C (0xF), NULL);
+        _obj->plotflag = 1;
+        _obj->linewt = 0x1f;
       });
     }
   else
@@ -25218,7 +27960,7 @@ dwg_add_STYLE (Dwg_Data *restrict dwg, const char *restrict name)
 EXPORT Dwg_Object_LTYPE *
 dwg_add_LTYPE (Dwg_Data *restrict dwg, const char *restrict name)
 {
-  API_ADD_TABLE (LTYPE, LTYPE_CONTROL, { _obj->alignment = 0x41; });
+  API_ADD_TABLE (LTYPE, LTYPE_CONTROL, { _obj->flag = 64; _obj->alignment = 0x41; });
 }
 
 EXPORT Dwg_Object_VIEW *
@@ -25273,7 +28015,8 @@ dwg_add_APPID (Dwg_Data *restrict dwg, const char *restrict name)
 EXPORT Dwg_Object_DIMSTYLE *
 dwg_add_DIMSTYLE (Dwg_Data *restrict dwg, const char *restrict name)
 {
-  if (name && strNE (name, "Standard"))
+  if (name
+      && strNE (name, dwg->header.version < R_13 ? "STANDARD" : "Standard"))
     dwg_require_DIMSTYLE_Standard (dwg);
   {
     API_ADD_TABLE (DIMSTYLE, DIMSTYLE_CONTROL, {
@@ -25343,7 +28086,7 @@ dwg_add_UCS (Dwg_Data *restrict dwg, const dwg_point_3d *restrict origin,
 // VX_TABLE_RECORD
 // only r11-r2000
 EXPORT Dwg_Object_VX_TABLE_RECORD *
-dwg_add_VX (Dwg_Data *restrict dwg, const char *restrict name)
+dwg_add_VX (Dwg_Data *restrict dwg, const char *restrict name /* maybe NULL */)
 {
   API_ADD_TABLE (VX_TABLE_RECORD, VX_CONTROL);
 }
@@ -25356,43 +28099,48 @@ dwg_add_GROUP (Dwg_Data *restrict dwg,
   Dwg_Object *dictobj;
   Dwg_Object_Ref *groupdict;
   Dwg_Object *nod = dwg_get_first_object (dwg, DWG_TYPE_DICTIONARY);
-  API_ADD_OBJECT (GROUP);
-  if (dwg->header.version <= R_12)
-    {
-      LOG_ERROR ("Invalid entity %s <r13", "GROUP")
-      API_UNADD_ENTITY;
-      return NULL;
-    }
-  // find nod dict
-  groupdict = dwg_ctrl_table (dwg, "GROUP");
-  if (!groupdict)
-    {
-      dict = dwg_add_DICTIONARY (dwg, (const BITCODE_T) "ACAD_GROUP", name,
-                                 obj->handle.value);
-    }
-  else
-    {
-      Dwg_Object *group = dwg_ref_object (dwg, groupdict);
-      if (group)
-        dict = dwg_add_DICTIONARY_item (obj->tio.object->tio.DICTIONARY,
-                                        (const BITCODE_T) "ACAD_GROUP",
-                                        group->handle.value);
-    }
-  if (dict)
-    {
-      dictobj = dwg_obj_generic_to_object (dict, &error);
-      obj->tio.object->ownerhandle
-          = dwg_add_handleref (dwg, 4, dictobj->handle.value, NULL);
-      obj->tio.object->ownerhandle->obj = NULL;
-      add_obj_reactor (obj->tio.object, dictobj->handle.value);
-    }
+  if (name && !dwg_is_valid_name_u8 (dwg, name))
+    LOG_WARN ("Invalid name \"%s\"\n", name);
+  // return NULL;
+  {
+    API_ADD_OBJECT (GROUP);
+    if (dwg->header.version <= R_12)
+      {
+        LOG_ERROR ("Invalid entity %s <r13", "GROUP");
+        API_UNADD_ENTITY;
+        return NULL;
+      }
+    // find nod dict
+    groupdict = dwg_ctrl_table (dwg, "GROUP");
+    if (!groupdict)
+      {
+        dict = dwg_add_DICTIONARY (dwg, (const BITCODE_T) "ACAD_GROUP", name,
+                                   obj->handle.value);
+      }
+    else
+      {
+        Dwg_Object *group = dwg_ref_object (dwg, groupdict);
+        if (group)
+          dict = dwg_add_DICTIONARY_item (obj->tio.object->tio.DICTIONARY,
+                                          (const BITCODE_T) "ACAD_GROUP",
+                                          group->handle.value);
+      }
+    if (dict)
+      {
+        dictobj = dwg_obj_generic_to_object (dict, &error);
+        obj->tio.object->ownerhandle
+            = dwg_add_handleref (dwg, 4, dictobj->handle.value, NULL);
+        obj->tio.object->ownerhandle->obj = NULL;
+        add_obj_reactor (obj->tio.object, dictobj->handle.value);
+      }
 
-  _obj->selectable = 1;
-  if (name)
-    _obj->name = dwg_add_u8_input (dwg, name);
-  else
-    _obj->unnamed = 1;
-  return _obj;
+    _obj->selectable = 1;
+    if (name)
+      _obj->name = dwg_add_u8_input (dwg, name);
+    else
+      _obj->unnamed = 1;
+    return _obj;
+  }
 }
 
 EXPORT Dwg_Object_MLINESTYLE *
@@ -25400,55 +28148,68 @@ dwg_add_MLINESTYLE (Dwg_Data *restrict dwg, const char *restrict name)
 {
   Dwg_Object_DICTIONARY *dict;
   Dwg_Object_Ref *dictref;
-  API_ADD_OBJECT (MLINESTYLE);
-  // find nod dict
-  dictref = dwg_find_dictionary (dwg, "ACAD_MLINESTYLE");
-  if (!dictref)
-    {
-      dict = dwg_add_DICTIONARY (dwg, (const BITCODE_T) "ACAD_MLINESTYLE",
-                                 name, obj->handle.value);
-      if (dict)
-        {
-          obj->tio.object->ownerhandle = dwg_add_handleref (
-              dwg, 4, dwg_obj_generic_handlevalue (dict), obj);
-          if (!obj->tio.object->num_reactors)
-            add_obj_reactor (obj->tio.object,
-                             dwg_obj_generic_handlevalue (dict));
-        }
-    }
-  else
-    {
-      Dwg_Object *dictobj = dwg_ref_object (dwg, dictref);
-      if (dictobj)
-        {
-          dwg_add_DICTIONARY_item (dictobj->tio.object->tio.DICTIONARY, name,
-                                   obj->handle.value);
-          obj->tio.object->ownerhandle
-              = dwg_add_handleref (dwg, 4, dictobj->handle.value, obj);
-          if (!obj->tio.object->num_reactors)
-            add_obj_reactor (obj->tio.object, dictobj->handle.value);
-        }
-    }
+  if (!dwg_is_valid_name_u8 (dwg, name))
+    LOG_WARN ("Invalid name \"%s\"\n", name);
+  // return NULL;
+  {
+    API_ADD_OBJECT (MLINESTYLE);
+    // find nod dict
+    dictref = dwg_find_dictionary (dwg, "ACAD_MLINESTYLE");
+    if (!dictref)
+      {
+        dict = dwg_add_DICTIONARY (dwg, (const BITCODE_T) "ACAD_MLINESTYLE",
+                                   name, obj->handle.value);
+        if (dict)
+          {
+            obj->tio.object->ownerhandle = dwg_add_handleref (
+                dwg, 4, dwg_obj_generic_handlevalue (dict), obj);
+            if (!obj->tio.object->num_reactors)
+              add_obj_reactor (obj->tio.object,
+                               dwg_obj_generic_handlevalue (dict));
+          }
+      }
+    else
+      {
+        Dwg_Object *dictobj = dwg_ref_object (dwg, dictref);
+        if (dictobj)
+          {
+            dwg_add_DICTIONARY_item (dictobj->tio.object->tio.DICTIONARY, name,
+                                     obj->handle.value);
+            obj->tio.object->ownerhandle
+                = dwg_add_handleref (dwg, 4, dictobj->handle.value, obj);
+            if (!obj->tio.object->num_reactors)
+              add_obj_reactor (obj->tio.object, dictobj->handle.value);
+          }
+      }
 
-  _obj->name = strEQc (name, "Standard") ? dwg_add_u8_input (dwg, "STANDARD")
-                                         : dwg_add_u8_input (dwg, name);
-  _obj->fill_color = (BITCODE_CMC){ 256, CMC_DEFAULTS };
-  if (strEQc (name, "Standard") || strEQc (name, "STANDARD"))
-    {
-      _obj->start_angle = _obj->end_angle = deg2rad (90.0);
-      _obj->num_lines = 2;
-      _obj->lines
-          = (Dwg_MLINESTYLE_line *)calloc (2, sizeof (Dwg_MLINESTYLE_line));
-      _obj->lines[0].parent = _obj;
-      _obj->lines[0].offset = 0.5;
-      _obj->lines[0].color = (BITCODE_CMC){ 256, CMC_DEFAULTS };
-      _obj->lines[0].lt_index = 32767;
-      _obj->lines[0].parent = _obj;
-      _obj->lines[1].offset = -0.5;
-      _obj->lines[1].color = (BITCODE_CMC){ 256, CMC_DEFAULTS };
-      _obj->lines[1].lt_index = 32767;
-    }
-  return _obj;
+    _obj->name = strEQc (name, "Standard") ? dwg_add_u8_input (dwg, "Standard")
+                                           : dwg_add_u8_input (dwg, name);
+    _obj->fill_color = (BITCODE_CMC){ 256, CMC_DEFAULTS };
+    if (strEQc (name, "Standard") || strEQc (name, "STANDARD"))
+      {
+        _obj->start_angle = _obj->end_angle = deg2rad (90.0);
+        _obj->num_lines = 2;
+        _obj->lines
+            = (Dwg_MLINESTYLE_line *)calloc (2, sizeof (Dwg_MLINESTYLE_line));
+        _obj->lines[0].parent = _obj;
+        _obj->lines[0].offset = 0.5;
+        _obj->lines[0].color = (BITCODE_CMC){ 256, CMC_DEFAULTS };
+        _obj->lines[0].parent = _obj;
+        _obj->lines[1].offset = -0.5;
+        _obj->lines[1].color = (BITCODE_CMC){ 256, CMC_DEFAULTS };
+        if (dwg->header.version >= R_2018)
+          {
+            _obj->lines[0].lt.ltype = NULL; // FIXME
+            _obj->lines[1].lt.ltype = NULL;
+          }
+        else
+          {
+            _obj->lines[0].lt.index = 32767;
+            _obj->lines[1].lt.index = 32767;
+          }
+      }
+    return _obj;
+  }
 }
 
 // OLE2FRAME
@@ -25967,11 +28728,20 @@ dwg_add_XRECORD_binary (Dwg_Object_XRECORD *restrict _obj, const short dxf,
     _obj->xdata = rbuf;
   _obj->num_xdata++;
   rbuf->type = dxf;
-  rbuf->value.str.size = size;
   rbuf->value.str.is_tu = 0;
   rbuf->value.str.u.data = (char *)malloc (size);
-  memcpy (rbuf->value.str.u.data, data, size);
-  _obj->xdata_size += 3 + size; // 2 + 1 + len
+  if (!rbuf->value.str.u.data)
+    {
+      LOG_ERROR ("%s: Out of memory", __FUNCTION__)
+      rbuf->value.str.size = 0;
+      _obj->xdata_size += 3; // 2 + 1
+    }
+  else
+    {
+      rbuf->value.str.size = size;
+      memcpy (rbuf->value.str.u.data, data, size);
+      _obj->xdata_size += 3 + size; // 2 + 1 + len
+    }
   return _obj;
 }
 
@@ -26054,14 +28824,24 @@ dwg_add_VBA_PROJECT (Dwg_Data *restrict dwg, const BITCODE_BL size,
     // add the data to dwg->vbaproject, the SECTION_VBAPROJECT
     dwg->vbaproject.size = size;
     dwg->vbaproject.unknown_bits = (BITCODE_TF)malloc (size);
-    // memcpy (_obj->data, data, size);
-    memcpy (dwg->vbaproject.unknown_bits, data, size);
+    if (!dwg->vbaproject.unknown_bits)
+      {
+        LOG_ERROR ("%s: Out of memory", __FUNCTION__);
+        dwg->vbaproject.size = 0;
+        _obj->data_size = 0;
+      }
+    else
+      {
+        // memcpy (_obj->data, data, size);
+        memcpy (dwg->vbaproject.unknown_bits, data, size);
+      }
     // header.vbaproj_address is set in encode
     return _obj;
   }
 }
 
-/* either added to the VIEWPORT entity in pspace, or VPORT object in mspace. */
+/* either added to a p/mspace BLOCK_HEADER, to a VIEWPORT entity in pspace,
+   or a VPORT object in mspace. */
 EXPORT Dwg_Object_LAYOUT *
 dwg_add_LAYOUT (Dwg_Object *restrict vp, const char *restrict name,
                 const char *restrict canonical_media_name)
@@ -26069,10 +28849,11 @@ dwg_add_LAYOUT (Dwg_Object *restrict vp, const char *restrict name,
   int err;
   Dwg_Data *dwg = vp->parent;
 #ifdef NEED_VPORT_FOR_MODEL_LAYOUT
-  if (vp->fixedtype != DWG_TYPE_VPORT && vp->fixedtype != DWG_TYPE_VIEWPORT)
+  if (vp->fixedtype != DWG_TYPE_VPORT && vp->fixedtype != DWG_TYPE_VIEWPORT
+      && vp->fixedtype != DWG_TYPE_BLOCK_HEADER)
     {
-      LOG_ERROR ("LAYOUT can only be added to VPORT (in mspace) or VIEWPORT "
-                 "(in pspace)");
+      LOG_ERROR ("LAYOUT can only be added to VPORT (in mspace) or "
+                 "the *Paper_Space BLOCK_HEADER or VIEWPORT (in pspace)");
       return NULL;
     }
 #endif
@@ -26085,7 +28866,7 @@ dwg_add_LAYOUT (Dwg_Object *restrict vp, const char *restrict name,
     Dwg_Object *dictobj;
     Dwg_Object_Ref *dictref;
     Dwg_Object *nod;
-    unsigned long ownerhandle;
+    unsigned long ownerhandle = 0UL;
 
     API_ADD_OBJECT (LAYOUT);
 
@@ -26112,7 +28893,7 @@ dwg_add_LAYOUT (Dwg_Object *restrict vp, const char *restrict name,
         _obj->UCSYDIR = dwg->header_vars.UCSYDIR;
       }
 
-    // either VIEWPORT or VPORT
+    // either VIEWPORT or VPORT or to a pspace or mspace BLOCK_HEADER
     if (vp->fixedtype == DWG_TYPE_BLOCK_HEADER)
       {
         ownerhandle = vp->handle.value;
@@ -26120,18 +28901,20 @@ dwg_add_LAYOUT (Dwg_Object *restrict vp, const char *restrict name,
       }
     else if (vp->fixedtype == DWG_TYPE_VPORT)
       {
-        ownerhandle = vp->tio.object->ownerhandle->absolute_ref;
+        ownerhandle = dwg->header_vars.BLOCK_RECORD_MSPACE->absolute_ref;
         _obj->active_viewport
             = dwg_add_handleref (dwg, 4, vp->handle.value, NULL);
       }
-    else
+    else if (vp->fixedtype == DWG_TYPE_VIEWPORT)
       {
+        // in pspace
         ownerhandle = vp->tio.entity->ownerhandle->absolute_ref;
         _obj->active_viewport
             = dwg_add_handleref (dwg, 4, vp->handle.value, NULL);
       }
 
-    _obj->block_header = dwg_add_handleref (dwg, 4, ownerhandle, NULL);
+    if (ownerhandle)
+      _obj->block_header = dwg_add_handleref (dwg, 4, ownerhandle, NULL);
     // TODO copy the plotsettings and viewport settings as default
 
     dictref = dwg_find_dictionary (dwg, "ACAD_LAYOUT");
@@ -28059,25 +30842,25 @@ dwg_add_PDFUNDERLAY (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
 EXPORT Dwg_Entity_LARGE_RADIAL_DIMENSION *
 dwg_add_LARGE_RADIAL_DIMENSION (Dwg_Object_BLOCK_HEADER *restrict blkhdr,
                                 const dwg_point_3d *restrict center_pt,
-                                const dwg_point_3d *restrict first_arc_pt,
+                                const dwg_point_3d *restrict chord_pt,
                                 const dwg_point_3d *restrict ovr_center,
-                                const dwg_point_3d *restrict jog_point,
-                                const double leader_len)
+                                const dwg_point_3d *restrict jog_pt,
+                                const double jog_angle)
 {
   API_ADD_ENTITY (LARGE_RADIAL_DIMENSION);
   _obj->def_pt.x = center_pt->x;
   _obj->def_pt.y = center_pt->y;
   _obj->def_pt.z = center_pt->z;
-  _obj->first_arc_pt.x = first_arc_pt->x;
-  _obj->first_arc_pt.y = first_arc_pt->y;
-  _obj->first_arc_pt.z = first_arc_pt->z;
+  _obj->chord_pt.x = chord_pt->x;
+  _obj->chord_pt.y = chord_pt->y;
+  _obj->chord_pt.z = chord_pt->z;
   _obj->ovr_center.x = ovr_center->x;
   _obj->ovr_center.y = ovr_center->y;
   _obj->ovr_center.z = ovr_center->z;
-  _obj->jog_point.x = jog_point->x;
-  _obj->jog_point.y = jog_point->y;
-  _obj->jog_point.z = jog_point->z;
-  _obj->leader_len = leader_len;
+  _obj->jog_pt.x = jog_pt->x;
+  _obj->jog_pt.y = jog_pt->y;
+  _obj->jog_pt.z = jog_pt->z;
+  _obj->jog_angle = jog_angle;
   return _obj;
 }
 

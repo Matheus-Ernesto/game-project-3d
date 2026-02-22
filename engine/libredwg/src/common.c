@@ -1,7 +1,7 @@
 /*****************************************************************************/
 /*  LibreDWG - free implementation of the DWG file format                    */
 /*                                                                           */
-/*  Copyright (C) 2009-2023 Free Software Foundation, Inc.                   */
+/*  Copyright (C) 2009-2025 Free Software Foundation, Inc.                   */
 /*                                                                           */
 /*  This library is free software, licensed under the terms of the GNU       */
 /*  General Public License as published by the Free Software Foundation,     */
@@ -274,6 +274,10 @@ dwg_version_type (const Dwg_Version_Type version)
 EXPORT Dwg_Version_Type
 dwg_version_hdr_type (const char *hdr)
 {
+#ifndef HAVE_NONNULL
+  if (!hdr)
+    return R_INVALID;
+#endif
   for (int i = R_AFTER - 1; i > 0; i--)
     {
       if (strEQ (dwg_versions[i].hdr, hdr))
@@ -287,6 +291,10 @@ dwg_version_hdr_type (const char *hdr)
 Dwg_Version_Type
 dwg_version_hdr_type2 (const char *hdr, unsigned dwg_version)
 {
+#ifndef HAVE_NONNULL
+  if (!hdr)
+    return R_INVALID;
+#endif
   for (int i = R_AFTER - 1; i > 0; i--)
     {
       if (strEQ (dwg_versions[i].hdr, hdr))
@@ -496,6 +504,26 @@ delete_hv (BITCODE_H *entries, BITCODE_BS *num_p, BITCODE_BS i)
     {
       memmove (&entries[i], &entries[i + 1], (nume - i) * sizeof (BITCODE_H));
     }
+}
+
+// find if handle already exists, returns index or -1
+BITCODE_BSd
+find_hv (BITCODE_H *entries, BITCODE_BS num_entries, BITCODE_RLL handle_value)
+{
+  BITCODE_BS i;
+#ifndef HAVE_NONNULL
+  if (!entries || !num_entries)
+    return -1; // empty handle vector
+#else
+  if (!num_entries)
+    return -1; // empty handle vector
+#endif
+  for (i = 0; i < num_entries; i++)
+    {
+      if (entries[i] && (entries[i]->handleref.value == handle_value))
+        return i;
+    }
+  return -1; // not found
 }
 
 /* from my dwg11.c, 1995 - rurban */

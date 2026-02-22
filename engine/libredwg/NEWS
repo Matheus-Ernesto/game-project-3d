@@ -2,7 +2,61 @@ GNU LibreDWG NEWS -- history of user-visible changes.  -*-indented-text-*-
 Copyright (C) 2024 Free Software Foundation, Inc.
 See the end for copying conditions.
 
-LibreDWG version 0.13.0 - 2023-02-04 - beta:
+LibreDWG version 0.13.3 - 2023-02-26 - beta:
+
+Minor features:
+  * Promoted SUN object to stable
+Minor bugfixes:
+  * Fix make dist, checking missing dwg2ps.1 and dwgadd.1. Check for missing
+    libps. (#941)
+  * Improved BLOCKSTRETCHACTION a bit
+  * Improved dxf import for OLE2FRAME.data
+  * Fix some fuzzing errors: ossfuzz 66843, 66835, 66639
+  * Various unknown fixes, esp. for out-of-tree builds
+  * Improved wrong DWG_MAX_OBJSIZE, which prevented
+    very large 3DSOLID's to encode, like STEERING.dwg from_autocad_r13
+  * Improved support for beta versions, no logic holes (#908)
+
+LibreDWG version 0.13.2 - 2023-02-10 - beta:
+
+The source releases 0.13 and 0.13.1 missed test/xmlsuite and bindings/python,
+due to a broken automated release process.
+
+Minor bugfixes:
+  * Fix make dist, checking missing test/xmlsuite and bindings/python.
+  * Fix the release CI process, install the missing python deps.
+  * add build-aux/install-libxslt helper
+
+LibreDWG version 0.13.1 - 2023-02-10 - beta:
+
+Minor features:
+  * dwgread now supports --fmt=minJSON or --file=XXX.min.json
+    to emit minimized json without whitespace. Use eg.
+      jq . XXX.min.json
+    to unminimize it. Saves about 50% size.
+Minor bugfixes:
+  * Fixed DXF XRECORD xdata values and sizes (wrong binary encoding in outdxf,
+    wrong xdata_size in indxf)
+  * Fixed indxf for stable ASSOCGEOMDEPENDENCY object.
+  * Fixed decoding handles with sizes > 4, now capped at 32bit.
+    There were apparently undocumented handle bits in the 5th byte.
+  * Fixed decoding preR13 entities with an offset of 1, one unknown byte.
+    Fixes one r2.6 TEXT example.
+  * Improve PROXY fields and DXF codes
+  * Changed MLINESTYLE.line.lt fields (#924)
+  * gcc-14 warning fixes (#931)
+  * Fixed LWPOLYLINE.PLINEGEN flag
+  * Fixed SummaryInfo.props[].tag and value types to T16
+  * Change DIMSTYLE.DIMTXTDIRECTION dxf code from 295 to 294. (#835)
+    Undocumented, ODA has it as 295, netDXF as 294. on indxf accept both.
+  * Fix encode ERROR: Wrong object size on MS adjust on large objects.
+  * Fix encode downconvert_DIMSTYLE, when the eed already had one
+    member, AcadAnnotative.
+  * Fixed preR13 generated internal handles, esp. for the control table records,
+    by updating the internal HANDSEED. Which fixes the ERROR: Duplicate handle X
+    already points to object X.
+
+LibreDWG version 0.13 - 2023-02-04 - beta:
 
 Major features:
   * Added pre-R13 DWG decode support for all old DWG formats
@@ -49,7 +103,7 @@ Minor bugfixes:
   * Fixed many more minor fuzzer errors with illegal input, detected by the
     oss-fuzz service and others. More bounds and type checks, null-derefs,
     double-free, missing zero-termination in fuzzer inputs.
-    
+
     Fixed GH fuzzing issues 911, 901, 899, 890, 880, 881, 859, 850,
     848, 708, 707, 704, 697, 696, 695, 694, 692, 677, 616, 615, 594,
     581, 578, 528, 527, 524, 518, 497, 494, 493, 492, 491, 490, 489,
@@ -858,7 +912,7 @@ Other newsworthy changes:
     "Out of memory"
   * Harmonized in_dxfb with in_dxf, but still WIP
 
-
+
 LibreDWG version 0.6.2 - released 2018/11/07 - still alpha:
 
 Important bugfixes:
@@ -869,14 +923,14 @@ Important bugfixes:
   * Fixed EED realloc on decoding when end - dat->byte == 1
     (PR #41, Denis Pryt)
 
-
+
 LibreDWG version 0.6.1 - released 2018/11/05 - still alpha:
 
 Important bugfixes:
   * fix wrong FIELD_2DD_VECTOR in dwg decode (GH #40).
 
 
-
+
 LibreDWG version 0.6 - released 2018/08/13 - still alpha:
 
 API breaking changes:
@@ -926,7 +980,7 @@ New features:
   * Changed and clarified the semver version numbering on development checkouts with
     major.minor[.patch[.build.nonmastercommits-gittag]]. See HACKING.
 
-
+
 LibreDWG version 0.5 - released 2018/07/05:
 
 This is the first public release ever, after several years of silence.

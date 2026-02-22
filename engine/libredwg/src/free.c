@@ -1,7 +1,7 @@
 /*****************************************************************************/
 /*  LibreDWG - free implementation of the DWG file format                    */
 /*                                                                           */
-/*  Copyright (C) 2018-2023 Free Software Foundation, Inc.                   */
+/*  Copyright (C) 2018-2025 Free Software Foundation, Inc.                   */
 /*                                                                           */
 /*  This library is free software, licensed under the terms of the GNU       */
 /*  General Public License as published by the Free Software Foundation,     */
@@ -96,7 +96,6 @@ static BITCODE_BL rcount1, rcount2;
 #define SUB_FIELD_CAST(o, name, type, cast, dxf)                              \
   {                                                                           \
   }
-#define FIELD_VALUE(name) _obj->name
 #define SUB_FIELD(o, nam, type, dxf) FIELD (_obj->o.nam, type)
 
 #define ANYCODE -1
@@ -195,13 +194,13 @@ static BITCODE_BL rcount1, rcount2;
 #define FIELD_TIMEBLL(name, dxf)
 #define FIELD_TIMERLL(name, dxf)
 #define FIELD_CMC(color, dxf)                                                 \
-  SINCE (R_2004)                                                              \
+  SINCE (R_2004a)                                                             \
   {                                                                           \
     FIELD_T (color.name, 0);                                                  \
     FIELD_T (color.book_name, 0);                                             \
   }
 #define SUB_FIELD_CMC(o, color, dxf)                                          \
-  SINCE (R_2004)                                                              \
+  SINCE (R_2004a)                                                             \
   {                                                                           \
     VALUE_TV (_obj->o.color.name, 0);                                         \
     VALUE_TV (_obj->o.color.book_name, 0);                                    \
@@ -271,7 +270,7 @@ static BITCODE_BL rcount1, rcount2;
       VALUE_TV (_ent->reactors, 0);                                           \
     }
 #define XDICOBJHANDLE(code)                                                   \
-  SINCE (R_2004)                                                              \
+  SINCE (R_2004a)                                                             \
   {                                                                           \
     if (!obj->tio.object->is_xdic_missing)                                    \
       {                                                                       \
@@ -284,7 +283,7 @@ static BITCODE_BL rcount1, rcount2;
     VALUE_HANDLE (obj->tio.object->xdicobjhandle, xdicobjhandle, code, 0);    \
   }
 #define ENT_XDICOBJHANDLE(code)                                               \
-  SINCE (R_2004)                                                              \
+  SINCE (R_2004a)                                                             \
   {                                                                           \
     if (!_ent->is_xdic_missing)                                               \
       {                                                                       \
@@ -347,7 +346,7 @@ static BITCODE_BL rcount1, rcount2;
     _obj = ent = _ent->tio.token;
 
 #define DWG_ENTITY_END                                                        \
-    FREE_IF (obj->unknown_rest);                                              \
+  FREE_IF (obj->unknown_rest);                                                \
   return error;                                                               \
   }
 
@@ -390,7 +389,7 @@ static BITCODE_BL rcount1, rcount2;
 /* obj itself is allocated via dwg->object[], dxfname is klass->dxfname or
  * static */
 #define DWG_OBJECT_END                                                        \
-    FREE_IF (obj->unknown_rest);                                              \
+  FREE_IF (obj->unknown_rest);                                                \
   return error;                                                               \
   }
 
@@ -413,7 +412,7 @@ dwg_free_common_entity_data (Dwg_Object *obj)
 
   FREE_IF (_ent->preview);
 
-// clang-format off
+  // clang-format off
   #include "common_entity_data.spec"
   if (dat->from_version >= R_2007 && _ent->color.flag & 0x40)
     FIELD_HANDLE (color.handle, 0, 430);
@@ -434,7 +433,7 @@ dwg_free_common_object_data (Dwg_Object *obj)
   BITCODE_BL vcount;
   int error = 0;
 
-// clang-format off
+  // clang-format off
   #include "common_object_handle_data.spec"
   // clang-format on
 }
@@ -1531,6 +1530,7 @@ dwg_free_preR13_header_vars (Dwg_Data *dwg)
 
   // fields added by dwg_add_Document:
   FIELD_TV (MENU, 0);
+  FIELD_TFv (unit1_name, 32, 1);
 
   // clang-format off
   #include "header_variables_r11.spec"
@@ -1561,7 +1561,7 @@ dwg_free_summaryinfo (Dwg_Data *dwg)
   Dwg_Object *obj = NULL;
   Bit_Chain *dat = &pdat;
 
-// clang-format off
+  // clang-format off
   #include "summaryinfo.spec"
   // clang-format on
   return 0;
@@ -1574,7 +1574,7 @@ dwg_free_appinfo (Dwg_Data *dwg)
   Dwg_Object *obj = NULL;
   Bit_Chain *dat = &pdat;
 
-// clang-format off
+  // clang-format off
   #include "appinfo.spec"
   // clang-format on
   return 0;
@@ -1587,7 +1587,7 @@ dwg_free_filedeplist (Dwg_Data *dwg)
   Bit_Chain *dat = &pdat;
   BITCODE_RL vcount;
 
-// clang-format off
+  // clang-format off
   #include "filedeplist.spec"
   // clang-format on
   return 0;
@@ -1599,7 +1599,7 @@ dwg_free_security (Dwg_Data *dwg)
   Dwg_Object *obj = NULL;
   Bit_Chain *dat = &pdat;
 
-// clang-format off
+  // clang-format off
   #include "security.spec"
   // clang-format on
   return 0;
@@ -1614,7 +1614,7 @@ dwg_free_acds (Dwg_Data *dwg)
   BITCODE_RL rcount3 = 0, rcount4, vcount;
   int error = 0;
 
-// clang-format off
+  // clang-format off
   #include "acds.spec"
   // clang-format on
   return 0;
@@ -1673,7 +1673,7 @@ dwg_free (Dwg_Data *dwg)
       // FREE_IF (dwg->objfreespace...);
       FREE_IF (dwg->Template.description);
       FREE_IF (dwg->header.section);
-      FREE_IF (dwg->auxheader.R11_HANDSEED);
+      // FREE_IF (dwg->auxheader.R11_HANDSEED);
 
       for (i = 0; i < dwg->num_objects; ++i)
         {
@@ -1714,6 +1714,8 @@ dwg_free (Dwg_Data *dwg)
           dwg->object_map = NULL;
         }
       dwg->num_objects = dwg->num_classes = dwg->num_object_refs = 0;
+      FREE_IF (dwg->object_ordered_ref);
+      dwg->num_object_ordered_refs = 0;
 #undef FREE_IF
     }
 }

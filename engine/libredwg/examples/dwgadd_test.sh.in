@@ -4,6 +4,9 @@ abs_builddir="@abs_builddir@"
 top_builddir="@top_builddir@"
 EXEEXT="@EXEEXT@"
 TESTS_ENVIRONMENT="@AM_TESTS_ENVIRONMENT@"
+HAVE_ASAN="@HAVE_ASAN@"
+HAVE_ODA="@HAVE_ODA@"
+ODAFileConverter="@ODAFILECONVERTER@"
 srcdir="@abs_srcdir@"
 echo srcdir: "$srcdir"
 
@@ -16,6 +19,36 @@ elif [ -n "$TESTS_ENVIRONMENT" ]; then
 else
     TESTPROG="@LTEXEC@"
 fi
+
+if [ -n "$HAVE_ODA" ]; then
+    baseFileConverter="$(basename "$ODAFileConverter")"
+fi
+checkODA() {
+    DWG="$1"
+    V="$2"
+    case $V in
+        r2000) r=2000 ;;
+        r14) r=14 ;;
+        r13) r=13 ;;
+        r12) r=12 ;;
+        r11) r=12 ;;
+        r10) r=10 ;;
+        r9) r=9 ;;
+        *) return ;;
+    esac
+    dxf="$(basename "$DWG" .dwg).dxf"
+    rm -f "$dxf.err"
+    echo timeout 30 "$baseFileConverter" . . "ACAD$r" DXF 0 1 "$DWG"
+    timeout 30 "$ODAFileConverter" . . "ACAD$r" DXF 0 1 "$DWG" >/dev/null 2>/dev/null
+    ret=$?
+    if test -f "$dxf.err"; then
+        cat "$dxf.err"
+        echo FAIL "$baseFileConverter" "$DWG" "$V"
+        return 1
+    fi
+    rm -f "$dxf"
+    return 0
+}
 
 dwgaddtest() {
     MG="$1"
@@ -32,9 +65,13 @@ dwgaddtest() {
         $TESTPROG "${abs_builddir}/dwgadd${EXEEXT}" --verify \
                        -o dwgadd_test.dwg "$FEX"
         ret=$?
+        if [ -n "$has_oda" ]; then
+            checkODA dwgadd_test.dwg r2000
+            ret=$?
+        fi
     else
         #PRE=
-        #if test "$V" = "r1.4" -a -n "@HAVE_ASAN@"
+        #if test "$V" = "r1.4" -a -n $HAVE_ASAN
         #then
         #   PRE="env ASAN_OPTIONS=detect_leaks=0"
         #fi
@@ -43,6 +80,14 @@ dwgaddtest() {
         $TESTPROG "${abs_builddir}/dwgadd${EXEEXT}" --verify \
                        -a "$V" -o dwgadd_test.dwg "$FEX"
         ret=$?
+        if [ -n "$has_oda" ]; then
+            checkODA dwgadd_test.dwg "$V"
+            if [ "$V" = "r14" ]; then
+                echo "TODO $V $EX"
+                ret=0
+            fi
+            ret=$?
+        fi
     fi
     if [ $ret -ne 0 ]
     then
@@ -102,8 +147,46 @@ dwgaddtest AC1015 r2000 $tmp
 
 echo "point (0 0 0)" >$tmp
 cat $tmp
-dwgaddtest AC1015 r2000 $tmp
 dwgaddtest AC1009 r11 $tmp
+dwgaddtest AC1015 r2000 $tmp
+
+echo "readdwg \"dwgadd_test.dwg\"" >$tmp
+echo "point (10 0 0)" >>$tmp
+cat $tmp
+dwgaddtest AC1015 r2000 $tmp
+
+if [ -f "$abs_builddir"/../dxf ]; then
+    cd "$abs_builddir"/.. || exit 1
+    ./dxf -o examples/dwgadd_test.dxf examples/dwgadd_test.dwg
+    rm -f -- ./dwgadd_test_examples.log
+    cd "$abs_builddir" || exit 1
+    if [ -f dwgadd_test.dxf ]; then
+        echo "readdxf \"dwgadd_test.dxf\"" >$tmp
+        echo "point (10 0 0)" >>$tmp
+        cat $tmp
+        if [ "$HAVE_ASAN" = "yes" ]
+        then
+            env ASAN_OPTIONS=detect_leaks=0 dwgaddtest AC1015 r2000 $tmp
+        else
+            dwgaddtest AC1015 r2000 $tmp
+        fi
+    fi
+fi
+
+if [ -f "$abs_builddir"/../json ]; then
+    cd "$abs_builddir"/.. || exit 1
+    cp examples/dwgadd_test.dwg .
+    ./json dwgadd_test.dwg
+    mv dwgadd_test.json examples/
+    rm -f dwgadd_test.dwg dwgadd_test.log
+    cd "$abs_builddir" || exit 1
+    if [ -f dwgadd_test.json ]; then
+        echo "readjson \"dwgadd_test.json\"" >$tmp
+        echo "point (20 0 0)" >>$tmp
+        cat $tmp
+        dwgaddtest AC1015 r2000 $tmp
+    fi
+fi
 
 # cleanup
-rm -f dwgadd_test.dwg $tmp
+rm -f -- dwgadd_test.dwg dwgadd_test.dxf dwgadd_test.json $tmp

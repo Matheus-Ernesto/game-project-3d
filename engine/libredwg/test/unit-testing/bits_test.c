@@ -71,6 +71,7 @@ bit_write_BB_tests (void)
   bitfree (&bitchain);
 }
 
+#if 0
 static void
 bit_read_3B_tests (void)
 {
@@ -106,6 +107,7 @@ bit_write_3B_tests (void)
     fail ("bit_write_3B %d", bitchain.chain[0]);
   bitfree (&bitchain);
 }
+#endif
 
 /* This function calls tests for bit_write_4BITS_tests()
    Used in VIEW view_mode, type 71
@@ -168,15 +170,70 @@ bit_read_4BITS_tests (void)
 }
 
 static void
-bit_read_BLL_tests (void)
+bit_BLL_tests (void)
 {
-  /* 001 => 1, 00000011 */
+  /* 3: 001 => 1, 00000011 */
   Bit_Chain bitchain = strtobt ("00100000011");
   BITCODE_BLL result = bit_read_BLL (&bitchain);
   if (result == 3)
     pass ();
   else
-    fail ("bit_read_BLL " FORMAT_BLL, result);
+    fail ("bit_read_BLL 3 => " FORMAT_BLL, result);
+  bit_set_position (&bitchain, 0);
+
+  bit_write_BLL (&bitchain, 0xF); // => 00100001 11100000
+  if (bitchain.chain[0] == 0x21 && bitchain.chain[1] == 0xe0)
+    pass ();
+  else
+    fail ("bit_write_BLL 0xF => %02X %02X", bitchain.chain[0],
+          bitchain.chain[1]);
+  bit_set_position (&bitchain, 0);
+
+  bit_write_BLL (&bitchain, 0x6C4E);
+  // 0b010 + 0b110110001001110. p/x 0b010 rev(00110100 01001110) => 0x49 0xcd
+  // 0x80
+  if (bitchain.chain[0] == 0x49 && bitchain.chain[1] == 0xcd
+      && bitchain.chain[2] == 0x80)
+    pass ();
+  else
+    fail ("bit_write_BLL 0x6C4E => %02X %02X %02X", bitchain.chain[0],
+          bitchain.chain[1], bitchain.chain[2]);
+  bit_set_position (&bitchain, 0);
+
+  bit_write_BLL (&bitchain, 0x100000);
+  // 0b011 1000000000000000000000
+  if (bitchain.chain[0] == 0x60 && bitchain.chain[1] == 0x00
+      && bitchain.chain[2] == 0x02)
+    pass ();
+  else
+    fail ("bit_write_BLL 0x100000 => %02X %02X %02X", bitchain.chain[0],
+          bitchain.chain[1], bitchain.chain[2]);
+  bit_set_position (&bitchain, 0);
+
+  for (int j = 0; j < 5; j++)
+    {
+      for (int len = 0; len <= 7; len++)
+        {
+          // generate random number with len bytes
+          BITCODE_BLL r = 0;
+          for (int i = 0; i < len; i++)
+            {
+              r <<= 8;
+              r |= (uint8_t)(rand () & 0xFF);
+            }
+
+          // 0xc669 => 010 + 0xc669
+          bit_write_BLL (&bitchain, r);
+          bit_set_position (&bitchain, 0);
+          result = bit_read_BLL (&bitchain);
+          if (result == r)
+            pass ();
+          else
+            fail ("bit_read_BLL len=%d " FORMAT_RLL " => " FORMAT_RLL, len, r,
+                  result);
+          bit_set_position (&bitchain, 0);
+        }
+    }
   bitfree (&bitchain);
 }
 
@@ -407,7 +464,7 @@ bit_BL_tests (void)
   bitfree (&bitchain);
 }
 
-// seperate branches for bit=0 and bit=1
+// separate branches for bit=0 and bit=1
 static void
 bit_RD_tests (void)
 {
@@ -445,7 +502,7 @@ bit_RD_tests (void)
   bitfree (&bitchain);
 }
 
-// seperate branches for bit=0 and bit=1
+// separate branches for bit=0 and bit=1
 static void
 bit_BD_tests (void)
 {
@@ -479,6 +536,7 @@ bit_BD_tests (void)
             fail ("bit_read_BD bit=%d %g != %g", i, result, u.d);
         }
     }
+  bitfree (&bitchain);
 
   bitchain = strtobt ("10");
   result = bit_read_BD (&bitchain);
@@ -614,8 +672,14 @@ bit_RLL_tests (void)
 static void
 bit_RLL_BE_tests (void)
 { /*                             0x7f 0xf7 0xbf 0x7d 0x00 0x00 0x00 0x01 */
-  Bit_Chain bitchain = strtobt ("01111111" "11110111" "10111111" "01111101"
-                                "00000000" "00000000" "00000000" "00000001");
+  Bit_Chain bitchain = strtobt ("01111111"
+                                "11110111"
+                                "10111111"
+                                "01111101"
+                                "00000000"
+                                "00000000"
+                                "00000000"
+                                "00000001");
   BITCODE_RLL result = bit_read_RLL_BE (&bitchain);
   if (result == UINT64_C (0x7FF7BF7D00000001))
     pass ();
@@ -624,12 +688,13 @@ bit_RLL_BE_tests (void)
 
   bit_set_position (&bitchain, 0);
   bit_write_RLL_BE (&bitchain, UINT64_C (0x8000ffff00000001));
-  if (memcmp (bitchain.chain, "\x80\x00\xff\xff\x00\x00\x00\x01", 8 ) == 0)
+  if (memcmp (bitchain.chain, "\x80\x00\xff\xff\x00\x00\x00\x01", 8) == 0)
     pass ();
   else
-    fail ("bit_write_RLL_BE %x %x %x %x %x %x %x %x", bitchain.chain[0], bitchain.chain[1],
-          bitchain.chain[2], bitchain.chain[3], bitchain.chain[4], bitchain.chain[5],
-          bitchain.chain[6], bitchain.chain[7]);
+    fail ("bit_write_RLL_BE %x %x %x %x %x %x %x %x", bitchain.chain[0],
+          bitchain.chain[1], bitchain.chain[2], bitchain.chain[3],
+          bitchain.chain[4], bitchain.chain[5], bitchain.chain[6],
+          bitchain.chain[7]);
 
   bit_set_position (&bitchain, 0);
   result = bit_read_RLL_BE (&bitchain);
@@ -640,8 +705,15 @@ bit_RLL_BE_tests (void)
   bitfree (&bitchain);
 
   // ----------------------------------------------------------------
-  bitchain = strtobt ("0" "01111111" "11110111" "10111111" "01111101"
-                          "00000000" "00000000" "00000000" "00000001");
+  bitchain = strtobt ("0"
+                      "01111111"
+                      "11110111"
+                      "10111111"
+                      "01111101"
+                      "00000000"
+                      "00000000"
+                      "00000000"
+                      "00000001");
   bit_set_position (&bitchain, 1);
   result = bit_read_RLL_BE (&bitchain);
   if (result == UINT64_C (0x7FF7BF7D00000001))
@@ -651,12 +723,13 @@ bit_RLL_BE_tests (void)
 
   bit_set_position (&bitchain, 1);
   bit_write_RLL_BE (&bitchain, UINT64_C (0x8000ffff00000001));
-  if (memcmp (bitchain.chain, "\x40\x00\x7F\xFF\x80\x00\x00\x00", 8 ) == 0)
+  if (memcmp (bitchain.chain, "\x40\x00\x7F\xFF\x80\x00\x00\x00", 8) == 0)
     pass ();
   else
-    fail ("bit_write_RLL_BE bit=1 %x %x %x %x %x %x %x %x", bitchain.chain[0], bitchain.chain[1],
-          bitchain.chain[2], bitchain.chain[3], bitchain.chain[4], bitchain.chain[5],
-          bitchain.chain[6], bitchain.chain[7]);
+    fail ("bit_write_RLL_BE bit=1 %x %x %x %x %x %x %x %x", bitchain.chain[0],
+          bitchain.chain[1], bitchain.chain[2], bitchain.chain[3],
+          bitchain.chain[4], bitchain.chain[5], bitchain.chain[6],
+          bitchain.chain[7]);
 
   bit_set_position (&bitchain, 1);
   result = bit_read_RLL_BE (&bitchain);
@@ -685,8 +758,7 @@ bit_read_H_tests (void)
     pass ();                                                                  \
   else                                                                        \
     {                                                                         \
-      fail ("bit_read_H: %s (result " FORMAT_H ")", s, ARGS_H (result));      \
-      /*bit_print (&bitchain, sizeof (Dwg_Handle)); */                        \
+      fail ("bit_read_H: %s (result " FORMAT_H ")", s, ARGS_H (result)); /*bit_print (&bitchain, sizeof (Dwg_Handle)); */                        \
     }                                                                         \
   bitfree (&bitchain)
 
@@ -882,11 +954,50 @@ bit_utf8_to_TV_tests (void)
   else
     fail ("bit_utf8_to_TV %s as CP949", p);
   p = bit_utf8_to_TV (dest, (const unsigned char *)"시험", sizeof (dest),
-                      strlen (src1), 0, CP_CP949);
+                      strlen ("시험"), 0, CP_CP949);
   if (strEQc (p, "\xdc\xc3\x7e\xe8"))
     pass ();
   else
     fail ("bit_utf8_to_TV %s as CP949", p);
+  p = bit_utf8_to_TV (dest, (const unsigned char *)"█", sizeof (dest),
+                      strlen ("█"), 0, CP_CP869);
+  if (strEQc (p, "\xdb"))
+    pass ();
+  else
+    fail ("bit_utf8_to_TV %s as CP869 (DB %2X)", p, (unsigned)*p);
+  p = bit_utf8_to_TV (dest, (const unsigned char *)"δ", sizeof (dest),
+                      strlen ("δ"), 0, CP_CP869);
+  if (strEQc (p, "\xdd"))
+    pass ();
+  else
+    fail ("bit_utf8_to_TV %s as CP869 (DD %2X)", p, (unsigned)*p);
+}
+
+static void
+bit_utf8_to_TU_tests (void)
+{
+  BITCODE_TU p;
+
+  p = bit_utf8_to_TU ((char *)"Ë", 0); // "\xc3\x8b"
+  if (*p == 0xCB && !p[1])
+    pass ();
+  else
+    fail ("bit_utf8_to_TU U+00CB => %2X%2X", p[0], p[1]);
+  free (p);
+
+  p = bit_utf8_to_TU ((char *)"█", 0); // \xe2\x96\x88
+  if (*p == 0x2588 && !p[1])
+    pass ();
+  else
+    fail ("bit_utf8_to_TU U+2588 => %2X%2X", p[0], p[1]);
+  free (p);
+
+  p = bit_utf8_to_TU ((char *)"δ", 0); // "\xce\xb4"
+  if (*p == 0x03B4 && !p[1])
+    pass ();
+  else
+    fail ("bit_utf8_to_TU U+03B4 => %2X%2X", p[0], p[1]);
+  free (p);
 }
 
 static void
@@ -998,6 +1109,8 @@ bit_read_TV_tests (void)
     ok ("bit_read_TV (<R_13)");
   else
     fail ("bit_read_TV (<R_13): %s", result);
+  free (result);
+  bitfree (&bitchain);
 
   bitchain = strtobt ("01"         // BB (1)
                       "00000100"   // RC (3)
@@ -1011,7 +1124,7 @@ bit_read_TV_tests (void)
     ok ("bit_read_TV (>R_13)");
   else
     fail ("bit_read_TV (>R_13): %s", result);
-
+  free (result);
   bitfree (&bitchain);
 }
 
@@ -1050,6 +1163,7 @@ bit_read_TF_tests (void)
   else
     fail ("bit_read_TF");
 
+  free (result);
   bitfree (&bitchain);
 }
 
@@ -1080,6 +1194,7 @@ bit_read_BE_tests (void)
     ok ("bit_read_BE (0.0 0.0 1.1) R_2000");
   else
     fail ("bit_read_BE (%f,%f,%f) R_2000", x, y, z);
+  bitfree (&bitchain);
 
   bitprepare (&bitchain, 25);
   bitchain.from_version = R_2000;
@@ -1093,6 +1208,7 @@ bit_read_BE_tests (void)
     ok ("bit_read_BE (20.2535 10.2523 52.32563) R_2000");
   else
     fail ("bit_read_BE (%f,%f,%f) R_2000", x, y, z);
+  bitfree (&bitchain);
 
   bitchain = strtobt ("10100100");
   bitchain.from_version = R_14;
@@ -1101,6 +1217,7 @@ bit_read_BE_tests (void)
     ok ("bit_read_BE (0.0 0.0 1.1) R_14");
   else
     fail ("bit_read_BE (%f,%f,%f) R_14", x, y, z);
+  bitfree (&bitchain);
 
   bitprepare (&bitchain, 25);
   bitchain.from_version = R_14;
@@ -1132,8 +1249,6 @@ bit_write_BE_tests (void)
           bitchain.bit);
 
   bit_set_position (&bitchain, 0);
-  bitprepare (&bitchain, 25);
-  bitchain.version = R_2000;
   bit_write_BE (&bitchain, 20.2535, 10.2523, 52.32563);
   if (bitchain.byte == 24 && bitchain.bit == 7)
     ok ("bit_write_BE (20.2535 10.2523 52.32563) R_2000");
@@ -1142,7 +1257,6 @@ bit_write_BE_tests (void)
           bitchain.bit);
 
   bit_set_position (&bitchain, 0);
-  bitprepare (&bitchain, 25);
   bitchain.version = R_14;
   bit_write_BE (&bitchain, 0.0, 0.0, 1.0);
   if (bitchain.byte == 0 && bitchain.bit == 6)
@@ -1151,7 +1265,6 @@ bit_write_BE_tests (void)
     fail ("bit_write_BE @%" PRIuSIZE ".%u R_14", bitchain.byte, bitchain.bit);
 
   bit_set_position (&bitchain, 0);
-  bitprepare (&bitchain, 25);
   bitchain.version = R_14;
   bit_write_BE (&bitchain, 20.2535, 10.2523, 52.32563);
   if (bitchain.byte == 24 && bitchain.bit == 6)
@@ -1234,6 +1347,129 @@ bit_read_CMC_tests (void)
 }
 
 static void
+bit_read_MS_tests (void)
+{
+  Bit_Chain bitchain = strtobt ("11111111"
+                                "01111111");
+  unsigned int result = bit_read_MS (&bitchain);
+  if (result == 32767)
+    ok ("bit_read_MS - 32767");
+  else
+    fail ("bit_read_MS");
+  bitfree (&bitchain);
+
+  bitchain = strtobt ("11111111"
+                      "11111111"
+                      "11111111"
+                      "01111111");
+  result = bit_read_MS (&bitchain);
+  if (result == 1073741823)
+    ok ("bit_read_MS - 1073741823");
+  else
+    fail ("bit_read_MS");
+  bitfree (&bitchain);
+}
+
+static void
+bit_read_UMC_tests (void)
+{
+  Bit_Chain bitchain;
+  BITCODE_UMC umc;
+
+#define test_UMC(s, x)                                                        \
+  bitchain = strtobt (s);                                                     \
+  umc = bit_read_UMC (&bitchain);                                             \
+  if (umc == x)                                                               \
+    ok ("bit_read_UMC - " FORMAT_UMC, (BITCODE_UMC)x);                        \
+  else                                                                        \
+    fail ("bit_read_UMC " FORMAT_UMC " != " FORMAT_UMC, umc, (BITCODE_UMC)x); \
+  bitfree (&bitchain)
+
+  test_UMC ("00000000", 0x0);
+  test_UMC ("01111111", 0x7F);
+  test_UMC ("11100101"
+            "10001110"
+            "00100110",
+            0x98765);
+  test_UMC ("11010010"
+            "11101100"
+            "10101001"
+            "11110010"
+            "10010010"
+            "10100010"
+            "00000001",
+            0x5112E4A7652);
+  test_UMC ("11111111"
+            "11111111"
+            "11111111"
+            "11111111"
+            "11111111"
+            "11111111"
+            "11111111"
+            "01111111",
+            0xFFFFFFFFFFFFFF);
+}
+
+static void
+bit_read_MC_tests (void)
+{
+  Bit_Chain bitchain;
+  BITCODE_MC mc;
+
+#define test_MC(s, x)                                                         \
+  bitchain = strtobt (s);                                                     \
+  mc = bit_read_MC (&bitchain);                                               \
+  if (mc == x)                                                                \
+    ok ("bit_read_MC - %d", (BITCODE_MC)x);                                   \
+  else                                                                        \
+    fail ("bit_read_MC " FORMAT_MC " != " FORMAT_MC, mc, (BITCODE_MC)x);      \
+  bitfree (&bitchain)
+
+  test_MC ("00000000", 0);
+  test_MC ("00111111", 63);
+  test_MC ("01111111", -63);
+  test_MC ("11111111"
+           "00000000",
+           127);
+  test_MC ("11111111"
+           "01000000",
+           -127);
+  test_MC ("11111111"
+           "00111111",
+           8191);
+  test_MC ("11111111"
+           "01111111",
+           -8191);
+  test_MC ("11111111"
+           "11111111"
+           "00000000",
+           16383);
+  test_MC ("11111111"
+           "11111111"
+           "01000000",
+           -16383);
+  test_MC ("11000000"
+           "10111011"
+           "01111000",
+           -925120);
+  test_MC ("11111111"
+           "11111111"
+           "11111111"
+           "00111111",
+           134217727);
+  test_MC ("11111111"
+           "11111111"
+           "11111111"
+           "01111111",
+           -134217727);
+  test_MC ("11111111"
+           "11111111"
+           "11111111"
+           "11111111",
+           268435455);
+}
+
+static void
 in_hexbin_tests (void)
 {
   Bit_Chain dat = { 0 };
@@ -1291,7 +1527,8 @@ in_hexbin_tests (void)
     // only with DEBUG we can detect wrong chars
 #ifndef NDEBUG
   hex[0] = 'g';
-  fprintf (stderr, "NOTE: ignore the next ERROR Invalid hex string member gF:\n");
+  fprintf (stderr,
+           "NOTE: ignore the next ERROR Invalid hex string member gF:\n");
   written = in_hex2bin (dat.chain, hex, dat.size);
   if (written == 0)
     ok ("in_hexbin error (ignore the ERROR above)");
@@ -1325,11 +1562,13 @@ main (int argc, char const *argv[])
   bit_advance_position_tests ();
   bit_read_BB_tests ();
   bit_write_BB_tests ();
+#if 0
   bit_read_3B_tests ();
   bit_write_3B_tests ();
+#endif
   bit_read_4BITS_tests ();
   bit_write_4BITS_tests ();
-  bit_read_BLL_tests ();
+  bit_BLL_tests ();
   bit_read_RC_tests ();
   bit_write_RC_tests ();
   bit_RS_tests ();
@@ -1342,6 +1581,7 @@ main (int argc, char const *argv[])
   bit_RLL_tests ();
   bit_RLL_BE_tests ();
   bit_utf8_to_TV_tests ();
+  bit_utf8_to_TU_tests ();
   bit_TV_to_utf8_tests ();
   bit_read_H_tests ();
   bit_write_H_tests ();
@@ -1353,6 +1593,9 @@ main (int argc, char const *argv[])
   bit_read_BE_tests ();
   bit_write_BE_tests ();
   bit_read_CMC_tests ();
+  bit_read_MS_tests ();
+  bit_read_UMC_tests ();
+  bit_read_MC_tests ();
   in_hexbin_tests ();
 
   // Prepare the testcase
@@ -1372,9 +1615,9 @@ main (int argc, char const *argv[])
           bitchain.bit);
 
   bit_set_position (&bitchain, 0);
-  //#ifdef WORDS_BIGENDIAN
-  //  bit_print (&bitchain, sizeof (double));
-  //#endif
+  // #ifdef WORDS_BIGENDIAN
+  //   bit_print (&bitchain, sizeof (double));
+  // #endif
   if ((dbl = bit_read_RD (&bitchain)) == 1.2345)
     pass ();
   else
@@ -1389,9 +1632,9 @@ main (int argc, char const *argv[])
           bitchain.bit);
 
   bit_set_position (&bitchain, 1);
-  //#ifdef WORDS_BIGENDIAN
-  //  bit_print (&bitchain, sizeof (double));
-  //#endif
+  // #ifdef WORDS_BIGENDIAN
+  //   bit_print (&bitchain, sizeof (double));
+  // #endif
   if ((dbl = bit_read_RD (&bitchain)) == 1.2345)
     pass ();
   else

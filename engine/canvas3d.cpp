@@ -17,6 +17,39 @@ public:
     World world;
     bool enable3D;
 
+    struct Filter3D
+    {
+        bool enabled = false;
+        float darkness = 0.0f;  // 0 = normal, 1 = preto total
+        float blur = 0.0f;      // 0 = sem blur, 1 = blur máximo (requer shader)
+        float sepia = 0.0f;     // 0 = normal, 1 = sépia total
+        float grayscale = 0.0f; // 0 = normal, 1 = preto e branco
+        float tint_r = 1.0f;    // Tinta vermelha (multiplicativa)
+        float tint_g = 1.0f;    // Tinta verde
+        float tint_b = 1.0f;    // Tinta azul
+        float tint_a = 1.0f;    // Alpha (transparência)
+    } filter3D;
+
+    void applyFilter3D() {
+        if (!filter3D.enabled) return;
+        
+        // Escurecimento via luz ambiente global
+        if (filter3D.darkness > 0.0f) {
+            float dark = 1.0f - filter3D.darkness;
+            GLfloat global_ambient[] = {dark * 0.3f, dark * 0.3f, dark * 0.3f, 1.0f};
+            glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+        }
+        
+        // Tint (multiplicar cores)
+        if (filter3D.tint_r != 1.0f || filter3D.tint_g != 1.0f || filter3D.tint_b != 1.0f) {
+            glEnable(GL_COLOR_MATERIAL);
+            glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+            glColor4f(filter3D.tint_r, filter3D.tint_g, filter3D.tint_b, filter3D.tint_a);
+        }
+    }
+    
+    // ... resto da classe
+
     struct TextureGL
     {
         GLuint id;
@@ -131,29 +164,82 @@ public:
     void draw(sf::RenderWindow &window)
     {
         // Habilita o sistema de iluminação
-        glEnable(GL_LIGHTING); // Habilita a iluminação global
-        glEnable(GL_LIGHT0);   // Habilita a luz 0
+        glEnable(GL_LIGHTING);
 
-        // Posição da luz (a posição em espaço homogêneo (x, y, z, w) - w=1 para luz pontual)
-        GLfloat light_position[] = {5.0f, 5.0f, 3.0f, 1.0f};
-        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+        // Configura o modelo de cor (usar material e luz)
+        glEnable(GL_COLOR_MATERIAL);
+        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
-        // Propriedades da luz (difusa, especular, ambiente)
-        GLfloat light_diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f}; // Cor difusa (branca)
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+        // Desabilita todas as luzes primeiro
+        for (int i = 0; i < 8; i++)
+        { // OpenGL geralmente suporta pelo menos 8 luzes
+            glDisable(GL_LIGHT0 + i);
+        }
 
-        GLfloat light_specular[] = {1.0f, 1.0f, 1.0f, 1.0f}; // Reflexão especular
-        glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+        // Configura cada luz do vetor
+        int lightCount = 0;
+        for (auto &light : world.scene.lights)
+        {
+            if (!light.enabled || lightCount >= 8)
+                continue; // Máximo de 8 luzes
 
-        GLfloat light_ambient[] = {0.3f, 0.3f, 0.3f, 1.0f}; // Cor ambiente (luz suave)
-        glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+            GLenum lightID = GL_LIGHT0 + lightCount;
 
-        // Atenuação da luz
-        GLfloat attenuation[] = {1.0f, 0.05f, 0.01f}; // Atenuação de luz
-        glLightfv(GL_LIGHT0, GL_CONSTANT_ATTENUATION, &attenuation[0]);
-        glLightfv(GL_LIGHT0, GL_LINEAR_ATTENUATION, &attenuation[1]);
-        glLightfv(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, &attenuation[2]);
+            // Ativa a luz
+            glEnable(lightID);
 
+            // Posição da luz
+            GLfloat light_position[] = {light.pos_x, light.pos_y, light.pos_z, 1.0f};
+            glLightfv(lightID, GL_POSITION, light_position);
+
+            // Propriedades da luz
+            GLfloat light_diffuse[] = {light.diffuse_r, light.diffuse_g, light.diffuse_b, light.diffuse_a};
+            glLightfv(lightID, GL_DIFFUSE, light_diffuse);
+
+            GLfloat light_specular[] = {light.specular_r, light.specular_g, light.specular_b, light.specular_a};
+            glLightfv(lightID, GL_SPECULAR, light_specular);
+
+            GLfloat light_ambient[] = {light.ambient_r, light.ambient_g, light.ambient_b, light.ambient_a};
+            glLightfv(lightID, GL_AMBIENT, light_ambient);
+
+            // Atenuação
+            glLightf(lightID, GL_CONSTANT_ATTENUATION, light.constant_attenuation);
+            glLightf(lightID, GL_LINEAR_ATTENUATION, light.linear_attenuation);
+            glLightf(lightID, GL_QUADRATIC_ATTENUATION, light.quadratic_attenuation);
+
+            // Configurações específicas por tipo de luz
+            if (light.type == 1) // Direcional
+            {
+                // Para luz direcional, w = 0 indica direção, não posição
+                GLfloat light_direction[] = {light.dir_x, light.dir_y, light.dir_z, 0.0f};
+                glLightfv(lightID, GL_POSITION, light_direction);
+            }
+            else if (light.type == 2) // Spot
+            {
+                glLightf(lightID, GL_SPOT_CUTOFF, light.spot_cutoff);
+                glLightf(lightID, GL_SPOT_EXPONENT, light.spot_exponent);
+
+                GLfloat spot_direction[] = {light.dir_x, light.dir_y, light.dir_z};
+                glLightfv(lightID, GL_SPOT_DIRECTION, spot_direction);
+            }
+
+            lightCount++;
+        }
+
+        // Se não há luzes configuradas, cria uma luz padrão
+        if (world.scene.lights.empty())
+        {
+            glEnable(GL_LIGHT0);
+
+            GLfloat light_position[] = {5.0f, 5.0f, 5.0f, 1.0f};
+            glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+            GLfloat light_diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
+            glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+
+            GLfloat light_ambient[] = {0.3f, 0.3f, 0.3f, 1.0f};
+            glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+        }
         // Para cada objeto na cena, defina as propriedades do material e desenhe o objeto
         for (auto &obj : world.scene.objects3d)
         {

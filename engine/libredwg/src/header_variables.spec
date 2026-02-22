@@ -39,18 +39,24 @@
 
 // size, bitsize_hi and bitsize read before
 
-  SINCE (R_2013)
+  SINCE (R_2013b)
     {
       FIELD_BLL (REQUIREDVERSIONS, 160);
     }
 
   SINCE (R_13b1)
     {
-      IF_ENCODE_FROM_EARLIER_OR_DXF {
+      IF_ENCODE_FROM_EARLIER {
         FIELD_VALUE (unit1_ratio) = 412148564080.0;
-        FIELD_VALUE (unit2_ratio) = 1.0;
-        FIELD_VALUE (unit3_ratio) = 1.0;
-        FIELD_VALUE (unit4_ratio) = 1.0;
+        VERSIONS (R_13b1, R_2004) {
+          FIELD_VALUE (unit2_ratio) = 6.162483e-14;
+          FIELD_VALUE (unit3_ratio) = 1.62263e+13;
+          FIELD_VALUE (unit4_ratio) = 2.63294e+26;
+        } else {
+          FIELD_VALUE (unit2_ratio) = 1.0;
+          FIELD_VALUE (unit3_ratio) = 1.0;
+          FIELD_VALUE (unit4_ratio) = 1.0;
+        }
       }
       FIELD_BD (unit1_ratio, 0); // unit conversions. i.e. meter / inch
       FIELD_BD (unit2_ratio, 0);
@@ -58,9 +64,19 @@
       FIELD_BD (unit4_ratio, 0);
     }
   VERSIONS (R_13b1, R_2004) { // undocumented as such in the ODA spec
-      IF_ENCODE_FROM_EARLIER_OR_DXF {
-        free (FIELD_VALUE (unit1_name));
-        FIELD_VALUE (unit1_name) = strdup ("m");
+      IF_ENCODE_FROM_EARLIER
+      {
+        if (!(FIELD_VALUE (unit1_name)))
+        {
+          VERSIONS (R_13b1, R_2004) {
+            FIELD_VALUE (unit1_name) = strdup ("meter");
+            FIELD_VALUE (unit2_name) = strdup ("inch");
+            FIELD_VALUE (unit3_name) = strdup ("inch");
+            FIELD_VALUE (unit4_name) = strdup ("sq inch");
+          } else {
+            FIELD_VALUE (unit1_name) = strdup ("m");
+          }
+        }
       }
       FIELD_TV (unit1_name, 0);
       FIELD_TV (unit2_name, 0);
@@ -75,7 +91,7 @@
       IF_ENCODE_FROM_EARLIER_OR_DXF {
         FIELD_VALUE (unknown_8) = 24;
       }
-      FIELD_BL (unknown_8, 0);
+      FIELD_BLx (unknown_8, 0);
       FIELD_BL (unknown_9, 0);
     }
   VERSIONS (R_13b1, R_14) // or maybe UNTIL (R_14)
@@ -84,7 +100,8 @@
     }
   VERSIONS (R_13b1, R_2000)
     {
-      FIELD_HANDLE (VX_TABLE_RECORD, 5, 0); //current view
+      // => VX. VX.viewport <=> active_viewport in LAYOUT
+      FIELD_HANDLE (VX_TABLE_RECORD, 5, 0); // current view
     }
   SINCE (R_13b1)
     {
@@ -107,7 +124,7 @@
   VERSIONS (R_13b1, R_14) {
     FIELD_B (BLIPMODE, 70);
   }
-  SINCE (R_2004) {
+  SINCE (R_2004a) {
     FIELD_B (unknown_11, 0); //undocumented
   }
 
@@ -155,7 +172,8 @@
   FIELD_BS (PROXYGRAPHICS, 70);
   UNTIL (R_14) {
     IF_ENCODE_FROM_EARLIER {
-      FIELD_VALUE (DRAGMODE) = 2;
+      if (!FIELD_VALUE (DRAGMODE))
+        FIELD_VALUE (DRAGMODE) = 2;
     }
     FIELD_BS (DRAGMODE, 70);
   }
@@ -180,7 +198,7 @@
   UNTIL (R_14) {
     FIELD_BS (PICKSTYLE, 70);
   }
-  SINCE (R_2004) {
+  SINCE (R_2004a) {
     FIELD_BL (unknown_12, 0);
     FIELD_BL (unknown_13, 0);
     FIELD_BL (unknown_14, 0);
@@ -231,7 +249,7 @@
   FIELD_BD (FACETRES, 40);
   FIELD_BD (CMLSCALE, 40);
   FIELD_BD (CELTSCALE, 40);
-  PRE (R_2007) {
+  PRE (R_2007a) {
     FIELD_TV (MENU, 1);
   }
   FIELD_TIMEBLL (TDUCREATE, 40);
@@ -256,7 +274,7 @@
                    _obj->TDUPDATE.days, _obj->TDUPDATE.ms, _buf);
     }
   }
-  SINCE (R_2004) {
+  SINCE (R_2004a) {
     FIELD_BL (unknown_15, 0);
     FIELD_BL (unknown_16, 0);
     FIELD_BL (unknown_17, 0);
@@ -269,7 +287,7 @@
   FIELD_HANDLE (TEXTSTYLE, 5, 7);
   FIELD_HANDLE (CELTYPE, 5, 6);
 
-  IF_FREE_OR_SINCE (R_2007)
+  IF_FREE_OR_SINCE (R_2007a)
     {
       FIELD_HANDLE (CMATERIAL, 5, 0);
     }
@@ -277,7 +295,7 @@
   FIELD_HANDLE (DIMSTYLE, 5, 2);
   FIELD_HANDLE (CMLSTYLE, 5, 2);
 
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       FIELD_BD (PSVPSCALE, 40);
     }
@@ -296,7 +314,7 @@
       FIELD_HANDLE (PUCSNAME, 5, 2);
     }
 
-  IF_FREE_OR_SINCE (R_2000)
+  IF_FREE_OR_SINCE (R_2000b)
     {
       FIELD_HANDLE (PUCSORTHOREF, 5, 2);
       FIELD_BS (PUCSORTHOVIEW, 70);
@@ -320,7 +338,7 @@
   FIELD_3BD (UCSYDIR, 10);
   FIELD_HANDLE (UCSNAME, 5, 2);
 
-  IF_FREE_OR_SINCE (R_2000)
+  IF_FREE_OR_SINCE (R_2000b)
     {
       FIELD_HANDLE (UCSORTHOREF, 5, 2);
       FIELD_BS (UCSORTHOVIEW, 70);
@@ -331,7 +349,7 @@
       FIELD_3BD (UCSORGRIGHT, 10);
       FIELD_3BD (UCSORGFRONT, 10);
       FIELD_3BD (UCSORGBACK, 10);
-      PRE (R_2007) {
+      PRE (R_2007a) {
         FIELD_TV (DIMPOST, 1);
         FIELD_TV (DIMAPOST, 1);
       }
@@ -381,7 +399,7 @@
   FIELD_BD (DIMTP, 40);
   FIELD_BD (DIMTM, 40);
 
-  SINCE (R_2007)
+  SINCE (R_2007a)
     {
       FIELD_BD (DIMFXL, 40);
       FIELD_BD (DIMJOGANG, 40);
@@ -389,7 +407,7 @@
       FIELD_CMC (DIMTFILLCLR, 70);
     }
 
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       FIELD_B (DIMTOL, 70);
       FIELD_B (DIMLIM, 70);
@@ -402,7 +420,7 @@
       FIELD_BS (DIMAZIN, 70);
     }
 
-  SINCE (R_2007)
+  SINCE (R_2007a)
     {
       FIELD_BS (DIMARCSYM, 70);
     }
@@ -425,7 +443,7 @@
       FIELD_TV (DIMBLK2_T, 1);
     }
 
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       FIELD_BD (DIMALTRND, 40);
       FIELD_B (DIMALT, 70);
@@ -440,7 +458,7 @@
   FIELD_CMC (DIMCLRE, 70);
   FIELD_CMC (DIMCLRT, 70);
 
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       FIELD_BS (DIMADEC, 70);
       FIELD_BS (DIMDEC, 70);
@@ -463,19 +481,19 @@
       FIELD_BS (DIMATFIT, 70);
     }
 
-  SINCE (R_2007)
+  SINCE (R_2007a)
     {
       FIELD_B (DIMFXLON, 70);
     }
 
-  SINCE (R_2010)
+  SINCE (R_2010b)
     {
       FIELD_B (DIMTXTDIRECTION, 70);
       FIELD_BD (DIMALTMZF, 40);
       FIELD_BD (DIMMZF, 40);
     }
 
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       FIELD_HANDLE (DIMTXSTY, 5, 7);
       FIELD_HANDLE (DIMLDRBLK, 5, 1);
@@ -484,14 +502,14 @@
       FIELD_HANDLE (DIMBLK2, 5, 1);
     }
 
-  SINCE (R_2007)
+  SINCE (R_2007a)
     {
       FIELD_HANDLE (DIMLTYPE, 5, 6);
       FIELD_HANDLE (DIMLTEX1, 5, 6);
       FIELD_HANDLE (DIMLTEX2, 5, 6);
     }
 
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       FIELD_BSd (DIMLWD, 70);
       FIELD_BSd (DIMLWE, 70);
@@ -514,7 +532,7 @@
   FIELD_HANDLE (DICTIONARY_ACAD_MLINESTYLE, 5, 0);
   FIELD_HANDLE (DICTIONARY_NAMED_OBJECT, 5, 0);
 
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       IF_ENCODE_FROM_EARLIER_OR_DXF {
          FIELD_VALUE (TSTACKALIGN) = 1;
@@ -522,7 +540,7 @@
       }
       FIELD_BS (TSTACKALIGN, 70);
       FIELD_BS (TSTACKSIZE, 70);
-      PRE (R_2007) {
+      PRE (R_2007a) {
         FIELD_TV (HYPERLINKBASE, 1);
         FIELD_TV (STYLESHEET, 1);
       }
@@ -531,22 +549,22 @@
       FIELD_HANDLE (DICTIONARY_PLOTSTYLENAME, 5, 0); // should be CPLOTSTYLE
     }
 
-  SINCE (R_2004)
+  SINCE (R_2004a)
     {
       FIELD_HANDLE (DICTIONARY_MATERIAL, 5, 0);
       FIELD_HANDLE (DICTIONARY_COLOR, 5, 0);
     }
 
-  SINCE (R_2007)
+  SINCE (R_2007a)
     {
       FIELD_HANDLE (DICTIONARY_VISUALSTYLE, 5, 0);
     }
 
-  SINCE (R_2013)
+  SINCE (R_2013b)
     {
       FIELD_HANDLE (unknown_20, 5, 0); //  DICTIONARY_LIGHTLIST? since 2010
     }
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       ENCODER {
         // unneeded here. done in in_dxf.c:1189
@@ -579,13 +597,13 @@
         {
           FIELD_HANDLE (CPSNID, 5, 0);
         }
-      PRE (R_2007) {
+      PRE (R_2007a) {
         FIELD_TV (FINGERPRINTGUID, 2);
         FIELD_TV (VERSIONGUID, 2);
       }
     }
 
-  SINCE (R_2004)
+  SINCE (R_2004a)
     {
       FIELD_RC (SORTENTS, 280);   //bitmask, see docs
       FIELD_RC (INDEXCTL, 280);
@@ -597,7 +615,7 @@
       FIELD_BS (INTERSECTIONCOLOR, 280);
       FIELD_RC (OBSLTYPE, 280);
       FIELD_RC (INTERSECTIONDISPLAY, 290);
-      PRE (R_2007) {
+      PRE (R_2007a) {
         FIELD_TV (PROJECTNAME, 1);
       }
     }
@@ -608,7 +626,7 @@
   FIELD_HANDLE (LTYPE_BYBLOCK, 5, 0);
   FIELD_HANDLE (LTYPE_CONTINUOUS, 5, 0);
 
-  SINCE (R_2007)
+  SINCE (R_2007a)
     {
       IF_ENCODE_FROM_EARLIER {
          FIELD_VALUE (STEPSPERSEC) = 2.0;
@@ -675,7 +693,7 @@
       FIELD_BS (unknown_57, 0);
     }
 
-  IF_FREE_OR_SINCE (R_2007) {
+  IF_FREE_OR_SINCE (R_2007a) {
     // TODO split str_dat stream and get rid of this block
     SECTION_STRING_STREAM
     FIELD_T (unit1_name, 0);
@@ -685,7 +703,7 @@
     FIELD_T (MENU, 1);
     FIELD_T (DIMPOST, 1);
     FIELD_T (DIMAPOST, 1);
-    SINCE (R_2010) {
+    SINCE (R_2010b) {
       FIELD_T (DIMALTMZS, 1);
       FIELD_T (DIMMZS, 1);
     }

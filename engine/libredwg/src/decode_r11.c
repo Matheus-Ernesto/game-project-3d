@@ -1,7 +1,7 @@
 /*****************************************************************************/
 /*  LibreDWG - free implementation of the DWG file format                    */
 /*                                                                           */
-/*  Copyright (C) 2022-2024 Free Software Foundation, Inc.                   */
+/*  Copyright (C) 2022-2025 Free Software Foundation, Inc.                   */
 /*                                                                           */
 /*  This library is free software, licensed under the terms of the GNU       */
 /*  General Public License as published by the Free Software Foundation,     */
@@ -95,8 +95,8 @@ dwg_decode_preR13_handleref (Bit_Chain *restrict dat, int size,
       LOG_ERROR ("Out of memory");
       return NULL;
     }
-  //dwg->object_ref[dwg->num_object_refs++] = ref;
-  //ref->handleref.is_global = 1;
+  // dwg->object_ref[dwg->num_object_refs++] = ref;
+  // ref->handleref.is_global = 1;
   ref->handleref.size = size;
   if (size == 2)
     ref->r11_idx = (BITCODE_RSd)bit_read_RS (dat);
@@ -151,7 +151,8 @@ decode_preR13_section_hdr (const char *restrict name, Dwg_Section_Type_r11 id,
              (BITCODE_RS)tbl->number);
   LOG_RPOS;
   tbl->flags_r11 = bit_read_RS (dat);
-  LOG_TRACE ("%s_CONTROL.flags_r11: " FORMAT_RSx " [RS]", tbl->name, tbl->flags_r11);
+  LOG_TRACE ("%s_CONTROL.flags_r11: " FORMAT_RSx " [RS]", tbl->name,
+             tbl->flags_r11);
   LOG_RPOS;
   tbl->address = bit_read_RL (dat);
   LOG_TRACE ("%s_CONTROL.address: " FORMAT_RLx " [RL] (%u)", tbl->name,
@@ -397,9 +398,13 @@ decode_preR13_section (Dwg_Section_Type_r11 id, Bit_Chain *restrict dat,
               LOG_ERROR ("Out of memory");                                    \
               obj->num_unknown_rest = 0;                                      \
             }                                                                 \
-        }                                                                     \
-      /* In the table header the size OR number can be wrong. */              \
-      /* Here we catch the wrong number. */                                   \
+        } /* In the table header the size OR number can be wrong. */ /* Here    \
+                                                                        we      \
+                                                                        catch   \
+                                                                        the     \
+                                                                        wrong   \
+                                                                        number. \
+                                                                      */                                   \
       if (tbl->number > 0 && tbl->size < 33)                                  \
         return DWG_ERR_SECTIONNOTFOUND;                                       \
     }                                                                         \
@@ -613,7 +618,7 @@ decode_entity_preR13 (Bit_Chain *restrict dat, Dwg_Object *restrict obj,
     {
       obj->handle.value = dwg_next_handle (dwg);
       dwg_add_handle (&obj->handle, 0, obj->handle.value, obj);
-      LOG_TRACE ("=> handle: (0.%d." FORMAT_RLLx ")\n", obj->handle.size,
+      LOG_TRACE ("=> handle: (0.%d." FORMAT_HV ")\n", obj->handle.size,
                  obj->handle.value);
     }
   obj->common_size = bit_position (dat) - obj->bitsize_pos;

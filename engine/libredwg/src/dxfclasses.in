@@ -49,6 +49,7 @@ enum apptypes
   DGNLSCLASS,
   AEC60CLASS,
   SPECIALCLASS,
+  NanoSPDSCLASS,
 };
 #define ODBX ODBXCLASS
 #define ISM ISMCLASS
@@ -58,6 +59,7 @@ enum apptypes
 #define DGNLS DGNLSCLASS
 #define AEC60 AEC60CLASS
 #define SPECIAL SPECIALCLASS
+#define NanoSPDS NanoSPDSCLASS
 //%null-strings
 
 %}
@@ -87,6 +89,7 @@ ACDBDICTIONARYWDFLT,		"AcDbDictionaryWithDefault",	ODBX_OR_A2000CLASS,	0
 ACDBPLACEHOLDER,		"AcDbPlaceHolder",		ODBX_OR_A2000CLASS,	0
 ACAD_PROXY_ENTITY_WRAPPER,	"AcDbProxyEntityWrapper",	ODBX_OR_A2000CLASS,	0
 ACAD_PROXY_OBJECT_WRAPPER,	"AcDbProxyObjectWrapper",	ODBX_OR_A2000CLASS,	0
+SPATIAL_INDEX,	"AcDbSpatialIndex",	ODBX_OR_A2000CLASS,	0
 #
 DICTIONARYVAR,	"AcDbDictionaryVar",	A2000CLASS,	0
 LAYOUT,		"AcDbLayout",		A2000CLASS,	0
@@ -95,7 +98,6 @@ SORTENTSTABLE,	"AcDbSortentsTable",	A2000CLASS,	0
 VBA_PROJECT,	"AcDbVbaProject",	ODBX,	0
 XRECORD,	"AcDbXrecord",		ODBX,	0
 LAYER_INDEX,	"AcDbLayerIndex",	ODBX,	0
-SPATIAL_INDEX,	"AcDbSpatialIndex",	ODBX,	0
 SPATIAL_FILTER,	"AcDbSpatialFilter",	ODBX,	0
 IDBUFFER,	"AcDbIdBuffer",		ODBX,	0
 VISUALSTYLE,	"AcDbVisualStyle",	ODBX,	0
@@ -309,6 +311,13 @@ LSCOMPOUNDCOMPONENT,			"AcDbLSCompoundComponent",	DGNLS, 0
 LSPOINTCOMPONENT,			"AcDbLSPointComponent",		DGNLS, 0
 LSSYMBOLCOMPONENT,			"AcDbLSSymbolComponent",	DGNLS, 0
 AEC_REFEDIT_STATUS_TRACKER,		"AecDbRefEditStatusTracker",    AEC60, 0
+Wall,                                   "PtDbWall",                     NanoSPDS, 1
+Format,                                 "mcsDbObjectFormat",            NanoSPDS, 1
+NOTEPOSITION,                           "mcsDbObjectNotePosition",      NanoSPDS, 1
+mcsDbObject,                            "mcsDbObject",                  NanoSPDS, 1
+McDbContainer2,                         "McDbContainer2",               NanoSPDS, 0
+spdsLevelMark,                          "mcsDbObjectLevelMark",         NanoSPDS, 1
+spdsRelationMark,                       "mcsDbObjectRelationMark",      NanoSPDS, 1
 %%
 
 /* Create classes on demand.
@@ -349,6 +358,8 @@ dwg_require_class (Dwg_Data *restrict dwg, const char *const restrict dxfname, c
           return dwg_add_class (dwg, dxfname, result->cppname, "AcDbPointCloudObj", result->isent); //appname?
         case DGNLSCLASS:
           return dwg_add_class (dwg, dxfname, result->cppname, "AcDgnLS", result->isent);
+        case NanoSPDSCLASS:
+          return dwg_add_class (dwg, dxfname, result->cppname, "NanoSPDS", result->isent);
         case AEC60CLASS:
           return dwg_add_class (dwg, dxfname, result->cppname, "AecArchBase60|Product Desc: "
                                 "Autodesk Architectural Desktop 2007", result->isent);

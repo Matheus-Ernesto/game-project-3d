@@ -69,11 +69,20 @@
         FIELD_VALUE (isbylayerlt) = FIELD_VALUE (ltype_flags) < 3 ? 1 : 0;
 #endif
 #ifdef IS_DXF
-      switch (FIELD_VALUE (ltype_flags)) {
-      case 0: break; //VALUE_TV ("ByLayer", 6); break;
-      case 1: VALUE_TV ("ByBlock", 6); break;
-      case 2: VALUE_TV ("Continuous", 6); break;
-      default: break;
+      PRE (R_2000) {
+        switch (FIELD_VALUE (ltype_flags)) {
+        case 0: break; //VALUE_TV ("BYLAYER", 6); break;
+        case 1: VALUE_TVc ("BYBLOCK", 6); break;
+        case 2: VALUE_TVc ("CONTINUOUS", 6); break;
+        default: break;
+        }
+      } LATER_VERSIONS {
+        switch (FIELD_VALUE (ltype_flags)) {
+        case 0: break; //VALUE_TV ("ByLayer", 6); break;
+        case 1: VALUE_TVc ("ByBlock", 6); break;
+        case 2: VALUE_TVc ("Continuous", 6); break;
+        default: break;
+        }
       }
 #endif
       if (!FIELD_VALUE (isbylayerlt))
@@ -89,15 +98,15 @@
         }
     }
 
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       FIELD_HANDLE (layer, 5, 8);
 
 #ifdef IS_DXF
       switch (FIELD_VALUE (ltype_flags)) {
-      case 0: break; //VALUE_TV ("ByLayer", 6); break;
-      case 1: VALUE_TV ("ByBlock", 6); break;
-      case 2: VALUE_TV ("Continuous", 6); break;
+      case 0: break; //VALUE_TVc ("ByLayer", 6); break;
+      case 1: VALUE_TVc ("ByBlock", 6); break;
+      case 2: VALUE_TVc ("Continuous", 6); break;
       default: break;
       }
 #endif
@@ -115,7 +124,7 @@
 #endif
     }
 
-  SINCE (R_2007)
+  SINCE (R_2007a)
     {
       if (FIELD_VALUE (material_flags) == 3)
         FIELD_HANDLE (material, 5, 347);
@@ -123,13 +132,13 @@
         FIELD_HANDLE (shadow, 5, 0);
     }
 
-  SINCE (R_2000)
+  SINCE (R_2000b)
     {
       if (FIELD_VALUE (plotstyle_flags) == 3)
         FIELD_HANDLE (plotstyle, 5, 390);
     }
 
-  SINCE (R_2010)
+  SINCE (R_2010b)
     {
       // DXF 348 but which?
       if (FIELD_VALUE (has_full_visualstyle))
