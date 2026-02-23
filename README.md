@@ -62,3 +62,135 @@ Not in order:
 - Objects3d: Arc, Cylinder, Sphere with custom resolution, text, triangle, plane, circle, dot, line, poliline, dimension, bezier.
 - Typefaces.
 - Classes: mesh(3d/2d), transform, modifiers...
+
+Engine
+audio
+2d
+3d
+window
+configs
+- start()
+- exit()
+- syncConfigsToWindow()
+bool isWindowClosing()
+
+Audio
+vector songs
+vector sounds
+- playSong(sound)
+- pauseSong(name)
+- resumeSong(name)
+- removeSong(name)
+- isPlaying(name)
+- playSound(path, vel, volume)
+
+Song
+name
+path
+vel
+volume
+- constructor()
+
+2d
+vector gui
+background
+foreground
+vector effects
+
+3d
+vector scene
+background
+foreground
+vector effects
+
+
+Gui
+- add()
+- remove()
+- removeAll()
+
+scene
+- add()
+- remove()
+- removeAll()
+
+
+Object2D
+mesh2d
+transform
+vector effect
+vector modifiers
+
+Object3D
+mesh3d
+transform
+texture
+vector effect
+vector modifiers
+
+Mesh3d
+type 
+0 - cube
+1 - triangle
+2 - sphere
+3 - plane
+4 - circle
+5 - dot
+6 - line
+7 - poliline
+8 - model
+9 - arc
+10 - text
+11 - dimension
+12 - cylinder
+13 - bezier
+
+visible
+calculable
+typeFace Triangles/Quads/NGon
+vector faces
+- isHit();
+- distanceTo();
+v3f getExtreme(v3f direction);
+
+
+Cube implements Mesh3d
+
+Triangle implements Mesh3d
+point
+
+Sphere implements Mesh3d
+resolution
+
+Plane implements Mesh3d
+
+Circle implements Mesh3d
+
+Dot implements Mesh3d
+x1 x2 x3 y1 y2 y3
+
+Line implements Mesh3d
+
+Poliline implements Mesh3d
+
+Arc implements Mesh3d
+
+Text implements Mesh3d
+
+Model implements Mesh3d
+path
+format
+- import(path, format)
+
+Transform
+v3f position
+v3f scale
+v3f rotation
+v3f deltaVel
+
+Camera
+transform
+v3f look
+fov
+limitNear
+limitFar
