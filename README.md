@@ -3,7 +3,7 @@ In development. Just a 3d game for desktop. Linux and Windows compatible. There 
 
 ## Stats
 
-Time spent: 23 hours.
+Time spent: 50 hours.
 
 ## Requirements
 
@@ -15,7 +15,7 @@ The computer I using is a Intel duo E5300 without gpu... So this game runs in a 
 ## Description
 
 You are a discarded robot, trying to be the best project of your master, so you need to improve yourself, defend your master and destroy others projects with virus
-- Top view 3d Game
+- Top view 3d Game.
 - Decisions and 2 End games.
 
 ## Goals
@@ -24,9 +24,8 @@ Game time: ~1 hour to beat.
 
 Requirements: Run in any potato powered by a Esp32 with 4 MB ram, also runs on Windows and Linux.
 
-AI: No, just no. No AI arts, no scripts from AI.
-
 Feel free to use any part of this project, just credit the names of the involved with this project.
+
 
 People making project:
 
@@ -38,3 +37,8 @@ hidden (telegram) - Concept Art - Artist
 hidden (X - old Twitter) - Concept Art - Artist
 
 hidden (whatsapp) - Concept Art - Artist
+
+
+## Plans:
+
+Engine:
