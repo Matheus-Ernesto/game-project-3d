@@ -42,3 +42,23 @@ hidden (whatsapp) - Concept Art - Artist
 ## Plans:
 
 Engine:
+1. Vulkan API or OpenGL API. - OK
+2. Create a windowed black screen in OOP format. - OK
+3. Get stats, like FPS, RAM usage, Computer stats. - OK 1/3 
+4. Clean Coding. - OK
+5. Draw shapes. - OK
+6. Draw Texts. - OK
+7. Draw Images. - OK
+8. Draw 3d models. - ON GOING
+9. Audio uses. - ON GOING
+10. Clean Coding.
+11. Importable library.
+12. Final documentation.
+
+Not in order:
+- FBX Support.
+- OBJ Support.
+- DWG Support.
+- Objects3d: Arc, Cylinder, Sphere with custom resolution, text, triangle, plane, circle, dot, line, poliline, dimension, bezier.
+- Typefaces.
+- Classes: mesh(3d/2d), transform, modifiers...
