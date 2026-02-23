@@ -2,6 +2,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+#include "../engine/audio.cpp"
+#include "../engine/video.cpp"
 #include "../engine/2dCollections.cpp"
 #include "../engine/3dCollections.cpp"
 #include "../engine/canvas.cpp"

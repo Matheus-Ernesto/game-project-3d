@@ -28,6 +28,8 @@ public:
     inline static bool quitForce = false;
     inline static Canvas canvas;
     inline static Canvas3D canvas3d;
+    inline static AudioManager audio;
+    inline static VideoManager video;
     inline static sf::RenderWindow window;
 
     static void reshape(int t_width, int t_height)
@@ -42,6 +44,10 @@ public:
         canvas3d.apply(window, width, height, showFPS);
         window.resetGLStates();
         canvas.apply(window, width, height, showFPS);
+        video.update();
+        video.draw(window, "intro", 
+                          0, 0,  // posição
+                          1, 1); // escala normal
         window.display();
     }
 
