@@ -26,8 +26,8 @@ public:
     inline static bool showFPS = false;
     inline static string windowName = "Test";
     inline static bool quitForce = false;
-    inline static Canvas canvas;
-    inline static Canvas3D canvas3d;
+    inline static Canvas c2d;
+    inline static Canvas3D c3d;
     inline static AudioManager audio;
     inline static VideoManager video;
     inline static sf::RenderWindow window;
