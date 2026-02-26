@@ -3,14 +3,32 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>
+#include <string>
+#include <vector>
+#include <memory
 
 using namespace std;
 
-class Model
-{
+struct v2f {
+    float x = 0.f;
+    float y = 0.f;
 };
 
-class Texture
+struct v3f {
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+};
+
+struct v4f {
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+    float w = 0.f;
+};
+
+
+class Texture3d
 {
 public:
     // Dados da textura
@@ -208,27 +226,306 @@ public:
     }
 };
 
-class Object3D
-{
+
+class Mesh3d {
+protected:
+    int typeFace = 0;
+    
 public:
-    float pos_x = 0.f, pos_y = 0.f, pos_z = 0.f;
-    float rot_x = 0.f, rot_y = 0.f, rot_z = 0.f;
-    float sca_x = 1.f, sca_y = 1.f, sca_z = 1.f;
+    virtual ~Mesh3d() = default;
+    
+    virtual void getMesh3d() = 0;
+    virtual std::vector<v3f> getVertices() = 0;
+    virtual std::vector<unsigned int> getIndices() = 0;
+};
 
-    Texture texture;
-    Model model;
+class Transform3d {
+public:
+    v3f position;
+    v3f scale = v3f{1.f, 1.f, 1.f};
+    v3f rotation;
+    v4f deltaVel;
+};
 
-    bool visible = true;
-    string name = "";
+class Object3d {
+public:
+    std::string name;
+    std::unique_ptr<Mesh3d> mesh;
+    Transform3d transform;
+    std::unique_ptr<Texture3d> texture;
+};
 
-    int type = 0;
+class Arc : public Mesh3d {
+protected:
+    float radius = 1.f;
+    float startAngle = 0.f;
+    float endAngle = 360.f;
+    v3f center;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 1;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        return indices;
+    }
+};
 
-    static constexpr int CUBE = 0;
-    static constexpr int MODEL = 1;
-    static constexpr int SPHERE_SUB1 = 2;
-    static constexpr int SPHERE_SUB2 = 3;
-    static constexpr int SPHERE_SUB3 = 4;
-    static constexpr int SPHERE_SUB4 = 5;
+class Cylinder : public Arc {
+private:
+    float height = 2.f;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 2;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        return indices;
+    }
+};
+
+class Sphere : public Mesh3d {
+private:
+    float radius = 1.f;
+    int resolution = 16;
+    v3f center;
+    
+public:
+    void setResolution(int res) { resolution = res; }
+    int getResolution() { return resolution; }
+    
+    void getMesh3d() override {
+        typeFace = 3;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        return indices;
+    }
+};
+
+class Text : public Mesh3d {
+private:
+    std::string content;
+    float size = 1.f;
+    v3f position;
+    
+public:
+    void setText(const std::string& text) { content = text; }
+    std::string getText() { return content; }
+    
+    void getMesh3d() override {
+        typeFace = 4;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        return indices;
+    }
+};
+
+class Triangle : public Mesh3d {
+private:
+    v3f p1;
+    v3f p2;
+    v3f p3;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 5;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        vertices.push_back(p1);
+        vertices.push_back(p2);
+        vertices.push_back(p3);
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        indices.push_back(0);
+        indices.push_back(1);
+        indices.push_back(2);
+        return indices;
+    }
+};
+
+class Plane : public Mesh3d {
+private:
+    float width = 1.f;
+    float height = 1.f;
+    v3f center;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 6;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        return indices;
+    }
+};
+
+class Circle : public Mesh3d {
+private:
+    float radius = 1.f;
+    v3f center;
+    int segments = 32;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 7;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        return indices;
+    }
+};
+
+class Dot : public Mesh3d {
+private:
+    v3f position;
+    float size = 1.f;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 8;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        vertices.push_back(position);
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        return std::vector<unsigned int>();
+    }
+};
+
+class Line : public Mesh3d {
+private:
+    v3f start;
+    v3f end;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 9;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        vertices.push_back(start);
+        vertices.push_back(end);
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        indices.push_back(0);
+        indices.push_back(1);
+        return indices;
+    }
+};
+
+class Polyline : public Mesh3d {
+private:
+    std::vector<v3f> points;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 10;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        return points;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        return indices;
+    }
+};
+
+class Dimension : public Mesh3d {
+private:
+    v3f start;
+    v3f end;
+    float offset = 0.5f;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 11;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        return indices;
+    }
+};
+
+class Bezier : public Mesh3d {
+private:
+    std::vector<v3f> controlPoints;
+    int segments = 32;
+    
+public:
+    void getMesh3d() override {
+        typeFace = 12;
+    }
+    
+    std::vector<v3f> getVertices() override {
+        std::vector<v3f> vertices;
+        return vertices;
+    }
+    
+    std::vector<unsigned int> getIndices() override {
+        std::vector<unsigned int> indices;
+        return indices;
+    }
 };
 
 class Camera
@@ -270,6 +567,7 @@ public:
         cout << "err Obj " << name << " not found\n";
         return invalidObject;
     }
+    
     Light &getLight(string name)
     {
         for (auto &obj : lights)
@@ -280,6 +578,32 @@ public:
         static Light invalidObject;
         cout << "err Light " << name << " not found\n";
         return invalidObject;
+    }
+    
+    void deleteObject(string name)
+    {
+        for (size_t i = 0; i < objects3d.size(); i++)
+        {
+            if (objects3d[i].name == name)
+            {
+                objects3d.erase(objects3d.begin() + i);
+                return;
+            }
+        }
+        cout << "err Object " << name << " not found for deletion\n";
+    }
+    
+    void deleteLight(string name)
+    {
+        for (size_t i = 0; i < lights.size(); i++)
+        {
+            if (lights[i].name == name)
+            {
+                lights.erase(lights.begin() + i);
+                return;
+            }
+        }
+        cout << "err Light " << name << " not found for deletion\n";
     }
 
     void clearAll()
