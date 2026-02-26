@@ -1,142 +1,137 @@
-#include <SFML/Graphics.hpp>
-#include <memory>
-#include <chrono>
 #include <string>
+#include <vector>
+#include <iostream>
 
 using namespace std;
 
-class Text
-{
+struct v2f {
+    float x = 0.f;
+    float y = 0.f;
+};
+
+struct v3f {
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+};
+
+struct v4f {
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+    float w = 0.f;
+};
+
+class Mesh2d {
 public:
-    float x = 0.f, y = 0.f;
-    float r = 1.f, g = 1.f, b = 1.f, a = 1.f;
+    v2f position = {0.f, 0.f};
     int align = 0;
-    string name = "";
+};
+
+class Text : public Mesh2d {
+public:
     string text = "Sample";
     int fontSize = 24;
     string pathFont = "fonts/arial.ttf";
-
-    void setPosition(float x, float y)
-    {
-        this->x = x;
-        this->y = y;
-    }
-
-    void setColor(float r, float g, float b)
-    {
-        this->r = r;
-        this->g = g;
-        this->b = b;
-    }
-    void setColor(float r, float g, float b, float a)
-    {
-        this->r = r;
-        this->g = g;
-        this->b = b;
-        this->a = a;
-    }
 };
 
-class Image
-{
+class Image : public Mesh2d {
 public:
-    float x = 0.5f; // Meio da tela na horizontal
-    float y = 0.5f; // Meio da tela na vertical
-    int align = 1;  // ALIGN_CENTER (assumindo que 1 = centro)
-    string name = "check_uv_map";
-    int x1 = 0;               // Começo da textura no x
-    int y1 = 0;               // Começo da textura no y
-    int x2 = 1024;            // Largura da textura
-    int y2 = 1024;            // Altura da textura
-    float width = 100.f;         // Largura na tela
-    float height = 100.f;        // Altura na tela
-    float transparency = 255; // Totalmente opaco
+    v2f coordinatesStart = {0.f, 0.f};
+    v2f coordinatesEnd = {1024.f, 1024.f};
+    int stretchType = 0;
     string path = "assets/check_uv_map.png";
+    float width = 100.f;
+    float height = 100.f;
+    float transparency = 255.f;
 };
 
-class Circle
-{
+class Circle : public Mesh2d {
 public:
-    float x = 0.f, y = 0.f;
-    float r = 0.f, g = 0.f, b = 0.f;
+    float radius = 50.f;
+};
+
+class Line : public Mesh2d {
+public:
+    v2f coordinatesStart = {0.f, 0.f};
+    v2f coordinatesEnd = {100.f, 100.f};
+    int fillType = 0;
+    float size = 1.f;
+};
+
+class Dot : public Mesh2d {
+public:
+    float size = 5.f;
+};
+
+class PolyLine : public Mesh2d {
+public:
+    vector<v2f> coordinates = {};
+    int fillType = 0;
+    float size = 1.f;
+};
+
+class Rectangle : public Mesh2d {
+public:
+    float width = 100.f;
+    float height = 100.f;
+};
+
+class Transform2d {
+public:
+    v3f position = {0.f, 0.f, 0.f};
+    v3f rotation = {0.f, 0.f, 0.f};
+    v3f scale = {1.f, 1.f, 1.f};
+    v3f deltaVel = {0.f, 0.f, 0.f};
     int align = 0;
-    float radius = 0;
-    string name = "";
-
-    void setPosition(float x, float y)
-    {
-        this->x = x;
-        this->y = y;
-    }
-
-    void setColor(float r, float g, float b)
-    {
-        this->r = r;
-        this->g = g;
-        this->b = b;
-    }
 };
 
-class GUI
-{
+class Texture2d {
 public:
-    vector<Text> texts;
-    vector<Circle> circles;
-    vector<Image> images;
+    v4f color = {1.f, 1.f, 1.f, 1.f};
+    string path = "";
+};
 
-    void add(Text text)
-    {
-        texts.push_back(text);
-    }
-    void add(Circle circle)
-    {
-        circles.push_back(circle);
-    }
-    void add(Image image)
-    {
-        images.push_back(image);
-    }
+class Object2d {
+public:
+    string name = "object2d";
+    Mesh2d* mesh = nullptr;
+    Transform2d transform;
+    Texture2d texture;
+};
 
-    Text &getText(string name)
-    {
-        for (auto &obj : texts)
-        {
-            if (obj.name == name)
+class Gui {
+public:
+    vector<Object2d> objects;
+    
+    void add(Object2d obj) {
+        objects.push_back(obj);
+    }
+    
+    Object2d& get(string name) {
+        for (auto &obj : objects) {  
+            if (obj.name == name) {
                 return obj;
-        }
-        static Text invalidObject;
-        cout << "err Obj " << name << " not found\n";
-        return invalidObject;
+            }  
+        }  
+        
+        static Object2d invalidObject;  
+        cout << "err Obj " << name << " not found\n";  
+        return invalidObject;  
     }
-
-    Circle &getCircle(string name)
-    {
-        for (auto &obj : circles)
-        {
-            if (obj.name == name)
-                return obj;
+    
+    void delete_(string name) {  // 'delete' é palavra reservada, use delete_
+        for (size_t i = 0; i < objects.size(); i++) {
+            if (objects[i].name == name) {
+                objects.erase(objects.begin() + i);
+                cout << "Obj " << name << " removed successfully\n";
+                return;
+            }
         }
-        static Circle invalidObject;
-        cout << "err Obj " << name << " not found\n";
-        return invalidObject;
+        cout << "err Obj " << name << " not found for deletion\n";
     }
-
-    Image &getImage(string name)
-    {
-        for (auto &obj : images)
-        {
-            if (obj.name == name)
-                return obj;
-        }
-        static Image invalidObject;
-        cout << "err Obj " << name << " not found\n";
-        return invalidObject;
-    }
-
-    void clearAll()
-    {
-        texts.clear();
-        circles.clear();
-        images.clear();
+    
+    void deleteAll() {
+        objects.clear();
     }
 };
