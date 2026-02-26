@@ -5,7 +5,7 @@
 #include <SFML/OpenGL.hpp>
 #include <string>
 #include <vector>
-#include <memory
+#include <memory>
 
 using namespace std;
 
