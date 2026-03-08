@@ -1,16 +1,19 @@
 # game-project-3d: Metal Himiko
 In development. Just a 3d game for desktop. Linux and Windows compatible. There is a small 3d engine too.
 
+It uses OpenGL and SFML, with OOP for easy use.
+
 ## Stats
 
-Time spent: 50 hours.
+Time spent: 52 hours.
 
 ## Requirements
 
 A computer with display, just this.
 
-The computer I using is a Intel duo E5300 without gpu... So this game runs in a potato with esp32 and 4MB of ram.
+~~The computer I using is a Intel duo E5300 without gpu... So this game runs in a potato with esp32 and 4MB of ram.~~
 
+I finally bought a notebook, is not tha best but is good!!!
 
 ## Description
 
@@ -25,18 +28,6 @@ Game time: ~1 hour to beat.
 Requirements: Run in any potato powered by a Esp32 with 4 MB ram, also runs on Windows and Linux.
 
 Feel free to use any part of this project, just credit the names of the involved with this project.
-
-
-People making project:
-
-
-Matheus-Ernesto (github) - Code Project - Developer.
-
-hidden (telegram) - Concept Art - Artist
-
-hidden (X - old Twitter) - Concept Art - Artist
-
-hidden (whatsapp) - Concept Art - Artist
 
 
 ## Plans:
@@ -77,5 +68,4 @@ Not in order:
 - Modifier
 - Song
 - Mesh3d
-- Classes: mesh(3d/2d), transform, modifiers...
 - Reorganize classes
