@@ -14,7 +14,7 @@ using namespace std;
 class Canvas3D
 {
 public:
-    World world;
+    Collections3d::World world;
     bool enable3D;
 
     struct Filter3D
@@ -148,7 +148,7 @@ public:
     }
 
     // Função para aplicar textura baseado no objeto
-    void applyObjectTexture(const Texture &objTexture)
+    void applyObjectTexture(const Collections3d::Texture &objTexture)
     {
         if (objTexture.hasTexture())
         {
@@ -241,12 +241,12 @@ public:
             glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
         }
         // Para cada objeto na cena, defina as propriedades do material e desenhe o objeto
-        for (auto &obj : world.scene.objects3d)
+        for (auto &obj : world.scene.objects)
         {
-            applyObjectTexture(obj.texture);
+            applyObjectTexture(*obj.texture);
 
             // Propriedades do material do objeto (difusa, especular, brilho)
-            GLfloat mat_diffuse[] = {obj.texture.r, obj.texture.g, obj.texture.b, 1.0f};
+            GLfloat mat_diffuse[] = {obj.texture->r, obj.texture->g,obj.texture->b,obj.texture->a};
             glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
 
             GLfloat mat_specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -258,7 +258,7 @@ public:
             glPushMatrix();
 
             // Transformações para posicionar, escalar e rotacionar o objeto
-            glTranslatef(obj.pos_x, obj.pos_y, obj.pos_z);
+            glTranslatef(obj.transform, obj.pos_y, obj.pos_z);
             glScalef(obj.sca_x, obj.sca_y, obj.sca_z);
             glRotatef(obj.rot_x, 1.0, 0.0, 0.0);
             glRotatef(obj.rot_y, 0.0, 1.0, 0.0);

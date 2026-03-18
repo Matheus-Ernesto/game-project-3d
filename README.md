@@ -69,3 +69,18 @@ Not in order:
 - Song
 - Mesh3d
 - Reorganize classes
+
+
+## How to compile:
+
+
+### Linux
+
+Go to root project
+
+> g++ src/main.cpp -o bin/programa \
+    -I./include \
+    -L./lib \
+    -lsfml-graphics -lsfml-window -lsfml-system -lGL
+
+Or just runs  compile/linux_compile.sh

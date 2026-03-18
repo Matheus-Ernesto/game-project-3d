@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+#include "../engine/utils.cpp"
 #include "../engine/audio.cpp"
 #include "../engine/video.cpp"
 #include "../engine/2dCollections.cpp"
@@ -10,13 +11,13 @@
 #include "../engine/canvas3d.cpp"
 #include "../engine/engine.cpp"
 #include "../engine/configsCollections.cpp"
-#include "utils.cpp"
 
-#include "intro.cpp"
-#include "intro2.cpp"
-#include "jogo.cpp"
-#include "configuracoes.cpp"
-#include "menuPrincipal.cpp"
+#include "assets/scripts/utils.cpp"
+#include "assets/scripts/intro.cpp"
+#include "assets/scripts/intro2.cpp"
+#include "assets/scripts/jogo.cpp"
+#include "assets/scripts/configuracoes.cpp"
+#include "assets/scripts/menuPrincipal.cpp"
 
 using namespace std;
 
