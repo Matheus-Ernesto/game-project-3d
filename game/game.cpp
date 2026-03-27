@@ -1,4 +1,5 @@
 #include <iostream>
+#include <GL/glew.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
@@ -14,10 +15,10 @@
 
 #include "assets/scripts/utils.cpp"
 #include "assets/scripts/intro.cpp"
-#include "assets/scripts/intro2.cpp"
+//#include "assets/scripts/intro2.cpp"
 #include "assets/scripts/jogo.cpp"
-#include "assets/scripts/configuracoes.cpp"
-#include "assets/scripts/menuPrincipal.cpp"
+// #include "assets/scripts/configuracoes.cpp"
+// #include "assets/scripts/menuPrincipal.cpp"
 
 using namespace std;
 
@@ -55,41 +56,42 @@ int main()
     int level = 0;
 
     intro(engine);
-    intro2(engine);
-    while (level >= 0 && !engine.quit())
-    {
-        switch (menuPrincipal(engine))
-        {
-        case 0:
-            jogo(engine);
-            break;
-        case 1:
-            level = 1;
-            while (level == 1 && !engine.quit())
-            {
-                switch (configuracoes(engine))
-                {
-                case 0:
-                    video(engine, configs);
-                    break;
-                case 1:
-                    outros(engine, configs);
-                    break;
-                case 2:
-                    saves(engine);
-                    break;
-                default:
-                    level = 0;
-                    break;
-                }
-            }
-            loader.saveConfig(configs);
-            break;
-        default:
-            level = -1;
-            break;
-        }
-    }
+    jogo(engine);
+    //intro2(engine);
+    // while (level >= 0 && !engine.quit())
+    // {
+    //     switch (menuPrincipal(engine))
+    //     {
+    //     case 0:
+    //         jogo(engine);
+    //         break;
+    //     case 1:
+    //         level = 1;
+    //         while (level == 1 && !engine.quit())
+    //         {
+    //             switch (configuracoes(engine))
+    //             {
+    //             case 0:
+    //                 video(engine, configs);
+    //                 break;
+    //             case 1:
+    //                 outros(engine, configs);
+    //                 break;
+    //             case 2:
+    //                 saves(engine);
+    //                 break;
+    //             default:
+    //                 level = 0;
+    //                 break;
+    //             }
+    //         }
+    //         loader.saveConfig(configs);
+    //         break;
+    //     default:
+    //         level = -1;
+    //         break;
+    //     }
+    // }
     // sair
     engine.exit();
     return 0;

@@ -32,7 +32,7 @@ public:
     inline static int fps = 0;
     inline static vector<Font> fonts;
 
-    Collections2d::Gui gui;  // Agora usa a nova estrutura
+    Collections2d::Gui gui;
 
     vector<sf::Text> texts;
     vector<sf::CircleShape> circles;
@@ -124,7 +124,7 @@ public:
         {
             if (!obj.mesh) continue;
 
-            // Extrai cor do objeto (assumindo v4f com x=r, y=g, z=b, w=a)
+            // Extrai cor do objeto (armazenada no texture.color)
             sf::Color color(
                 static_cast<sf::Uint8>(obj.texture.color.x * 255),
                 static_cast<sf::Uint8>(obj.texture.color.y * 255),
@@ -132,7 +132,7 @@ public:
                 static_cast<sf::Uint8>(obj.texture.color.w * 255)
             );
 
-            // Posição (usamos x e y do transform, z pode ser ignorada)
+            // Posição do objeto (armazenada no transform.position)
             float posX = obj.transform.position.x;
             float posY = obj.transform.position.y;
 
@@ -176,7 +176,7 @@ public:
                 textElement.setCharacterSize(textMesh->fontSize);
                 textElement.setFillColor(color);
 
-                // Aplica rotação (usando ângulo em graus, por exemplo, rotation.z)
+                // Aplica rotação (usando transform.rotation.z)
                 textElement.setRotation(obj.transform.rotation.z);
 
                 // Ajusta origem conforme alinhamento
@@ -203,7 +203,7 @@ public:
                 sf::CircleShape circleElement(circleMesh->radius);
                 circleElement.setFillColor(color);
 
-                // Aplica rotação (roda a forma, se necessário)
+                // Aplica rotação
                 circleElement.setRotation(obj.transform.rotation.z);
 
                 sf::FloatRect bounds = circleElement.getLocalBounds();
@@ -271,7 +271,7 @@ public:
                     );
                     sprite.setTextureRect(uvRect);
 
-                    // Escala para atingir as dimensões desejadas (width/height do mesh)
+                    // Escala para atingir as dimensões desejadas
                     sprite.setScale(
                         imageMesh->width / uvRect.width,
                         imageMesh->height / uvRect.height
@@ -304,7 +304,6 @@ public:
                     sprites.push_back(sprite);
                 }
             }
-            // Outros tipos de mesh podem ser adicionados aqui futuramente
         }
     }
 

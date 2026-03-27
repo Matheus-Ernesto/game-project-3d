@@ -30,24 +30,28 @@ public:
         float tint_a = 1.0f;    // Alpha (transparência)
     } filter3D;
 
-    void applyFilter3D() {
-        if (!filter3D.enabled) return;
-        
+    void applyFilter3D()
+    {
+        if (!filter3D.enabled)
+            return;
+
         // Escurecimento via luz ambiente global
-        if (filter3D.darkness > 0.0f) {
+        if (filter3D.darkness > 0.0f)
+        {
             float dark = 1.0f - filter3D.darkness;
             GLfloat global_ambient[] = {dark * 0.3f, dark * 0.3f, dark * 0.3f, 1.0f};
             glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
         }
-        
+
         // Tint (multiplicar cores)
-        if (filter3D.tint_r != 1.0f || filter3D.tint_g != 1.0f || filter3D.tint_b != 1.0f) {
+        if (filter3D.tint_r != 1.0f || filter3D.tint_g != 1.0f || filter3D.tint_b != 1.0f)
+        {
             glEnable(GL_COLOR_MATERIAL);
             glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
             glColor4f(filter3D.tint_r, filter3D.tint_g, filter3D.tint_b, filter3D.tint_a);
         }
     }
-    
+
     // ... resto da classe
 
     struct TextureGL
@@ -243,11 +247,27 @@ public:
         // Para cada objeto na cena, defina as propriedades do material e desenhe o objeto
         for (auto &obj : world.scene.objects)
         {
-            applyObjectTexture(*obj.texture);
+            // Aplica textura se existir
+            if (obj.texture)
+            {
+                applyObjectTexture(*obj.texture);
+            }
+            else
+            {
+                glDisable(GL_TEXTURE_2D);
+            }
 
             // Propriedades do material do objeto (difusa, especular, brilho)
-            GLfloat mat_diffuse[] = {obj.texture->r, obj.texture->g,obj.texture->b,obj.texture->a};
-            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
+            if (obj.texture)
+            {
+                GLfloat mat_diffuse[] = {obj.texture->r, obj.texture->g, obj.texture->b, obj.texture->a};
+                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
+            }
+            else
+            {
+                GLfloat mat_diffuse[] = {0.8f, 0.8f, 0.8f, 1.0f}; // cor padrão cinza
+                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
+            }
 
             GLfloat mat_specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
@@ -258,19 +278,20 @@ public:
             glPushMatrix();
 
             // Transformações para posicionar, escalar e rotacionar o objeto
-            glTranslatef(obj.transform, obj.pos_y, obj.pos_z);
-            glScalef(obj.sca_x, obj.sca_y, obj.sca_z);
-            glRotatef(obj.rot_x, 1.0, 0.0, 0.0);
-            glRotatef(obj.rot_y, 0.0, 1.0, 0.0);
-            glRotatef(obj.rot_z, 0.0, 0.0, 1.0);
+            glTranslatef(obj.transform.position.x, obj.transform.position.y, obj.transform.position.z);
+            glScalef(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z);
+            glRotatef(obj.transform.rotation.x, 1.0, 0.0, 0.0);
+            glRotatef(obj.transform.rotation.y, 0.0, 1.0, 0.0);
+            glRotatef(obj.transform.rotation.z, 0.0, 0.0, 1.0);
 
-            if (obj.type == obj.CUBE)
+            // Verifica o tipo do mesh através de RTTI
+            if (dynamic_cast<Collections3d::Cube *>(obj.mesh.get()))
             {
                 glBegin(GL_QUADS);
 
                 // Face frontal (normal para +Z)
                 glNormal3f(0.0f, 0.0f, 1.0f);
-                if (obj.texture.hasTexture())
+                if (obj.texture && obj.texture->hasTexture())
                 {
                     glTexCoord2f(0.0f, 0.0f);
                     glVertex3f(-1.0f, -1.0f, 1.0f);
@@ -291,7 +312,7 @@ public:
 
                 // Face traseira (normal para -Z)
                 glNormal3f(0.0f, 0.0f, -1.0f);
-                if (obj.texture.hasTexture())
+                if (obj.texture && obj.texture->hasTexture())
                 {
                     glTexCoord2f(0.0f, 0.0f);
                     glVertex3f(-1.0f, -1.0f, -1.0f);
@@ -312,7 +333,7 @@ public:
 
                 // Face superior (normal para +Y)
                 glNormal3f(0.0f, 1.0f, 0.0f);
-                if (obj.texture.hasTexture())
+                if (obj.texture && obj.texture->hasTexture())
                 {
                     glTexCoord2f(0.0f, 0.0f);
                     glVertex3f(-1.0f, 1.0f, -1.0f);
@@ -333,7 +354,7 @@ public:
 
                 // Face inferior (normal para -Y)
                 glNormal3f(0.0f, -1.0f, 0.0f);
-                if (obj.texture.hasTexture())
+                if (obj.texture && obj.texture->hasTexture())
                 {
                     glTexCoord2f(0.0f, 0.0f);
                     glVertex3f(-1.0f, -1.0f, -1.0f);
@@ -354,7 +375,7 @@ public:
 
                 // Face esquerda (normal para -X)
                 glNormal3f(-1.0f, 0.0f, 0.0f);
-                if (obj.texture.hasTexture())
+                if (obj.texture && obj.texture->hasTexture())
                 {
                     glTexCoord2f(0.0f, 0.0f);
                     glVertex3f(-1.0f, -1.0f, -1.0f);
@@ -375,7 +396,7 @@ public:
 
                 // Face direita (normal para +X)
                 glNormal3f(1.0f, 0.0f, 0.0f);
-                if (obj.texture.hasTexture())
+                if (obj.texture && obj.texture->hasTexture())
                 {
                     glTexCoord2f(0.0f, 0.0f);
                     glVertex3f(1.0f, -1.0f, -1.0f);
@@ -396,11 +417,13 @@ public:
 
                 glEnd();
             }
-            else if (obj.type >= 2 && obj.type <= 5)
+            else if (auto sphere = dynamic_cast<Collections3d::Sphere *>(obj.mesh.get()))
             {
-                // Número de segmentos - ajuste para controlar o nível de detalhe
-                int stacks = 4 * obj.type; // Número de divisões verticais (paralelos) - 16 * 32 = 512 triângulos (aproximadamente)
-                int slices = 8 * obj.type; // Número de divisões horizontais (meridianos)
+                // Obtém a resolução da esfera (padrão 16 se não configurado)
+                int resolution = sphere->getResolution();
+                // Usa a resolução para definir stacks e slices (ajuste conforme necessário)
+                int stacks = resolution;     // número de divisões verticais
+                int slices = resolution * 2; // número de divisões horizontais
 
                 float radius = 1.0f; // Raio da esfera
 
@@ -493,6 +516,7 @@ public:
 
                 glEnd();
             }
+            // Outros tipos de mesh podem ser adicionados conforme necessário
 
             glPopMatrix();
             glDisable(GL_TEXTURE_2D);
@@ -501,25 +525,49 @@ public:
 
     void apply(sf::RenderWindow &window, int width, int height, bool showFps)
     {
+        // Configura o viewport (tamanho da janela)
+        glViewport(0, 0, width, height);
+
+        // Limpa os buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(world.colorBackgroud_r, world.colorBackgroud_g, world.colorBackgroud_b, 1.0f);
         glEnable(GL_DEPTH_TEST);
 
+        // ===== CONFIGURAÇÃO DA PROJEÇÃO =====
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluPerspective(world.camera.fov, window.getSize().x / (float)window.getSize().y, world.camera.limitNear, world.camera.limitFar);
 
+        // Configura perspectiva (FOV, aspect ratio, near, far)
+        float aspect = (float)width / (float)height;
+        
+        // Se não tiver GLU, use glFrustum:
+        float fovRad = world.camera.fov * M_PI / 180.0;
+        float top = tan(fovRad/2) * world.camera.limitNear;
+        float bottom = -top;
+        float right = top * aspect;
+        float left = -right;
+        glFrustum(left, right, bottom, top, world.camera.limitNear, world.camera.limitFar);
+
+        // ===== CONFIGURAÇÃO DA MODELVIEW (CÂMERA) =====
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glRotatef(world.camera.rotationX, 1.f, 0.f, 0.f);
-        glRotatef(world.camera.rotationY, 0.f, 1.f, 0.f);
-        glRotatef(world.camera.rotationZ, 0.f, 0.f, 1.f);
-        glTranslatef(world.camera.x, world.camera.y, world.camera.z);
 
+        // Aplica rotações e translação da câmera
+        // Ordem: primeiro rotaciona, depois translada (câmera ao contrário)
+        glRotatef(world.camera.rotationX, 1.0f, 0.0f, 0.0f);
+        glRotatef(world.camera.rotationY, 0.0f, 1.0f, 0.0f);
+        glRotatef(world.camera.rotationZ, 0.0f, 0.0f, 1.0f);
+        glTranslatef(-world.camera.x, -world.camera.y, -world.camera.z);
+
+        // Habilita face culling (opcional)
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
+        // Desenha a cena
         draw(window);
+
+        // Desabilita texturas após o desenho
+        glDisable(GL_TEXTURE_2D);
     }
 
     void update()

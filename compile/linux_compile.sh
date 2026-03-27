@@ -1,5 +1,17 @@
+#!/bin/bash
+
 cd ../game
-g++ game.cpp -o /test_1.o \
+
+# Compilar
+g++ game.cpp -o test1.o \
     -I../libs/linux/SFML/include \
-    -L../libslibs/linux/SFML/lib \
-    -lsfml-graphics -lsfml-window -lsfml-system -lGL
+    -I../libs/linux/glew/include \
+    -I../libs/linux/glm \
+    -L../libs/linux/SFML/lib \
+    -L../libs/linux/glew/lib \
+    -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio \
+    -lGLEW \
+    -lGL -lGLU \
+    -std=c++17 \
+    -Wl,-rpath,'$ORIGIN/../libs/linux/SFML/lib' \
+    -Wl,-rpath,'$ORIGIN/../libs/linux/glew/lib'

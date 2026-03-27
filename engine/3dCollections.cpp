@@ -526,10 +526,22 @@ namespace Collections3d{
     
     class Object {
     public:
-        string name;
-        unique_ptr<Mesh> mesh;
+        string name = "Object0";
+        shared_ptr<Mesh> mesh = nullptr;
         Transform transform;
-        unique_ptr<Texture> texture;
+        shared_ptr<Texture> texture = nullptr;
+
+        Object() = default;
+        Object(const Object&) = default;
+        Object(Object&&) = default;
+
+        Object& operator=(const Object&) = default;
+    
+        // Operador de atribuição de move
+        Object& operator=(Object&&) = default;
+        
+        // Destrutor
+        ~Object() = default;
     };
     
     class Camera
@@ -552,12 +564,12 @@ namespace Collections3d{
     
         void add(Object obj)
         {
-            objects.push_back(obj);
+            objects.push_back(std::move(obj));
         }
     
         void add(Light light)
         {
-            lights.push_back(light);
+            lights.push_back(std::move(light));
         }
     
         Object &getObject(string name)

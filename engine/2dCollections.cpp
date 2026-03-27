@@ -64,7 +64,7 @@ namespace Collections2d {
     public:
         vector<Object> objects;
 
-        void add(Object obj) {
+        void addObj(Object obj) {
             objects.push_back(obj);
         }
 
@@ -79,7 +79,7 @@ namespace Collections2d {
             return invalidObject;
         }
 
-        void delete_(string name) {
+        void deleteObj(string name) {
             for (size_t i = 0; i < objects.size(); i++) {
                 if (objects[i].name == name) {
                     objects.erase(objects.begin() + i);

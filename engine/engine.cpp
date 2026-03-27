@@ -41,9 +41,9 @@ public:
     static void display()
     {
         now = chrono::_V2::steady_clock::now();
-        canvas3d.apply(window, width, height, showFPS);
+        c3d.apply(window, width, height, showFPS);
         window.resetGLStates();
-        canvas.apply(window, width, height, showFPS);
+        c2d.apply(window, width, height, showFPS);
         video.update();
         video.draw(window, "intro", 
                           0, 0,  // posição
@@ -76,7 +76,7 @@ public:
                 sf::String(windowName.c_str()), sf::Style::Default, settings);
         }
 
-        canvas.loadFont("fonts/arial.ttf");
+        c2d.loadFont("fonts/arial.ttf");
         last = chrono::_V2::steady_clock::now();
     }
 
