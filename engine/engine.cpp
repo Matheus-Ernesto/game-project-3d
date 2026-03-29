@@ -55,7 +55,7 @@ public:
     {
         sf::ContextSettings settings;
         settings.majorVersion = 4; // OpenGL versão principal
-        settings.minorVersion = 5; // OpenGL versão secundária (opcional)
+        settings.minorVersion = 6; // OpenGL versão secundária (opcional)
         settings.depthBits = 24;   // Bits de profundidade
         settings.stencilBits = 8;  // Bits de estêncil (opcional)
 
@@ -78,6 +78,9 @@ public:
 
         c2d.loadFont("fonts/arial.ttf");
         last = chrono::_V2::steady_clock::now();
+
+        c2d.setup();
+        c3d.setup();
     }
 
     void pollEvents()

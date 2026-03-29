@@ -4,10 +4,12 @@
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>
 
+#include <GL/glew.h>
+#include <vector>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <cmath>
-
-#include <GL/glu.h>
-#include <GL/gl.h>
 
 using namespace std;
 
@@ -16,6 +18,18 @@ class Canvas3D
 public:
     Collections3d::World world;
     bool enable3D;
+
+    GLuint shaderProgram;
+    GLuint shadowMapFBO;
+    GLuint shadowMap;
+
+    glm::vec3 cameraPos;
+
+    glm::mat4 projection;
+    glm::mat4 view;
+    glm::mat4 lightSpaceMatrix;
+    glm::vec3 lightPos;
+    glm::vec3 lightColor;
 
     struct Filter3D
     {
@@ -539,10 +553,10 @@ public:
 
         // Configura perspectiva (FOV, aspect ratio, near, far)
         float aspect = (float)width / (float)height;
-        
+
         // Se não tiver GLU, use glFrustum:
         float fovRad = world.camera.fov * M_PI / 180.0;
-        float top = tan(fovRad/2) * world.camera.limitNear;
+        float top = tan(fovRad / 2) * world.camera.limitNear;
         float bottom = -top;
         float right = top * aspect;
         float left = -right;
@@ -572,5 +586,78 @@ public:
 
     void update()
     {
+    }
+
+    void setup()
+    {
+        glewExperimental = GL_TRUE;
+        if (glewInit() != GLEW_OK)
+        {
+            throw std::runtime_error("Failed to initialize GLEW");
+        }
+
+        glEnable(GL_DEPTH_TEST);
+
+        std::cout << "OpenGL: " << glGetString(GL_VERSION) << std::endl;
+
+        const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
+        // Create framebuffer
+        glGenFramebuffers(1, &shadowMapFBO);
+
+        // Create depth texture
+        glGenTextures(1, &shadowMap);
+        glBindTexture(GL_TEXTURE_2D, shadowMap);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT,
+                     0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+        // Attach depth texture to framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        {
+            std::cerr << "Framebuffer not complete!" << std::endl;
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        std::cout << "Shadow map setup complete" << std::endl;
+
+        std::string vertexSource = readShaderFile("vertex_shader.glsl");
+        std::string fragmentSource = readShaderFile("fragment_shader.glsl");
+
+        if (vertexSource.empty() || fragmentSource.empty())
+        {
+            throw std::runtime_error("Failed to load shader files");
+        }
+
+        GLuint vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
+        GLuint fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
+
+        shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glLinkProgram(shaderProgram);
+
+        GLint success;
+        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+        if (!success)
+        {
+            char infoLog[512];
+            glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+            std::cerr << "Program linking failed: " << infoLog << std::endl;
+        }
+
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        std::cout << "Shaders loaded successfully!" << std::endl;
     }
 };
